@@ -1,0 +1,37 @@
+//A script for RTPack.exe to make an .rtfont file.  To run it, do this:  RTPack.exe -make_font <filename of this file.txt>
+
+//Font image - if it's not already a .rttex, it will automatically convert to .rttex using -pvrt4444
+image|font_trajan_big_00.png
+
+//a .fnt data file created by Well Oiled Font Maker or Bitmap Font Generator, at the same time it makes the .bmp
+fnt_file|font_trajan_big.fnt
+
+blank_space_width|8
+
+//outputfile will automatically be <filename of this file>.rtfont
+
+`format code specifications for inline font formatting (SANSI for those that remember the BBS days)
+
+//add_format_color|<character code>,r,g,b
+add_format_color|0|255, 255,255|//default
+add_format_color|1|61, 140, 193|//light blue
+
+add_format_color|2|0, 160, 0|//dark green
+add_format_color|3|0, 160, 160|//dark cyan
+add_format_color|4|198, 5, 5|//dark red
+add_format_color|5|160, 0, 114|//dark purple
+add_format_color|6|210, 195, 172|//brown
+add_format_color|7|160, 160, 160|//gray
+add_format_color|8|132, 108, 70|//dark brown
+add_format_color|9|0, 0,255|//blue
+add_format_color|!|0, 255,255|//bright cyan
+add_format_color|@|232, 0,0|//bright red
+add_format_color|#|232, 0,166|//bright purple
+add_format_color|$|252, 255,0|//bright yellow
+add_format_color|^|0, 255,0|//bright green
+add_format_color|&|135, 129,189|//pastel violet
+
+add_format_color|w|255, 255,255|//white
+add_format_color|o|242, 101,34|//orange
+add_format_color|b|0, 0,0|//black
+add_format_color|p|240, 110,170|//pink

@@ -1,0 +1,12 @@
+NotShared/
+*.zip
+*.ncb
+*.bsc
+*.pch
+*.sbr
+*.ilk
+*.idb
+*.obj
+*.DS_Store
+*.pdb
+windows_vs/.vs

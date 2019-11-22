@@ -1,0 +1,1 @@
+xcopy tempbuild\*.* \\tennis\e\Seth /E /F /Y

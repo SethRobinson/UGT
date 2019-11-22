@@ -1,0 +1,1 @@
+xcopy tempbuild\*.* \\Yogini\d\Seth /E /F /Y

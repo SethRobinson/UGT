@@ -1,0 +1,28 @@
+# UGT - Universal Game Translator - Uses Google Cloud to read and speak dialog from any image/game in any language
+
+More info and youtube videos on how this works:  https://www.codedojo.com/?p=2426
+
+This source is C++ and includes a solution/project for Visual Studio 2019.
+
+Valid builds that are setup are Debug X64 and Release X64
+
+To compile UGT, first do some Proton tutorials and make sure are able to compile its 
+example projects.  (like RTSimpleApp)  https://github.com/SethRobinson/proton
+
+This project works identical to that, so it should be checked out as a Proton subfolder,
+just like those examples.
+
+It's hacked to only work on Windows (due to the low level nature of
+writing something that can do screen captures) but in theory those pieces could be
+abstracted out to be more platform agnostic.
+
+Special thanks:
+
+* Jari Komppa, I use his webcam lib Escapi (included with Proton to make compiling this easier) https://github.com/jarikomppa/escapi to see his project.
+
+License:  BSD style attribution, see LICENSE.md
+
+Credits and links
+- Written by Seth A. Robinson (seth@rtsoft.com) twitter: @rtsoft - [Codedojo](https://www.codedojo.com), Seth's blog
+- [Proton SDK wiki/tutorial site](https://www.protonsdk.com)
+
