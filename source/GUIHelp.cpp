@@ -74,6 +74,11 @@ Entity * CreateHelpMenu(Entity *pRoot)
 		msg += "Translate active window - `$" + h.originalString + "``\n";
 		h = GetApp()->m_hotKeyHandler.GetHotKeyByAction("hotkey_to_scan_whole_desktop");
 		msg += "Translate entire desktop - `$" + h.originalString + "``\n";
+	
+		h = GetApp()->m_hotKeyHandler.GetHotKeyByAction("hotkey_to_scan_draggable_area");
+		msg += "Translate draggable rectangle - `$" + h.originalString + "``\n";
+
+		
 		msg += "Continue after a translation - `$<space>``\n";
 		msg += "Show options that work after a translation is done - `$?`` or `$H`` key\n";
 		msg += "Hide this window - `$Click on something else``\n";

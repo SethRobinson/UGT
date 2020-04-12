@@ -186,7 +186,7 @@ wstring FreeTypeManager::GetNextLine(const CL_Vec2f &textBounds, WCHAR **pCur, f
 			{
 				//break at the last space we had marked
 				text.erase(lastWrapPoint, text.length() - lastWrapPoint);
-				(*pCur) += 1; //also get rid of the floating space
+				(*pCur) += 1; //also get rid of the floating space. 
 			}
 
 			(*pCur) += text.length();
@@ -418,19 +418,25 @@ int FreeTypeManager::GetKerningOffset(FT_UInt leftGlyph, FT_UInt rightGlyph)
 	return kerning.x / 64;
 }
 
-
 bool FreeTypeManager::Init()
 {
-	string fontName = "SourceHanSerif-Medium.ttc";
+
+	if (m_fontName.empty())
+	{
+		LogMsg("Use SetFontName first");
+		assert(!"Use SetFontName first");
+		return false;
+	}
 
 	FT_Error error = FT_Init_FreeType(&m_library);
 	if (error)
 	{
-		LogMsg("Freetype error");
+		LogMsg("Freetype init error?");
+		
 	}
 
 	error = FT_New_Face(m_library,
-		fontName.c_str(),
+		m_fontName.c_str(),
 		0,
 		&m_face);
 	
@@ -438,10 +444,16 @@ bool FreeTypeManager::Init()
 	{
 		LogMsg("Freetype: the font file could be opened and read, but it appears that its font format is unsupported");
 		return false;
-	}
+	} else
+		if (error == FT_Err_Cannot_Open_Resource)
+		{
+			LogMsg("Freetype: the font file %s couldn't be found", m_fontName.c_str());
+			return false;
+		}
+
 	else if (error)
 	{
-		LogMsg("Freetype: another error code means that the font file could not be opened or read, or that it is broken");
+		LogMsg("Freetype error %d: another error code means that the font file could not be opened or read, or that it is broken", error);
 		return false;
 	}
 

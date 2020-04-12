@@ -10,6 +10,8 @@
 #include "Gamepad/GamepadManager.h"
 
 int g_counter = 0;
+
+
 AudioHandle g_lastAudioHandle = AUDIO_HANDLE_BLANK;
 
 TextAreaComponent::TextAreaComponent()
@@ -18,12 +20,16 @@ TextAreaComponent::TextAreaComponent()
 	m_pSpeakerIconDest = NULL;
 	
 	SetName("TextArea");
+
+	GetApp()->m_pGameLogicComp->AddTextBox(this);
 }
 
 bool TextAreaComponent::FinishedWithTranslation()
 {
 	return !m_bWaitingForTranslation;
 }
+
+
 
 TextAreaComponent::~TextAreaComponent()
 {
@@ -45,6 +51,11 @@ TextAreaComponent::~TextAreaComponent()
 	if (!m_fileNameToRemove.empty())
 	{
 		RemoveFile(m_fileNameToRemove);
+	}
+
+	if (IsBaseAppInitted())
+	{
+		GetApp()->m_pGameLogicComp->RemoveTextBox(this);
 	}
 	
 }
@@ -205,6 +216,17 @@ bool TextAreaComponent::IsStillPlayingOrPlanningToPlay()
 	return GetAudioManager()->IsPlaying(m_audioHandle);
 }
 
+bool TextAreaComponent::IsDownloadingAudio()
+{
+	if (m_netAudioHTTP.GetState() == NetHTTP::STATE_ACTIVE || m_netAudioHTTP.GetState() == NetHTTP::STATE_FORWARD)
+	{
+		//waiting on data
+		return true;
+	}
+
+	return false;
+}
+
 void TextAreaComponent::RequestTranslation()
 {
 
@@ -282,6 +304,13 @@ void TextAreaComponent::OnSelected(VariantList* pVList) //0=vec2 point of click,
 
 	if (pEntClicked->GetName() == "SrcSpeakerIcon")
 	{
+
+		if (GetAudioManager()->IsPlaying(m_audioHandle))
+		{
+			StopSoundIfItWasPlaying();
+			return;
+
+		}
 			if (fingerID == 0)
 			{
 				RequestAudio(true, true);
@@ -336,7 +365,7 @@ void TextAreaComponent::Init(TextArea textArea)
 	vector<CL_Vec2f> offsets = ComputeLocalLineOffsets();
 	float wordWrapX = 0;
 	
-	m_pSourceLanguageSurf = GetApp()->GetFreeTypeManager()->TextToSurface(tempRect.get_size_vec2(), textArea.text,
+	m_pSourceLanguageSurf = GetApp()->GetFreeTypeManager(m_textArea.language)->m_vecFreeTypeManager.TextToSurface(tempRect.get_size_vec2(), textArea.text,
 		height, glColorBytes(0,0,0,0), GetTextColor(IsDialog(false)), m_textArea.language == "ja", &offsets, 
 		wordWrapX);
 
@@ -413,6 +442,13 @@ void TextAreaComponent::OnTouchStart(VariantList *pVList)
 			}
 		}
 
+
+		if (GetAudioManager()->IsPlaying(m_audioHandle))
+		{
+			StopSoundIfItWasPlaying();
+			return;
+
+		}
 		
 		RequestAudio(!bToggleLanguage, true);
 		return;
@@ -494,7 +530,7 @@ void TextAreaComponent::FitText(float *pHeightInOut, float widthMod, float trueC
 {
 
 	float bestHeightSoFar = *pHeightInOut;
-	float charWidth = 999999999;
+	float charWidth = 9999999.0f;
 	float verticalLinesAvailable = 0;
 	float canvasWidthTotalCharRoom = 0;
 
@@ -521,7 +557,7 @@ void TextAreaComponent::TweakForSending(const string &text, CL_Rectf &rect, floa
 
 	vector<string> lines = StringTokenize(text, "\n");
 	height = m_textArea.m_averageTextHeight;
-
+	
 	float widthMod = 0.60f;
 
 	float originalHeight = m_textArea.m_averageTextHeight;
@@ -544,6 +580,22 @@ void TextAreaComponent::TweakForSending(const string &text, CL_Rectf &rect, floa
 		}
 	}
 
+	float temp = 0;
+
+	if (isTranslated)
+	{
+		temp = GetApp()->GetFreeTypeManager(GetApp()->m_target_language)->m_widthOverride;
+	}
+	else
+	{
+		temp = GetApp()->GetFreeTypeManager(m_textArea.language)->m_widthOverride;
+	}
+	if (temp != 0.0f)
+	{
+		widthMod = temp;
+	}
+
+
 	{
 		//we might need more space
 		float maxWidth = 0;
@@ -564,7 +616,7 @@ void TextAreaComponent::TweakForSending(const string &text, CL_Rectf &rect, floa
 			FitText(&height, widthMod, trueCharCount);
 
 			rtRectf textRect;
-			GetApp()->m_freeTypeManager.MeasureText(&textRect, (WCHAR*) &m_textArea.wideText.at(0), m_textArea.wideText.size(), height, true);
+			GetApp()->GetFreeTypeManager(GetApp()->m_target_language)->m_vecFreeTypeManager.MeasureText(&textRect, (WCHAR*) &m_textArea.wideText.at(0), m_textArea.wideText.size(), height, true);
 #ifdef _DEBUG
 			LogMsg("Rect: %s", PrintRect(textRect).c_str());
 #endif
@@ -621,7 +673,7 @@ void TextAreaComponent::RenderLineByLine()
 	}
 	SAFE_DELETE(m_pDestLanguageSurf);
 
-	m_pDestLanguageSurf = GetApp()->GetFreeTypeManager()->TextToSurface(tempRect.get_size_vec2(), m_translatedString,
+	m_pDestLanguageSurf = GetApp()->GetFreeTypeManager(GetApp()->m_target_language)->m_vecFreeTypeManager.TextToSurface(tempRect.get_size_vec2(), m_translatedString,
 		height, glColorBytes(0, 0, 0, 0), GetTextColor(IsDialog(true)), GetApp()->m_target_language == "ja",
 		&offsets, wordWrapX);
 }
@@ -639,12 +691,12 @@ void TextAreaComponent::FitAndWordWrapToRect(const CL_Rectf &tempRect,  wstring 
 		if (!bFirstTime)
 		{
 			//make it smaller, it still doesn't fit
-			pixelHeightOut = pixelHeightOut *= 0.9f;
+			pixelHeightOut = pixelHeightOut *= 0.95f;
 		}
 		bFirstTime = false;
 		wlinesOut.clear();
 		//LogMsg("Trying size %.2f", pixelHeightOut);
-		GetApp()->m_freeTypeManager.MeasureTextAndAddByLinesIntoDeque(tempRect.get_size_vec2(), wtext, &wlinesOut,
+		GetApp()->GetFreeTypeManager(GetApp()->m_target_language)->m_vecFreeTypeManager.MeasureTextAndAddByLinesIntoDeque(tempRect.get_size_vec2(), wtext, &wlinesOut,
 			pixelHeightOut, wrappedSizeOut, GetApp()->m_target_language == "ja");
 	}
 }
@@ -679,7 +731,7 @@ void TextAreaComponent::RenderAsDialog()
 	vector<uint16> vec (finalSingle.begin(), finalSingle.end());
 
 	//Render it at that size
-	m_pDestLanguageSurf = GetApp()->GetFreeTypeManager()->TextToSurface(tempRect.get_size_vec2(), vec,
+	m_pDestLanguageSurf = GetApp()->GetFreeTypeManager(GetApp()->m_target_language)->m_vecFreeTypeManager.TextToSurface(tempRect.get_size_vec2(), vec,
 		pixelHeight, glColorBytes(0, 0, 0, 0), GetTextColor(IsDialog(true)), GetApp()->m_target_language == "ja",
 		NULL, 0);
 

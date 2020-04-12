@@ -16,6 +16,9 @@
 #include "EscapiManager.h"
 #include "WinDesktopCapture.h"
 
+class TextAreaComponent;
+
+
 class WordInfo
 {
 public:
@@ -65,6 +68,8 @@ public:
 
 	virtual void OnAdd(Entity *pEnt);
 
+	void UpdateStatusMessage(string msg);
+
 	void OnUpdate(VariantList *pVList);
 	void OnRender(VariantList *pVList);
 	void OnTakeScreenshot();
@@ -76,8 +81,12 @@ public:
 	void StartProcessingFrameForText();
 	EscapiManager m_escapiManager;
 	WinDesktopCapture m_desktopCapture;
+	string m_status;
 
-	
+	std::vector<TextAreaComponent*> m_textComps;
+	void AddTextBox(TextAreaComponent *p);
+	void RemoveTextBox(TextAreaComponent *p);
+
 private:
 
 	bool ReadFromParagraph(const cJSON *paragraph, TextArea &textArea);

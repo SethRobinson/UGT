@@ -35,6 +35,7 @@ public:
 	TextArea m_textArea;
 	void RequestAudio(bool bUseSrcLanguage, bool bShowMessage);
 	bool IsStillPlayingOrPlanningToPlay();
+	bool IsDownloadingAudio();
 	bool FinishedWithTranslation();
 
 protected:

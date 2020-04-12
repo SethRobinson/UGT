@@ -27,6 +27,10 @@ input|desktop
 ;when using camera mode and you have more than one camera available, you can set to id 1 or 2 etc instead of the default which is 0
 input_camera_device_id|0
 
+;Enter a full or partial name of an audio device to use that instead.  Check the log.txt for a list of them, it's
+;scanned and printed there on startup.  "default" means use the system default.
+audio_device|default
+
 ;target language codes are listed here: https://cloud.google.com/translate/docs/languages
 ;The first language added is the default, then the rest can be dynamically changed to by using -/+ or L and R on control pad
 
@@ -39,12 +43,14 @@ add_switchable_language|id|Indonesian
 add_switchable_language|fi|Finnish
 add_switchable_language|es|Spanish
 add_switchable_language|ja|Japanese
+add_switchable_language|hi|Hindi
 
 ;When uploading the screenshot to google for scanning, 100 means perfect quality (big image) and 0 would mean horrible quality.  95 is probably good
 jpg_quality_for_scan|100
 
-;Audio can be set to "fmod" or "none".  None means it won't even try to initialize the audio or play any sounds.
-;for compatibility, "sdl" will also be treated as fmod as I removed sdl support
+;Audio can be set to "fmod" or "audiere".  None means it won't even try to initialize the audio or play any sounds.
+;If this wasn't compiled with FMOD support, audiere will be used instead.  (RTsoft releases will have it though)
+;fmod seems slightly more compatible, audiere sometimes has weird audio crack/pops when playings mp3s generated with Google's text to speech.
 audio|fmod
 
 ;Valid key names: 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, -, =, Backspace, Tab, Q, W, E, R, T, Y, U, I, O, P, 
@@ -58,8 +64,8 @@ audio|fmod
 ;hotkey_to_scan_active_window|Control,Alt,Shift,F12|
 
 hotkey_to_scan_active_window|Control,F12|
-hotkey_to_scan_draggable_area|Control,Shift,F11|
 hotkey_to_scan_whole_desktop|Control,F11|
+hotkey_to_scan_draggable_area|Control,F10|
 
 ;Website for kanji lookups when you left click one (the actual kanji is appended to the end of the URL)
 ;Leaving commented out for the default
