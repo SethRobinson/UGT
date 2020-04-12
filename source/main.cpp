@@ -5,7 +5,8 @@
 #include "main.h"
 #include "WebOS/SDLMain.h"
 #include "BaseApp.h"
-
+#include "App.h"
+#include "WinDragRect.h"
 //avoid needing to define _WIN32_WINDOWS > 0x0400.. although I guess we could in PlatformPrecomp's win stuff...
 #ifndef WM_MOUSEWHEEL
 	#define WM_MOUSEWHEEL                   0x020A
@@ -1882,7 +1883,15 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, TCHAR *lpCmdLin
 		} else
 		{
 			//LogMsg("Sleeping");
-			Sleep(50);
+			if (GetApp()->GetCaptureMode() == CAPTURE_MODE_DRAGRECT)
+			{
+				GetApp()->m_pWinDragRect->Update();
+				Sleep(0);
+			}
+			else
+			{
+				Sleep(1);
+			}
 		}
 
 		if (g_fpsLimit != 0)

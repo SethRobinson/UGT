@@ -346,9 +346,6 @@
     <ClCompile Include="..\..\shared\SDL\SDL2Main.cpp">
       <Filter>shared\SDL</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\shared\Manager\WiringPiManager.cpp">
-      <Filter>shared\Manager</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\shared\Audio\AudioManagerSDL.cpp">
       <Filter>shared\Audio</Filter>
     </ClCompile>
@@ -667,6 +664,9 @@
     <ClCompile Include="..\..\shared\Audio\AudioManagerAudiere.cpp">
       <Filter>shared\Audio</Filter>
     </ClCompile>
+    <ClCompile Include="..\source\WinDragRect.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\source\App.h">
@@ -906,9 +906,6 @@
     <ClInclude Include="..\..\shared\linux\PlatformSetupLinux.h">
       <Filter>shared\linux</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\shared\Manager\WiringPiManager.h">
-      <Filter>shared\Manager</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\shared\Audio\AudioManagerSDL.h">
       <Filter>shared\Audio</Filter>
     </ClInclude>
@@ -1032,6 +1029,9 @@
     </ClInclude>
     <ClInclude Include="..\..\shared\Audio\AudioManagerAudiere.h">
       <Filter>shared\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\WinDragRect.h">
+      <Filter>source</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

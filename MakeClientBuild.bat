@@ -9,11 +9,13 @@ mkdir tempbuild\interface
 xcopy bin\interface tempbuild\interface /E /F /Y
 xcopy bin\*.dll tempbuild
 xcopy bin\curl-ca-bundle.crt tempbuild
-xcopy bin\font_license.txt tempbuild
+xcopy bin\siddhanta_font_license.txt tempbuild
+xcopy bin\SourceHanSerif-Medium_font_license.txt tempbuild
 xcopy bin\config_template.txt tempbuild
 xcopy bin\readme.txt tempbuild
-ECHO F|xcopy "bin\UGT_Release GL_x64.exe" tempbuild\ugt.exe
+ECHO F|xcopy "bin\UGT_FMOD_Release_GL_x64.exe" tempbuild\ugt.exe
 xcopy bin\SourceHanSerif-Medium.ttc tempbuild
+xcopy bin\siddhanta.ttf tempbuild
 
 
 :Do the signing, not required, uses RTsoft's signing key with obviously isn't included on the GIT
@@ -32,6 +34,7 @@ del %FNAME%
 ..\shared\win\utils\7z.exe rn %FNAME% tempbuild\ UGT\
 
 :Copy to Seth's machines he uses this on
-call CopyToYogini.bat
-call CopyToTennis.bat
+:call CopyToYogini.bat
+:call CopyToTennis.bat
+call CopyToRetro.bat
 pause

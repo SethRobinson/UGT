@@ -18,6 +18,7 @@
 #include <fcntl.h>
 #include "GUIHelp.h"
 #include "AutoPlayManager.h"
+#include "WinDragRect.h"
 
 #ifdef WINAPI
 extern HWND				g_hWnd;
@@ -32,7 +33,7 @@ FileManager g_fileManager;
 FileManager * GetFileManager() {return &g_fileManager;}
 
 //#include "Audio/AudioManagerSDL.h"
-//#include "Audio/AudioManagerFMODStudio.h"
+#include "Audio/AudioManagerFMODStudio.h"
 #include "Audio/AudioManagerAudiere.h"
 
 AudioManager *g_pAudioManager = NULL; //sound in windows/WebOS/Linux/html5
@@ -122,13 +123,14 @@ App * GetApp()
 
 App::App()
 {
-		m_version = "0.61 Beta";
+		m_version = "0.62 Beta";
 		m_bDidPostInit = false;
 }
 
 App::~App()
 {
 	//EnableTV(true);
+	SAFE_DELETE(m_pWinDragRect);
 }
 
 void SetStdOutToNewConsole()
@@ -162,7 +164,6 @@ bool App::IsInputDesktop()
 	return !(m_inputMode == "camera");
 }
 
-
 /*
 void App::OnGamepadStickUpdate(VariantList* pVList)
 {
@@ -195,7 +196,7 @@ void App::UpdateCursor()
 	Gamepad* pPad = GetGamepadManager()->GetDefaultGamepad();
 	if (!pPad) return;
 
-	float deadZone = 0.15f;
+	float deadZone = 0.2f;
 
 	POINT pt;
 	if (GetCursorPos(&pt))
@@ -224,6 +225,17 @@ void App::UpdateCursor()
 		LogMsg("Unable to get cursor access. Run as admin?");
 	}
 }
+
+void App::AddFontOverride(string fontName, string language, float widthOverride)
+{
+
+	m_vecFontInfo.resize(m_vecFontInfo.size() + 1);
+	m_vecFontInfo[m_vecFontInfo.size() - 1].m_vecFreeTypeManager.SetFontName(fontName);
+	m_vecFontInfo[m_vecFontInfo.size() - 1].m_widthOverride = widthOverride;
+	m_vecFontInfo[m_vecFontInfo.size() - 1].m_vecFontOverrideName = language;
+
+}
+
 bool App::Init()
 {
 	
@@ -235,11 +247,15 @@ bool App::Init()
 
 	if (!BaseApp::Init()) return false;
 
+	m_pWinDragRect = new WinDragRect();
 	if (GetEmulatedPlatformID() == PLATFORM_ID_IOS || GetEmulatedPlatformID() == PLATFORM_ID_WEBOS)
 	{
 		//SetLockedLandscape( true); //if we don't allow portrait mode for this game
 		//SetManualRotationMode(true); //don't use manual, it may be faster (33% on a 3GS) but we want iOS's smooth rotations
 	}
+
+	AddFontOverride("SourceHanSerif-Medium.ttc", "", 0.0f);
+	AddFontOverride("siddhanta.ttf", "hi", 0.47f);
 
 	bool bExisted = false;
 
@@ -554,6 +570,27 @@ void App::OnArcadeInput(VariantList *pVList)
 	//LogMsg("Arcade input: Hit %d (%s) (%s)", vKey, keyName.c_str(), pressed.c_str());
 }
 
+FontLanguageInfo * App::GetFreeTypeManager(string language)
+{
+	int languageID = 0;
+
+	for (int i = 0; i < m_vecFontInfo.size(); i++)
+	{
+		if (m_vecFontInfo[i].m_vecFontOverrideName == language)
+		{
+			languageID = i;
+		}
+	}
+
+	if (!m_vecFontInfo[languageID].m_vecFreeTypeManager.IsLoaded())
+	{
+		m_vecFontInfo[languageID].m_vecFreeTypeManager.Init();
+	}
+
+	return &m_vecFontInfo[languageID];
+
+}
+
 void App::SetViewMode(eViewMode viewMode)
 {
 	m_viewMode = viewMode;
@@ -594,12 +631,21 @@ void OnTakeScreenshot()
 
 void OnTranslateButton()
 {
+	if (GetApp()->GetCaptureMode() == CAPTURE_MODE_DRAGRECT)
+	{
+		LogMsg("Ignoring translate button, currently dragging rect");
+	}
+
 	if (GetApp()->GetCaptureMode() == CAPTURE_MODE_WAITING)
 	{
+	
 		GetApp()->m_sig_kill_all_text();
 		GetApp()->m_pGameLogicComp->m_escapiManager.SetPauseCapture(true);
 		GetApp()->m_pGameLogicComp->StartProcessingFrameForText();
 		GetApp()->m_oldHWND = GetForegroundWindow();
+
+		MoveWindow(g_hWnd, GetApp()->m_window_pos_x, GetApp()->m_window_pos_y, GetApp()->m_capture_width, GetApp()->m_capture_height, false);
+
 		LogMsg("Foreground is %d", GetApp()->m_oldHWND);
 		GetApp()->SetCaptureMode(CAPTURE_MODE_SHOWING);
 		AudioHandle handle = GetAudioManager()->Play("audio/wall.mp3");
@@ -608,6 +654,7 @@ void OnTranslateButton()
 	}
 	else
 	{
+		GetApp()->m_pGameLogicComp->UpdateStatusMessage("");
 
 		if (!GetApp()->IsInputDesktop() && GetHelpMenu() != NULL)
 		{
@@ -732,7 +779,8 @@ void AppInput(VariantList *pVList)
 			if (key == '7')  GetApp()->SetTargetLanguage("ko", "Korean");
 			if (key == '8')  GetApp()->SetTargetLanguage("es", "Spanish");
 			if (key == '9')  GetApp()->SetTargetLanguage("ru", "Russian");
-			
+			if (key == '0')  GetApp()->SetTargetLanguage("hi", "Hindi");
+
 			if (key == '[')  GetApp()->ModLanguageByIndex(-1, true);
 			if (key == ']')  GetApp()->ModLanguageByIndex(1, true);
 
@@ -754,14 +802,16 @@ void AppInput(VariantList *pVList)
 
 			if (key == VIRTUAL_KEY_BACK) //escape key
 			{
-				if (GetApp()->m_captureMode == CAPTURE_MODE_SHOWING)
-				{
-					OnTranslateButton();
-				}
-				else
-				{
-					GetApp()->m_hotKeyHandler.OnHideWindow();
-				}
+				
+					if (GetApp()->m_captureMode == CAPTURE_MODE_SHOWING)
+					{
+						OnTranslateButton();
+					}
+					else
+					{
+						GetApp()->m_hotKeyHandler.OnHideWindow();
+					}
+				
 			}
 			
 			if (key == ' ')
@@ -927,6 +977,11 @@ void App::Update()
 	m_pAutoPlayManager->Update();
 	HidingOverlayUpdate();
 
+
+	if (GetCaptureMode() == CAPTURE_MODE_DRAGRECT)
+	{
+		m_pWinDragRect->Update();
+	}
 	//if (!IsInputDesktop() ||  GetApp()->m_captureMode == CAPTURE_MODE_SHOWING || IsShowingHelp())
 	{
 		if (g_bHasFocus)
@@ -1004,7 +1059,9 @@ bool IsAppShowingHelp()
 bool App::IsShowingHelp()
 {
 	if (!GetApp()->IsInputDesktop()) return false;
-	return GetApp()->m_viewMode == 0 && GetApp()->m_captureMode == 0;
+	return GetApp()->m_viewMode == VIEW_MODE_DEFAULT && GetApp()->m_captureMode == CAPTURE_MODE_WAITING;
+		
+
 }
 
 void App::ScanSubArea()
@@ -1028,9 +1085,23 @@ int DivisibleByFour(int num, int max)
 
 void App::HandleHotKeyPushed(HotKeySetting setting)
 {
+
+	if (GetApp()->GetCaptureMode() == CAPTURE_MODE_DRAGRECT)
+	{
+		//not now
+		return;
+	}
+
+	if (GetApp()->GetCaptureMode() == CAPTURE_MODE_SHOWING)
+	{
+		OnTranslateButton(); //toggle it off I guess
+		return;
+	}
+
 	if (setting.hotKeyAction == "hotkey_to_scan_whole_desktop")
 	{
-		
+	
+
 		HWND        hDesktopWnd = GetDesktopWindow();
 		HDC         hDesktopDC = GetDC(hDesktopWnd);
 		int windowWidth = GetDeviceCaps(hDesktopDC, HORZRES);
@@ -1048,6 +1119,7 @@ void App::HandleHotKeyPushed(HotKeySetting setting)
 
 	if (setting.hotKeyAction == "hotkey_to_scan_active_window")
 	{
+		
 		RECT pos;
 		
 		GetWindowRect(GetForegroundWindow(), &pos);
@@ -1065,11 +1137,37 @@ void App::HandleHotKeyPushed(HotKeySetting setting)
 
 	if (setting.hotKeyAction == "hotkey_to_scan_draggable_area")
 	{
-		string msg = "Drag window area not implemented because Seth is a lazy ass";
-		string title = "Hotkeys and stuff";
+		
+		if (GetApp()->GetCaptureMode() == CAPTURE_MODE_DRAGRECT)
+		{
+			LogMsg("Ending drag mode");
+			GetApp()->m_pWinDragRect->End();
+			GetApp()->SetCaptureMode(CAPTURE_MODE_WAITING);
+			return;
+		}
 
-		MessageBox(g_hWnd, _T(msg.c_str()), title.c_str(), NULL);
-		LogMsg("Scanning draggable area");
+		if (GetApp()->GetCaptureMode() == CAPTURE_MODE_WAITING && !g_bHasFocus)
+		{
+			LogMsg("Scanning draggable area");
+			GetApp()->SetCaptureMode(CAPTURE_MODE_DRAGRECT);
+			GetApp()->m_pWinDragRect->Start();
+		}
+		else
+		{
+			
+			LogMsg("Scanning draggable area");
+			GetApp()->SetCaptureMode(CAPTURE_MODE_DRAGRECT);
+			GetApp()->m_pWinDragRect->Start();
+
+			/*
+			string msg;
+			msg += "Hide this window first.";
+			string title = "UGT " + m_version + "";
+
+			MessageBox(g_hWnd, _T(msg.c_str()), title.c_str(), NULL);
+			*/
+			 
+		}
 	}
 }
 
@@ -1254,6 +1352,7 @@ bool App::LoadConfigFile()
 	LogMsg("Reading config.txt");
 
 	string audio = "sdl";
+	string audioDevice;
 
 	TextScanner ts;
 	if (ts.LoadFile("config.txt"))
@@ -1267,6 +1366,7 @@ bool App::LoadConfigFile()
 		m_jpg_quality_for_scan = StringToInt(ts.GetParmString("jpg_quality_for_scan", 1));
 		m_inputMode = ts.GetParmString("input", 1);
 		
+		audioDevice = ts.GetParmString("audio_device", 1);
 		if (ts.GetParmString("input_camera_device_id", 1) != "")
 		{
 			m_input_camera_device_id = StringToInt(ts.GetParmString("input_camera_device_id", 1));
@@ -1325,21 +1425,33 @@ bool App::LoadConfigFile()
 
 	this->ModLanguageByIndex(1, false); //go to first language
 
-	if (!m_freeTypeManager.Init())
-	{
-		return false;
-	}
 
-	if (audio == "sdl" || audio == "fmod" || audio == "audiere")
+	if (audio == "sdl" || audio == "fmod")
 	{
+#ifdef RT_ENABLE_FMOD
+		LogMsg("Enable FMOD audio");
+		g_pAudioManager = new AudioManagerFMOD();
+#else
+		LogMsg("Not compiled with FMOD, so using Audiere for audio");
+		g_pAudioManager = new AudioManagerAudiere();
+#endif
+}
+	else if (audio == "audiere")
+	{
+		LogMsg("Using Audiere for audio");
 		g_pAudioManager = new AudioManagerAudiere();
 	}
 	else
 	{
+		LogMsg("Audio set to none in config.txt, so disabling it.");
 		g_pAudioManager = new AudioManager(); //dummy base, won't play any audio
 	}
 
 	g_pAudioManager->SetPreferOGG(false);
+
+	GetAudioManager()->SetRequestedDriverByName(audioDevice);
+
+
 	return true;
 }
 

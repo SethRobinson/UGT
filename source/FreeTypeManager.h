@@ -38,6 +38,7 @@ public:
 
 	void MeasureTextAndAddByLinesIntoDeque(const CL_Vec2f &textBounds, const wstring &text, deque<wstring> * pLines, float pixelHeight, CL_Vec2f &vEnclosingSizeOut,
 		bool bUseActualWidthForSpacing);
+	void SetFontName(string fontName) { m_fontName = fontName; }
 
 protected:
 
@@ -50,6 +51,7 @@ protected:
 	FT_Face     m_face = NULL;      /* handle to face object */
 	vector<FontState> m_fontStates;
 	float m_lastLineHeight = 0;
+	string m_fontName;
 
 private:
 };

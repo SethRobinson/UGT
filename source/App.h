@@ -12,6 +12,7 @@
 
 class GameLogicComponent;
 class AutoPlayManager;
+class WinDragRect;
 
 enum eViewMode
 {
@@ -24,6 +25,7 @@ enum eCaptureMode
 {
 	CAPTURE_MODE_WAITING,
 	CAPTURE_MODE_SHOWING,
+	CAPTURE_MODE_DRAGRECT
 	
 };
 
@@ -52,6 +54,20 @@ public:
 };
 
 
+class FontLanguageInfo
+{
+public:
+
+	FontLanguageInfo()
+	{
+		m_widthOverride = 0.0f;
+	}
+
+	string m_vecFontOverrideName;
+	FreeTypeManager m_vecFreeTypeManager;
+	float m_widthOverride;
+
+};
 
 class App: public BaseApp
 {
@@ -63,6 +79,7 @@ public:
 	bool IsInputDesktop();
 	void OnGamepadStickUpdate(VariantList* pVList);
 	void UpdateCursor();
+	void AddFontOverride(string fontName, string language, float widthOverride);
 	virtual bool Init();
 	virtual void Kill();
 	virtual void Draw();
@@ -96,7 +113,7 @@ public:
 	//we'll wire these to connect to some signals we care about
 	void OnAccel(VariantList *pVList);
 	void OnArcadeInput(VariantList *pVList);
-	FreeTypeManager * GetFreeTypeManager() { return &m_freeTypeManager; }
+	FontLanguageInfo* GetFreeTypeManager(string language);
 	eViewMode GetViewMode() { return m_viewMode; }
 	void SetViewMode(eViewMode viewMode);
 	eCaptureMode GetCaptureMode() { return m_captureMode; }
@@ -133,6 +150,7 @@ public:
 	HWND m_forceHWND = 0;
 	HWND m_oldHWND = 0;
 	VariantDB m_varDB; //holds all data we want to save/load
+	WinDragRect *m_pWinDragRect;
 
 	bool m_bTestMode = false;
 	int m_energy = 0;
@@ -140,7 +158,7 @@ public:
 	eViewMode m_viewMode = VIEW_MODE_DEFAULT;
 	bool m_bDidPostInit;
 	Surface m_surf; //for testing
-	FreeTypeManager m_freeTypeManager;
+	vector<FontLanguageInfo> m_vecFontInfo;
 	eCaptureMode m_captureMode = CAPTURE_MODE_WAITING;
 	HotKeySetting GetHotKeyDataFromConfig(string data, string action);
 	AutoPlayManager* m_pAutoPlayManager;

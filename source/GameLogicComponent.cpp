@@ -83,7 +83,7 @@ void GameLogicComponent::KillExamineOverlay()
 {
 	if (m_pSettingsIcon)
 	{
-		m_pSettingsIcon->SetTaggedForDeletion();
+	   m_pSettingsIcon->SetTaggedForDeletion();
 		m_pSettingsIcon = NULL;
 	} 
 }
@@ -133,6 +133,8 @@ void GameLogicComponent::OnAdd(Entity *pEnt)
 	{
 		if (!m_escapiManager.Init(GetApp()->m_capture_width, GetApp()->m_capture_height, GetApp()->m_input_camera_device_id))
 		{
+			UpdateStatusMessage("Error with camera capture");
+
 			LogMsg("Error with camera capture");
 		}
 	}
@@ -382,7 +384,7 @@ bool GameLogicComponent::ReadFromParagraph(const cJSON *paragraph, TextArea &tex
 		textArea.m_ySpacingToNextLineAverage = 0;
 		textArea.m_averageTextHeight = 0;
 
-		for (int i = 0; i < textArea.m_lines.size()-1; i++)
+		for (int i = 0; i < textArea.m_lines.size() - 1; i++)
 		{
 			bool bAddCR = false;
 
@@ -407,7 +409,7 @@ bool GameLogicComponent::ReadFromParagraph(const cJSON *paragraph, TextArea &tex
 			}
 
 			if (xPercentUsedOfTotalRect < 0.75f)
-			{	
+			{
 				bAddCR = true;
 			}
 #ifdef _DEBUG
@@ -421,6 +423,11 @@ bool GameLogicComponent::ReadFromParagraph(const cJSON *paragraph, TextArea &tex
 			{
 				newFinal += "\n";
 			}
+			else
+			{
+				newFinal += " ";
+			}
+
 
 			textArea.m_averageTextHeight += textArea.m_lines[i].m_lineRect.get_height();
 			textArea.m_ySpacingToNextLineAverage += ySpacingToNextLinePercent;
@@ -463,6 +470,17 @@ bool GameLogicComponent::ReadFromParagraph(const cJSON *paragraph, TextArea &tex
 	return true;
 }
 
+void GameLogicComponent::AddTextBox(TextAreaComponent *p)
+{
+	m_textComps.push_back(p);
+}
+
+void GameLogicComponent::RemoveTextBox(TextAreaComponent *p)
+{
+	m_textComps.erase(std::remove(m_textComps.begin(), m_textComps.end(), p), m_textComps.end());
+
+}
+
 void GameLogicComponent::ConstructEntityFromTextArea(TextArea &textArea)
 {
 	//LogMsg("Constructing %s", textArea.text.c_str());
@@ -484,7 +502,7 @@ void GameLogicComponent::ConstructEntitiesFromTextAreas()
 bool GameLogicComponent::BuildDatabase(char *pJson)
 {
 	LogMsg("Parsing...");
-
+	UpdateStatusMessage("Parsing...");
 	cJSON *root = cJSON_Parse(pJson);
 	
 	cJSON *responses = cJSON_GetObjectItem(root, "responses");
@@ -632,7 +650,6 @@ void GameLogicComponent::StartProcessingFrameForText()
 
 	//m_escapiManager.GetSoftSurface()->WriteBMPOut("temp.bmp");
 
-
 	string postDataOCR_a = R"({
       'requests': [
         {
@@ -661,9 +678,17 @@ void GameLogicComponent::StartProcessingFrameForText()
 	m_netHTTP.Setup(url, 80, urlappend, NetHTTP::END_OF_DATA_SIGNAL_HTTP);
 	m_netHTTP.AddPostData("", (const byte*)requestWithEmbeddedFile.c_str(), requestWithEmbeddedFile.length());
 	m_netHTTP.Start();
+
+	UpdateStatusMessage("Sending image to google for OCR processing...");
+
 }
 
 extern bool g_bHasFocus;
+
+void GameLogicComponent::UpdateStatusMessage(string msg)
+{
+	m_status = msg;
+}
 
 void GameLogicComponent::OnUpdate(VariantList *pVList)
 {
@@ -688,16 +713,39 @@ void GameLogicComponent::OnUpdate(VariantList *pVList)
 	if (m_netHTTP.GetError() != NetHTTP::ERROR_NONE)
 	{
 		//Big error, show message
-		LogMsg("NetHTTP error: %d", m_netHTTP.GetError());
+	
+		string msg = string("NetHTTP error: ") + toString(m_netHTTP.GetError());
+		UpdateStatusMessage(msg);
+		LogMsg(msg.c_str());
+
 	}
 
+	if (m_netHTTP.GetState() == NetHTTP::STATE_ACTIVE)
+	{
+		string s = "Sending image to google for OCR processing... ";
+
+		int uploadedBytes = m_netHTTP.GetBytesUploaded();
+
+		int bytes = m_netHTTP.GetDownloadedBytes();
+		int expectedBytes = m_netHTTP.GetExpectedBytes();
+
+		if (uploadedBytes < m_netHTTP.GetPostDataSize())
+		{
+			s += " Uploading: (" + toString(uploadedBytes/1024) + "kb /" + toString(m_netHTTP.GetPostDataSize()/1024) + "kb)";
+		}
+		else
+		{
+			s += " Downloading: (" + toString(bytes/1024) + "kb)";
+		}
+		UpdateStatusMessage(s);
+
+	}
 	if (m_netHTTP.GetState() == NetHTTP::STATE_FINISHED)
 	{
 #ifdef _DEBUG
 		FILE *fp = fopen("crap.json", "wb");
 		fwrite(m_netHTTP.GetDownloadedData(), m_netHTTP.GetDownloadedBytes(), 1, fp);
 		fclose(fp);
-
 #endif
 
 		if (GetApp()->GetCaptureMode() == CAPTURE_MODE_WAITING)
@@ -707,7 +755,11 @@ void GameLogicComponent::OnUpdate(VariantList *pVList)
 
 		if (!BuildDatabase((char*)m_netHTTP.GetDownloadedData()))
 		{
-			ShowQuickMessage("Error parsing json reply from google.  View error.txt! Invalid API key?");
+			string msg = "Error parsing json reply from google.  View error.txt! Invalid API key?";
+
+			UpdateStatusMessage(msg);
+			LogMsg(msg.c_str());
+			
 			FILE *fp = fopen("error.txt", "wb");
 			fwrite(m_netHTTP.GetDownloadedData(), m_netHTTP.GetDownloadedBytes(), 1, fp);
 			fclose(fp);
@@ -721,6 +773,38 @@ void GameLogicComponent::OnUpdate(VariantList *pVList)
 		}
 	}
 
+
+	if (m_textComps.size() > 0)
+	{
+
+		int translationsLeft = 0;
+
+		int ttsLeft = 0;
+	
+		for (int i = 0; i < m_textComps.size(); i++)
+		{
+			if (!m_textComps[i]->FinishedWithTranslation())
+				translationsLeft++;
+
+			if (m_textComps[i]->IsDownloadingAudio())
+			{
+				ttsLeft++;
+			}
+		}
+
+		string s;
+		if (translationsLeft > 0) 
+		{
+			s = "(translations left: " + toString(translationsLeft)+") ";
+		}
+		
+		if (ttsLeft > 0)
+		{
+			s += "(text to speech left: " + toString(ttsLeft) + ")";
+		}
+		
+		UpdateStatusMessage(s);
+	}
 }
 
 void GameLogicComponent::OnRender(VariantList *pVList)
@@ -756,7 +840,7 @@ void GameLogicComponent::OnRender(VariantList *pVList)
 
 				string msg = "Space to continue - ? for help - rtsoft.com";
 					GetApp()->GetFont(FONT_SMALL)->DrawAlignedSolidColor(GetScreenSizeXf()-3, GetScreenSizeYf()-3, msg,
-					ALIGNMENT_DOWN_RIGHT, 0.6f, MAKE_RGBA(200, 200, 200, 255));
+					ALIGNMENT_DOWN_RIGHT, 0.6f, MAKE_RGBA(200, 200, 200, 255), NULL, &g_globalBatcher);
 			}
 			else
 			{
@@ -786,6 +870,19 @@ void GameLogicComponent::OnRender(VariantList *pVList)
 	GetApp()->GetFont(FONT_LARGE)->DrawScaled(20, GetScreenSizeYf() - 100, "" + toString(GetApp()->m_energy), 2.0f, MAKE_RGBA(255, 255, 255, 255));
 	*/
 
+
+	if (!m_status.empty())
+	{
+		CL_Rect r = GetScreenRect();
+		r.set_top_left(CL_Vec2i(0, GetScreenSizeYf() - 30));
+		//r.right = GetScreenSizeXf() - 300;
+		r.bottom = GetScreenSizeYf() - 0;
+
+		DrawFilledRect(r, MAKE_RGBA(0, 0, 0, 200));
+
+		GetApp()->GetFont(FONT_SMALL)->DrawAligned(GetScreenSizeX() / 2, GetScreenSizeYf() - 5, m_status, ALIGNMENT_DOWN_CENTER, 1.0f, MAKE_RGBA(200,200,20,255), NULL, &g_globalBatcher);
+
+	}
 }
 
 string MakeFileNameUnique(string fName)
