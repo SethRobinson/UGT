@@ -9,6 +9,7 @@
 
 #include "Renderer/JPGSurfaceLoader.h"
 #include "util/utf8.h"
+#include "util/TextScanner.h"
 
 #ifdef _DEBUG
 //string g_fileName = "positioning_test.png";
@@ -320,7 +321,7 @@ bool GameLogicComponent::ReadFromParagraph(const cJSON *paragraph, TextArea &tex
 					y = 0;
 				}
 
-				assert(x >= 0 && y >= 0);
+				//assert(x >= 0 && y >= 0);
 				verts[vertCount] = CL_Vec2f(x, y);
 				vertCount++;
 			}
@@ -497,6 +498,11 @@ void GameLogicComponent::ConstructEntitiesFromTextAreas()
 	{
 		ConstructEntityFromTextArea(m_textareas[i]);
 	}
+
+	if (m_textareas.empty())
+	{
+		UpdateStatusMessage("(nothing found)");
+	}
 }
 
 bool GameLogicComponent::BuildDatabase(char *pJson)
@@ -582,7 +588,7 @@ bool GameLogicComponent::BuildDatabase(char *pJson)
 		
 #endif
 		
-		assert(textArea.m_rect.left >= 0);
+		//assert(textArea.m_rect.left >= 0);
 	}
 
 	ConstructEntitiesFromTextAreas();
@@ -662,7 +668,25 @@ void GameLogicComponent::StartProcessingFrameForText()
             {
               'type': 'TEXT_DETECTION'
             }
-          ]
+          ])";
+
+	string hint = GetApp()->m_source_language_hint;
+	string postDataOCR_c = "";
+
+#ifdef _DEBUG
+	//hint = "pa";
+#endif
+
+	if (ToLowerCaseString(hint) != "auto")
+	{
+		//optionally insert text hinting
+		postDataOCR_c = ",\n'imageContext': {\n'languageHints': ['";
+		postDataOCR_c += hint;
+		postDataOCR_c += "']\n}";
+	}
+ 
+
+string postDataOCR_d = R"(
         }
       ]
     }
@@ -672,7 +696,7 @@ void GameLogicComponent::StartProcessingFrameForText()
 	
 	SAFE_DELETE_ARRAY(fileData);
 
-	string requestWithEmbeddedFile = postDataOCR_a + encodedImage + postDataOCR_b;
+	string requestWithEmbeddedFile = postDataOCR_a + encodedImage + postDataOCR_b+ postDataOCR_c+ postDataOCR_d;
 	string url = "https://vision.googleapis.com";
 	string urlappend = "/v1/images:annotate?key=" + GetApp()->GetGoogleKey();
 	m_netHTTP.Setup(url, 80, urlappend, NetHTTP::END_OF_DATA_SIGNAL_HTTP);
@@ -755,7 +779,14 @@ void GameLogicComponent::OnUpdate(VariantList *pVList)
 
 		if (!BuildDatabase((char*)m_netHTTP.GetDownloadedData()))
 		{
-			string msg = "Error parsing json reply from google.  View error.txt! Invalid API key?";
+
+			TextScanner s;
+			s.AppendFromMemoryAddressRaw((char*)m_netHTTP.GetDownloadedData(), m_netHTTP.GetDownloadedBytes());
+			s.StripLeadingSpaces();
+
+			string error = s.GetParmString("\"message\"", 1, ":");
+			
+			string msg = "Error.txt written: " + error;
 
 			UpdateStatusMessage(msg);
 			LogMsg(msg.c_str());
@@ -833,14 +864,19 @@ void GameLogicComponent::OnRender(VariantList *pVList)
 				m_desktopCapture.GetSurface()->Blit(0, 0);
 				DrawRect(GetScreenRect(), MAKE_RGBA(150, 0, 0, 255), 3);
 				
-				
 				CL_Rect r = GetScreenRect();
-				r.set_top_left(CL_Vec2i(GetScreenSizeXf() - 300, GetScreenSizeYf() - 20));
-				DrawFilledRect(r, MAKE_RGBA(0, 0, 0, 200));
+				r.set_top_left(CL_Vec2i(GetScreenSizeXf() - 82, GetScreenSizeYf() - 20));
+				
+				if (GetScreenSizeYf() > 50)
+				{
+					//only show this help prompt if there is room
 
-				string msg = "Space to continue - ? for help - rtsoft.com";
-					GetApp()->GetFont(FONT_SMALL)->DrawAlignedSolidColor(GetScreenSizeXf()-3, GetScreenSizeYf()-3, msg,
-					ALIGNMENT_DOWN_RIGHT, 0.6f, MAKE_RGBA(200, 200, 200, 255), NULL, &g_globalBatcher);
+				DrawFilledRect(r, MAKE_RGBA(0, 0, 0, 200));
+				string msg = "<Space or ?>";
+				
+					GetApp()->GetFont(FONT_SMALL)->DrawAlignedSolidColor(GetScreenSizeXf() - 3, GetScreenSizeYf() - 3, msg,
+						ALIGNMENT_DOWN_RIGHT, 0.6f, MAKE_RGBA(200, 200, 200, 255), NULL, &g_globalBatcher);
+				}
 			}
 			else
 			{

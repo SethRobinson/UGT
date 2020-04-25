@@ -123,7 +123,7 @@ App * GetApp()
 
 App::App()
 {
-		m_version = "0.62 Beta";
+		m_version = "0.63 Beta";
 		m_bDidPostInit = false;
 }
 
@@ -256,6 +256,7 @@ bool App::Init()
 
 	AddFontOverride("SourceHanSerif-Medium.ttc", "", 0.0f);
 	AddFontOverride("siddhanta.ttf", "hi", 0.47f);
+	AddFontOverride("lohit.punjabi.1.1.ttf", "pa", 0.45f);
 
 	bool bExisted = false;
 
@@ -1389,6 +1390,10 @@ bool App::LoadConfigFile()
 		if (ts.GetParmString("audio_default_language", 1) != "")
 		{
 			m_audio_default_language = ts.GetParmString("audio_default_language", 1);
+		}
+		if (ts.GetParmString("source_language_hint", 1) != "")
+		{
+			m_source_language_hint = ts.GetParmString("source_language_hint", 1);
 		}
 
 		

@@ -1,4 +1,4 @@
-#include "PlatformPrecomp.h"
+﻿#include "PlatformPrecomp.h"
 #include "GUIHelp.h"
 #include "App.h"
 #include "Entity/EntityUtils.h"
@@ -91,18 +91,19 @@ Entity * CreateHelpMenu(Entity *pRoot)
 		msg += "  `$Dpad-Up`` to show original picture.  `$Dpad-Down`` to show pre-translation OCR results.";
 		msg += "  Hold `$LJoy Button`` to move fast. `$Select + A`` for alt translation.\n";
 	}
-	
-	msg += "\nVersion "+GetApp()->GetAppVersion()+" - by Seth A. Robinson in 2019\n";
+	msg += "Source language hint: `$" + GetApp()->m_source_language_hint+"``\n";
+
+	msg += "\nVersion "+GetApp()->GetAppVersion()+" by Seth A. Robinson (c) 2019-2020\n";
 
 	Entity *pText = CreateTextBoxEntity(pBG, "Text", CL_Vec2f(100, 180), CL_Vec2f(800, 800), msg);
 
-	float y = 400;
+	float y = 420;
 	Entity* pEnt;
 	float startX = 100;
 	float spacerY = 10;
 
 	bool bAutoPlay= GetApp()->GetVar("check_autoplay_audio")->GetUINT32() != 0;
-	pEnt = CreateCheckbox(pBG, "check_autoplay_audio", "Autoplay speaks detected dialog audio", startX, y, bAutoPlay, FONT_SMALL, 1.0f);
+	pEnt = CreateCheckbox(pBG, "check_autoplay_audio", "Automatically speak dialog", startX, y, bAutoPlay, FONT_SMALL, 1.0f);
 	pEnt->GetFunction("OnButtonSelected")->sig_function.connect(&HelpMenuOnSelect);
 	y += GetSize2DEntity(pEnt).y;
 	y += spacerY;

@@ -2,6 +2,9 @@
 
 ;To use google vision you'll need your own Cloud Vision API key. (this is so google can see who is using it and charge you money if you
 ;hammer it too much.  More info here:  https://cloud.google.com/vision/docs/before-you-begin
+; You need an API key, not a "Service key".  To get that,
+; Under "Credentials", choose "+Create Credentials" and then choose API key.   See pic:  https://prnt.sc/s5lc0j
+
 ;Also, visit https://console.cloud.google.com/apis/api/translate.googleapis.com and enable the Translation API.
 ;You also need to enable the Text To Speech API so it can talk:  https://console.cloud.google.com/flows/enableapi?apiid=texttospeech.googleapis.com
 ;Note: it will use the WaveNet voices when it can for the highest quality.
@@ -32,7 +35,7 @@ input_camera_device_id|0
 audio_device|default
 
 ;target language codes are listed here: https://cloud.google.com/translate/docs/languages
-;The first language added is the default, then the rest can be dynamically changed to by using -/+ or L and R on control pad
+;The first language added is the default, then the rest can be dynamically changed to by using [ and ] or L and R on control pad
 
 add_switchable_language|en|English
 add_switchable_language|ko|Korean
@@ -44,11 +47,16 @@ add_switchable_language|fi|Finnish
 add_switchable_language|es|Spanish
 add_switchable_language|ja|Japanese
 add_switchable_language|hi|Hindi
+add_switchable_language|pa|Punjabi
+
+;A source language hint code (same as above) can be given to Google, this is the only way I could get it to read Punjabi. For that situation,
+;you would change "auto" to "pa" below.  Warning, this does BREAK most other languages though, so not recommended unless you have to.
+source_language_hint|auto
 
 ;When uploading the screenshot to google for scanning, 100 means perfect quality (big image) and 0 would mean horrible quality.  95 is probably good
 jpg_quality_for_scan|100
 
-;Audio can be set to "fmod" or "audiere".  None means it won't even try to initialize the audio or play any sounds.
+;Audio can be set to "fmod" or "audiere".  "none" means it won't even try to initialize the audio or play any sounds.
 ;If this wasn't compiled with FMOD support, audiere will be used instead.  (RTsoft releases will have it though)
 ;fmod seems slightly more compatible, audiere sometimes has weird audio crack/pops when playings mp3s generated with Google's text to speech.
 audio|fmod

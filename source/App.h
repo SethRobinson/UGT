@@ -140,6 +140,7 @@ public:
 	int m_minimum_brightness_for_lumakey = 10;
 	bool m_audio_stop_when_window_is_closed = false;
 	string m_audio_default_language = "ja";
+	string m_source_language_hint = "auto";
 	vector<LanguageSetting> m_languages;
 	string m_inputMode = "desktop";
 	void SetTargetLanguage(string languageCode, string languageName, bool bShowMessage = true);

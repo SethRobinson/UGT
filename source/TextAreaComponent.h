@@ -73,6 +73,7 @@ protected:
 	Entity* m_pSpeakerIconDest;
 	AudioHandle m_audioHandle = AUDIO_HANDLE_BLANK;
 	string m_fileNameToRemove;
+	string m_lastTTSLanguageTarget;
 	
 };
 

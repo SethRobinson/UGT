@@ -76,7 +76,9 @@ void FreeTypeManager::MeasureText(rtRectf *pRectOut, const WCHAR *pText, int len
 	FT_GlyphSlot  slot = m_face->glyph;  /* a small shortcut */
 	int           pen_x, pen_y;
 	pen_x = 0;
-	pen_y = (m_face->size->metrics.ascender + m_face->size->metrics.descender) / 64;
+	//pen_y = (m_face->size->metrics.ascender + m_face->size->metrics.descender) / 64;
+	
+	pen_y = GetAscenderAmount();
 	float baseY = pen_y;
 
 	int lines = 1;
@@ -123,9 +125,38 @@ void FreeTypeManager::MeasureText(rtRectf *pRectOut, const WCHAR *pText, int len
 	}
 
 	dst.right = rt_max(dst.right, pen_x);
+
+	//add some final space for the descenders
+ 	dst.bottom = rt_max(dst.bottom, dst.bottom- GetDescenderAmount());
 	*pRectOut = dst;
 }
 
+float FreeTypeManager::GetDescenderAmount()
+{
+
+	//um, just winging it and allowing a small amount of descender space, no real reason to do it this way other than
+	//it seemed to fit what I was doing
+
+	if (m_face->face_flags & FT_FACE_FLAG_VERTICAL)
+	{
+		return (m_face->size->metrics.descender / 64) / 6;
+	}
+
+	return 0;
+}
+
+float FreeTypeManager::GetAscenderAmount()
+{
+
+	if (m_face->face_flags & FT_FACE_FLAG_VERTICAL)
+	{
+		return (m_face->size->metrics.ascender + m_face->size->metrics.descender) / 64;
+		//LogMsg("Has vertical");
+	}
+	
+	//One font I have for punjabi doesn't have this flag and stuff is cut off at the top if I don't do this
+	return m_face->size->metrics.ascender / 64;
+}
 
 wstring FreeTypeManager::GetNextLine(const CL_Vec2f &textBounds, WCHAR **pCur, float pixelHeight, CL_Vec2f &vEnclosingSizeOut, bool bUseActualWidthForSpacing)
 {
@@ -239,6 +270,8 @@ void FreeTypeManager::MeasureTextAndAddByLinesIntoDeque(const CL_Vec2f &textBoun
 
 	vEnclosingSizeOut.y = float(lineCount)*GetLineHeight(pixelHeight);
 
+	vEnclosingSizeOut.y = rt_max(vEnclosingSizeOut.y, vEnclosingSizeOut.y - GetDescenderAmount());
+
 }
 
 
@@ -339,7 +372,8 @@ Surface * FreeTypeManager::TextToSurface(CL_Vec2f surfaceSizeToCreate, vector<un
 	int           pen_x, pen_y;
 
 	pen_x = 0;
-	pen_y = (m_face->size->metrics.ascender+ m_face->size->metrics.descender) / 64;
+	//pen_y = (m_face->size->metrics.ascender+ m_face->size->metrics.descender) / 64;
+	pen_y = GetAscenderAmount();
 	float baseY = pen_y;
 	
 	FT_UInt lastChar = 0;

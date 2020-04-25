@@ -42,7 +42,10 @@ public:
 
 protected:
 
-	wstring GetNextLine(const CL_Vec2f &textBounds, WCHAR **pCur, float pixelHeight, CL_Vec2f &vEnclosingSizeOut, bool bUseActualWidthForSpacing);
+	float GetDescenderAmount();
+	float GetAscenderAmount();
+
+	wstring GetNextLine(const CL_Vec2f& textBounds, WCHAR** pCur, float pixelHeight, CL_Vec2f& vEnclosingSizeOut, bool bUseActualWidthForSpacing);
 
 	void draw_bitmap(FT_Bitmap* bitmap, FT_Int x, FT_Int y, SoftSurface *pSoftSurf, glColorBytes fgColor);
 

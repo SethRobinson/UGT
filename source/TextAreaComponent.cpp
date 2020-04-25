@@ -8,6 +8,7 @@
 #include "util/utf8.h"
 #include "AutoPlayManager.h"
 #include "Gamepad/GamepadManager.h"
+#include "util/TextScanner.h"
 
 int g_counter = 0;
 
@@ -134,10 +135,12 @@ void TextAreaComponent::RequestAudio(bool bUseSrcLanguage, bool bShowMessage)
 		//supported languages on the fly but.. yeah.
 	}
 
+	/*
 	if (language == "ro" || language == "gd" || language == "jv" || language == "ms")
 	{
 		language = "en";  //Unsupported text to speech languages, remove when they become supported later?
 	}
+	*/
 	string languageRegion = language;
 	
 	//hacky fixes to match up correction region with language
@@ -168,6 +171,8 @@ void TextAreaComponent::RequestAudio(bool bUseSrcLanguage, bool bShowMessage)
 	if (languageCode == "ja-JP") languageLetter = "B";
 
 	string finalVoice = languageCode + languageType + languageLetter;
+	
+	m_lastTTSLanguageTarget = languageCode;
 
 	//create json
 	cJSON* root = cJSON_CreateObject();
@@ -364,6 +369,7 @@ void TextAreaComponent::Init(TextArea textArea)
 
 	vector<CL_Vec2f> offsets = ComputeLocalLineOffsets();
 	float wordWrapX = 0;
+	
 	
 	m_pSourceLanguageSurf = GetApp()->GetFreeTypeManager(m_textArea.language)->m_vecFreeTypeManager.TextToSurface(tempRect.get_size_vec2(), textArea.text,
 		height, glColorBytes(0,0,0,0), GetTextColor(IsDialog(false)), m_textArea.language == "ja", &offsets, 
@@ -651,6 +657,7 @@ vector<CL_Vec2f> TextAreaComponent::ComputeLocalLineOffsets()
 	for (int i = 0; i < m_textArea.m_lineStarts.size(); i++)
 	{
 		offsets.push_back(m_textArea.m_lineStarts[i]- m_textAreaRect.get_top_left());
+		//offsets.at(i).y += 20;
 		assert(offsets.at(i).x >= 0 && offsets.at(i).y >= 0 &&  "Huh?  These shouldn't be negative");
 	}
 
@@ -704,7 +711,7 @@ void TextAreaComponent::FitAndWordWrapToRect(const CL_Rectf &tempRect,  wstring 
 void TextAreaComponent::RenderAsDialog()
 {
 	//build version with word wrapping
-	CL_Rectf tempRect = m_textAreaRect;
+ 	CL_Rectf tempRect = m_textAreaRect;
 
 	vector<unsigned short> utf16line;
 	utf8::utf8to16(m_translatedString.begin(), m_translatedString.end(), back_inserter(utf16line));
@@ -789,7 +796,24 @@ bool TextAreaComponent::ReadAudioFromJSON(char* pData)
 
 	if (error != NULL)
 	{
-		ShowQuickMessage("Error parsing audio data json reply from google.  View error.txt!");
+		TextScanner s;
+		s.AppendFromMemoryAddress(pData);
+		s.StripLeadingSpaces();
+
+		string error = s.GetParmString("\"message\"", 1, ":");
+		int code = StringToInt(s.GetParmString("\"code\"", 1, ":"));
+
+		string msg = "Error.txt written: " + error;
+
+		if (code == 400)
+		{
+			msg = m_lastTTSLanguageTarget +" unsupported for speech";
+		}
+
+		//UpdateStatusMessage(msg);
+		GetApp()->m_pGameLogicComp->UpdateStatusMessage(msg);
+
+		ShowQuickMessage(msg);
 		FILE* fp = fopen("error.txt", "wb");
 		fwrite(m_netAudioHTTP.GetDownloadedData(), m_netAudioHTTP.GetDownloadedBytes(), 1, fp);
 		fclose(fp);

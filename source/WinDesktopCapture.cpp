@@ -10,19 +10,14 @@ WinDesktopCapture::~WinDesktopCapture()
 }
 
 
-
 bool WinDesktopCapture::Capture(int x, int y, int width, int height)
 {
 	LogMsg("Doing capture...");
 	HDC hdc = GetDC(NULL); // get the desktop device context
 	HDC hDest = CreateCompatibleDC(hdc); // create a device context to use yourself
 
-		// create a bitmap
 	HBITMAP hbDesktop = CreateCompatibleBitmap(hdc, width, height);
-	//height = GetSystemMetrics(SM_CYVIRTUALSCREEN);
-	//width = GetSystemMetrics(SM_CXVIRTUALSCREEN);
-
-
+	
 	// use the previously created device context with the bitmap
 	SelectObject(hDest, hbDesktop);
 	// copy from the desktop device context to the bitmap device context
@@ -51,7 +46,6 @@ bool WinDesktopCapture::Capture(int x, int y, int width, int height)
 
 	// after the recording is done, release the desktop context you got..
 	ReleaseDC(NULL, hdc);
-
 
 	// ..and delete the context you created
 	DeleteDC(hDest);

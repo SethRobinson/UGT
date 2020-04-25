@@ -4,10 +4,7 @@
 
 int DivisibleByFour(int num, int max);
 
-//extern HWND	g_hWnd;
-//extern HDC g_hDC;
 extern HINSTANCE g_hInstance;
-
 
 #ifndef GET_X_LPARAM
 #define GET_X_LPARAM(lp)                        ((int)(short)LOWORD(lp))
@@ -16,13 +13,11 @@ extern HINSTANCE g_hInstance;
 #define GET_Y_LPARAM(lp)                        ((int)(short)HIWORD(lp))
 #endif
 
-
 WinDragRect::WinDragRect()
 {
 	m_dragMode = DRAGMODE_START;
 	m_hWnd = NULL;
 	m_font = CreateFont(18, 0, 0, 0, FW_BOLD, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, PROOF_QUALITY, VARIABLE_PITCH, "times");
-
 }
 
 WinDragRect::~WinDragRect()
@@ -34,26 +29,12 @@ LRESULT CALLBACK MyNewWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 {
 
 	RECT rect;
-	//LogMsg("Got win message");
 	switch (message)
 	{
 
-/*
-	case WM_CHAR:
-		if (wParam == VK_ESCAPE)
-		{
-			// handle escape key pressed here
-			GetApp()->m_pWinDragRect->End();
-			return 0;
-		}
-	*/
-
 	case WM_PAINT:
-
 	{
 		GetApp()->m_pWinDragRect->OnPaint();
-
-		
 		return 1;
 	}
 		break;
@@ -91,7 +72,6 @@ LRESULT CALLBACK MyNewWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 		GetApp()->m_pWinDragRect->m_dragMode = DRAGMODE_FINISHED;
 		//set final rect
 
-
 	}
 		break;
 
@@ -127,8 +107,6 @@ void WinDragRect::OnPaint()
 	PAINTSTRUCT ps;
 	HDC hdc = BeginPaint(m_hWnd, &ps);
 
-
-	
 	POINT pt;
 	if (GetCursorPos(&pt))
 	{
@@ -138,11 +116,8 @@ void WinDragRect::OnPaint()
 		LogMsg("Unable to get cursor position");
 	}
 	
-
 	if (m_dragMode == DRAGMODE_START)
 	{
-
-
 		SelectObject(hdc, GetApp()->m_pWinDragRect->m_font);
 		SetTextColor(hdc, RGB(255, 255, 255));
 		SetBkColor(hdc, RGB(0, 0, 255));
@@ -176,19 +151,19 @@ void WinDragRect::OnPaint()
 		SelectObject(hdc, brush);
 		FillRect(hdc, &rc, brush);
 
-
 		//remember this rect size...
 
-		m_selRect = CL_Rect(rc.left, rc.top, rc.right, rc.bottom);
+ 		m_selRect = CL_Rect(rc.left, rc.top, rc.right, rc.bottom);
 		m_selRect.normalize(); 
 
 		m_selRect.translate(CL_Vec2i(GetApp()->m_pWinDragRect->m_screenRect.left, (GetApp()->m_pWinDragRect->m_screenRect.top)));
+		m_selRect.normalize();
+
 	}
-
-
 
 	EndPaint(m_hWnd, &ps);
 }
+
 void WinDragRect::Start()
 {
 
@@ -249,12 +224,10 @@ void WinDragRect::End()
 
 void WinDragRect::Render()
 {
-
 }
 
 void WinDragRect::Update()
 {
-
 
 	if (m_dragMode == DRAGMODE_FINISHED)
 	{

@@ -16,7 +16,8 @@ xcopy bin\readme.txt tempbuild
 ECHO F|xcopy "bin\UGT_FMOD_Release_GL_x64.exe" tempbuild\ugt.exe
 xcopy bin\SourceHanSerif-Medium.ttc tempbuild
 xcopy bin\siddhanta.ttf tempbuild
-
+xcopy bin\lohit.punjabi.1.1.ttf tempbuild
+xcopy bin\lohit_punjabi_1_1_ttf_license.txt tempbuild
 
 :Do the signing, not required, uses RTsoft's signing key with obviously isn't included on the GIT
 copy tempbuild\ugt.exe ..\Signing
