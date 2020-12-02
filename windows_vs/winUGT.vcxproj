@@ -294,6 +294,8 @@
     <ClCompile Include="..\..\shared\Gamepad\GamepadManager.cpp" />
     <ClCompile Include="..\..\shared\Gamepad\GamepadProvider.cpp" />
     <ClCompile Include="..\..\shared\Gamepad\GamepadProviderDirectX.cpp" />
+    <ClCompile Include="..\..\shared\Gamepad\GamepadProviderXInput.cpp" />
+    <ClCompile Include="..\..\shared\Gamepad\GamepadXInput.cpp" />
     <ClCompile Include="..\..\shared\GUI\RTFont.cpp" />
     <ClCompile Include="..\..\shared\html5\HTML5Main.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug GL|x64'">true</ExcludedFromBuild>
@@ -816,6 +818,8 @@
     <ClInclude Include="..\..\shared\Gamepad\GamepadManager.h" />
     <ClInclude Include="..\..\shared\Gamepad\GamepadProvider.h" />
     <ClInclude Include="..\..\shared\Gamepad\GamepadProviderDirectX.h" />
+    <ClInclude Include="..\..\shared\Gamepad\GamepadProviderXInput.h" />
+    <ClInclude Include="..\..\shared\Gamepad\GamepadXInput.h" />
     <ClInclude Include="..\..\shared\GUI\RTFont.h" />
     <ClInclude Include="..\..\shared\GUI\RTFontFileFormat.h" />
     <ClInclude Include="..\..\shared\html5\HTML5Utils.h" />

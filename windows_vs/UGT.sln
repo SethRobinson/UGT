@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 16.0.29509.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UGT", "winUGT.vcxproj", "{B4AF0729-C4C8-470F-A075-2D37021ACC6D}"
+	ProjectSection(ProjectDependencies) = postProject
+		{3EF96013-D483-4A34-8599-4B1FE47CAEBE} = {3EF96013-D483-4A34-8599-4B1FE47CAEBE}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "escapi_dll", "..\..\shared\win\escapi-master\escapi_dll\escapi_dll.vcxproj", "{3EF96013-D483-4A34-8599-4B1FE47CAEBE}"
 EndProject

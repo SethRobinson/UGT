@@ -96,6 +96,7 @@ private:
 	Entity* m_pSettingsIcon = NULL;
 
 };
-	
 
+void RestoreCursorPos();
+void SaveCursorPos();
 #endif // GameLogicComponent_h__

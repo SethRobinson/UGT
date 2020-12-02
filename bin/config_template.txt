@@ -75,6 +75,19 @@ hotkey_to_scan_active_window|Control,F12|
 hotkey_to_scan_whole_desktop|Control,F11|
 hotkey_to_scan_draggable_area|Control,F10|
 
+;you can also set a global gamepad button to trigger scanning the active window.  This way you can scan while playing an emulator without touching the keyboard,
+;or while watching video via an app showing HDMI capture or whatever.  Set to "none" or blank to turn this off.
+;Note:  This will ONLY work if the controller is XInput compatible.  (This includes XBox 360 or Xbox One controllers)
+;Note:  To close the translation dialog window, it's always the right action button on the controller, the keys aren't configurable after it starts
+;doing its thang
+
+;Possible gamepad button names you can use for below:
+;left action button, right action button,up action button,down action button,left shoulder button,right shoulder button
+;select button,start button,left trigger button,right trigger button
+;left joystick button,right joystick button, none
+
+gamepad_button_to_scan_active_window|right joystick button
+
 ;Website for kanji lookups when you left click one (the actual kanji is appended to the end of the URL)
 ;Leaving commented out for the default
 ;kanji_lookup_website|https://jisho.org/search/
