@@ -253,7 +253,7 @@ void WinDragRect::Update()
 		}
 
 		GetApp()->m_capture_width = DivisibleByFour(GetApp()->m_capture_width, 0);
-
+		GetApp()->m_usedSubAreaScan = true;
 		GetApp()->ScanSubArea();
 
 		return;

@@ -47,13 +47,20 @@ void GameLogicComponent::OnSelected(VariantList* pVList) //0=vec2 point of click
 	if (pEntClicked->GetName() == "SettingsIcon")
 	{
 	
-		LogMsg("Clicked settings");
+		if (GetScreenSizeX() < 1024 || GetScreenSizeY() < 768)
+		{
+			ShowQuickMessage("Current screen too small to open menu!");
+			return;
+		}
+		LogMsg("Clicked settings\r\n");
 		
-		/*
-		GetApp()->m_sig_kill_all_text();
-		GetApp()->SetCaptureMode(CAPTURE_MODE_WAITING);
-		GetApp()->m_pGameLogicComp->m_escapiManager.SetPauseCapture(false);
-		*/
+		if (GetApp()->IsInputDesktop())
+		{
+			GetApp()->m_sig_kill_all_text();
+			GetApp()->SetCaptureMode(CAPTURE_MODE_WAITING);
+			GetApp()->m_pGameLogicComp->m_escapiManager.SetPauseCapture(false);
+		}
+		
 		Entity *pHelpMenu = CreateHelpMenu(GetParent());
 	
 	}
@@ -61,6 +68,23 @@ void GameLogicComponent::OnSelected(VariantList* pVList) //0=vec2 point of click
 	//GetEntityRoot()->PrintTreeAsText(); //useful for debugging
 }
 
+void RestoreCursorPos()
+{
+	SetCursorPos(GetApp()->m_cursorPosAtStart.x, GetApp()->m_cursorPosAtStart.y);
+	//LogMsg("Restored cursor %d, %d", GetApp()->m_cursorPosAtStart.x, GetApp()->m_cursorPosAtStart.y);
+}
+
+void SaveCursorPos()
+{
+	if (GetCursorPos(&GetApp()->m_cursorPosAtStart))
+	{
+		//LogMsg("Saved cursor %d, %d", GetApp()->m_cursorPosAtStart.x, GetApp()->m_cursorPosAtStart.y);
+	}
+	else
+	{
+		LogMsg("SaveCursorPos:  Error reading cursor");
+	}
+}
 
 void MoveCursorOutOfScreen()
 {
@@ -73,7 +97,7 @@ void GameLogicComponent::CreateExamineOverlay()
 {
 	if (!m_pSettingsIcon)
 	{
-		m_pSettingsIcon = CreateOverlayButtonEntity(GetEntityRoot(), "SettingsIcon", "interface/settings.rttex", GetScreenSizeXf(), GetScreenSizeYf());
+		m_pSettingsIcon = CreateOverlayButtonEntity(GetEntityRoot(), "SettingsIcon", "interface/settings.rttex", GetScreenSizeXf(), GetScreenSizeYf()-10);
 		SetAlignmentEntity(m_pSettingsIcon, ALIGNMENT_DOWN_RIGHT);
 		m_pSettingsIcon->GetFunction("OnButtonSelected")->sig_function.connect(1, boost::bind(&GameLogicComponent::OnSelected, this, _1));
 		SetTouchPaddingEntity(m_pSettingsIcon, CL_Rectf(0, 0, 0, 0));
@@ -798,7 +822,7 @@ void GameLogicComponent::OnUpdate(VariantList *pVList)
 
 		m_netHTTP.Reset(true);
 
-		if (!GetApp()->IsInputDesktop())
+		//if (!GetApp()->IsInputDesktop())
 		{
 			CreateExamineOverlay();
 		}

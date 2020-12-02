@@ -2,6 +2,7 @@
 #include "GUIHelp.h"
 #include "App.h"
 #include "Entity/EntityUtils.h"
+#include "Entity/ArcadeInputComponent.h"
 
 void HelpMenuOnSelect(VariantList *pVList) //0=vec2 point of click, 1=entity sent from
 {
@@ -34,6 +35,7 @@ void HelpMenuOnSelect(VariantList *pVList) //0=vec2 point of click, 1=entity sen
 		if (GetApp()->IsInputDesktop())
 		{
 			GetApp()->m_hotKeyHandler.OnHideWindow();
+
 		}
 		else
 		{
@@ -71,7 +73,7 @@ Entity * CreateHelpMenu(Entity *pRoot)
 	if (GetApp()->IsInputDesktop())
 	{
 		h = GetApp()->m_hotKeyHandler.GetHotKeyByAction("hotkey_to_scan_active_window");
-		msg += "Translate active window - `$" + h.originalString + "``\n";
+		msg += "Translate active window - `$" + h.originalString + "`` or `$"+ ProtonVirtualKeyToString(GetApp()->m_gamepad_button_to_scan_active_window)+"`` on Gamepad\n";
 		h = GetApp()->m_hotKeyHandler.GetHotKeyByAction("hotkey_to_scan_whole_desktop");
 		msg += "Translate entire desktop - `$" + h.originalString + "``\n";
 	
@@ -81,7 +83,7 @@ Entity * CreateHelpMenu(Entity *pRoot)
 		
 		msg += "Continue after a translation - `$<space>``\n";
 		msg += "Show options that work after a translation is done - `$?`` or `$H`` key\n";
-		msg += "Hide this window - `$Click on something else``\n";
+	
 	}
 	else
 	{

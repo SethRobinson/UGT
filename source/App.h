@@ -94,6 +94,7 @@ public:
 	void OnLoadSurfaces();
 	bool IsShowingHelp();
 	void ScanSubArea();
+	void ScanActiveWindow();
 	void HandleHotKeyPushed(HotKeySetting setting);
 	void OnExitApp(VariantList *pVarList);
 	string GetGoogleKey() { return m_google_api_key; }
@@ -104,12 +105,11 @@ public:
 	Variant* GetVar(const string& keyName);
 	Variant* GetVarWithDefault(const string& varName, const Variant& var) { return m_varDB.GetVarWithDefault(varName, var); }
 
-
 	string m_target_language = "en";
 	boost::signal<void(void)> m_sig_target_language_changed;
 	boost::signal<void(void)> m_sig_kill_all_text;
 	AutoPlayManager* GetAutoPlayManager() { return m_pAutoPlayManager; }
-
+	eVirtualKeys m_gamepad_button_to_scan_active_window;
 	//we'll wire these to connect to some signals we care about
 	void OnAccel(VariantList *pVList);
 	void OnArcadeInput(VariantList *pVList);
@@ -125,7 +125,11 @@ public:
 	HotKeySetting m_hotkey_for_whole_desktop, m_hotkey_for_active_window, m_hotkey_for_draggable_area;
 	vector< KeyData> m_keyData;
 	eTextHinting m_globalHinting = HINTING_NORMAL;
+	POINT m_cursorPosAtStart;
+	bool m_cursorShouldBeRestoredToStartPos;
+	
 	//parms from config.txt, I'm lazy so making it all global
+	bool m_usedSubAreaScan;
 	int m_capture_width = 1920;
 	int m_capture_height = 1080;
 	int m_window_pos_x = 0;

@@ -1882,6 +1882,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, TCHAR *lpCmdLin
 				GetBaseApp()->Draw();
 		} else
 		{
+
+			//need to keep processing even though we're out of focus to catch gamepad buttons
+			GetBaseApp()->Update();
+
 			//LogMsg("Sleeping");
 			if (GetApp()->GetCaptureMode() == CAPTURE_MODE_DRAGRECT)
 			{
@@ -2060,7 +2064,6 @@ void LogMsgNoCR(const char* traceStr, ...)
 	vsnprintf_s(buffer, logSize, logSize, traceStr, argsVA);
 	va_end(argsVA);
 
-
 	OutputDebugString(buffer);
 
 	if (IsBaseAppInitted())
@@ -2084,7 +2087,6 @@ void LogMsg ( const char* traceStr, ... )
 	vsnprintf_s( buffer, logSize, logSize, traceStr, argsVA );
 	va_end( argsVA );
 	
-
 	OutputDebugString(buffer);
 	OutputDebugString("\n");
 

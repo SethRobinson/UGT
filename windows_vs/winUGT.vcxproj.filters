@@ -667,6 +667,12 @@
     <ClCompile Include="..\source\WinDragRect.cpp">
       <Filter>source</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\shared\Gamepad\GamepadProviderXInput.cpp">
+      <Filter>shared\Gamepad</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\shared\Gamepad\GamepadXInput.cpp">
+      <Filter>shared\Gamepad</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\source\App.h">
@@ -1032,6 +1038,12 @@
     </ClInclude>
     <ClInclude Include="..\source\WinDragRect.h">
       <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\shared\Gamepad\GamepadProviderXInput.h">
+      <Filter>shared\Gamepad</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\shared\Gamepad\GamepadXInput.h">
+      <Filter>shared\Gamepad</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

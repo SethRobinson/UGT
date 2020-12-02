@@ -6,7 +6,7 @@
  */ 
 #include "PlatformPrecomp.h"
 #include "App.h"
-
+ 
 #include "Entity/CustomInputComponent.h" //used for the back button (android)
 #include "Entity/FocusInputComponent.h" //needed to let the input component see input messages
 #include "Entity/ArcadeInputComponent.h" 
@@ -45,6 +45,7 @@ GamepadManager * GetGamepadManager() { return &g_gamepadManager; }
 
 #ifdef WINAPI
 #include "Gamepad/GamepadProviderDirectX.h"
+#include "Gamepad/GamepadProviderXInput.h"
 extern bool g_bHasFocus;
 
 #endif
@@ -108,8 +109,6 @@ BaseApp * GetBaseApp()
 {
 	if (!g_pApp)
 	{
-		//SetStdOutToNewConsole();
-
 		g_pApp = new App;
 	}
 	return g_pApp;
@@ -123,8 +122,12 @@ App * GetApp()
 
 App::App()
 {
-		m_version = "0.63 Beta";
+		m_usedSubAreaScan = false;
+		m_version = "0.64 Beta";
 		m_bDidPostInit = false;
+		m_gamepad_button_to_scan_active_window = VIRTUAL_KEY_NONE;
+		m_cursorShouldBeRestoredToStartPos = false;
+		m_cursorPosAtStart.x = m_cursorPosAtStart.y = 0;
 }
 
 App::~App()
@@ -296,7 +299,16 @@ bool App::Init()
 #ifdef PLATFORM_WINDOWS
 	//If you don't have directx, just comment out this and remove the dx lib dependency, directx is only used for the
 	//gamepad input on windows
-	GetGamepadManager()->AddProvider(new GamepadProviderDirectX); //use directx joysticks
+	GamepadProviderXInput *pTemp = new GamepadProviderXInput();
+	pTemp->PreallocateControllersEvenIfMissing(true);
+	GetGamepadManager()->AddProvider(pTemp); //use XInput joysticks
+
+	//do another scan for directx devices
+	GamepadProviderDirectX *pTempDirectX = new GamepadProviderDirectX;
+	pTempDirectX->SetIgnoreXInputCapableDevices(true);
+	GetGamepadManager()->AddProvider(pTempDirectX); //use directx joysticks
+
+	
 #endif
 
 	//arcade input component is a way to tie keys/etc to send signals through GetBaseApp()->m_sig_arcade_input
@@ -445,18 +457,53 @@ void OnGamepadButton(VariantList *m_pVList)
 
 	if (vKeyInfo == VIRTUAL_KEY_PRESS)
 	{
+
+		if (!g_bHasFocus && GetApp()->m_captureMode == CAPTURE_MODE_WAITING)
+		{
+			//give us focus?
+			if (vKey == GetApp()->m_gamepad_button_to_scan_active_window)
+			{
+				LogMsg("SCANNING FROM gamepad button");
+				SaveCursorPos();
+				GetApp()->m_cursorShouldBeRestoredToStartPos = true;
+
+				//relocate cursor to middle of window
+				SetCursorPos(GetApp()->m_window_pos_x + GetApp()->m_capture_width/2,
+					GetApp()->m_window_pos_y + GetApp()->m_capture_height/2);
+			
+
+				if (GetApp()->m_usedSubAreaScan)
+				{
+					//they've previously scanned a sub area by hand, so let's use that
+					GetApp()->ScanSubArea();
+				}
+				else
+				{
+					GetApp()->ScanActiveWindow();
+
+				}
+
+			}
+			return;
+		}
+
 		action = "Pressed";
 		if (vKey == VIRTUAL_DPAD_BUTTON_RIGHT)
 		{
+			LogMsg("Toggling from gamepad button");
+
+			if (GetApp()->IsInputDesktop() && GetHelpMenu() != NULL)
+			{
+				return;//don't allow us to translate the help menu, it screws stuff up
+			}
 			OnTranslateButton();
+			return;
 		}
 
 		if (vKey == VIRTUAL_DPAD_BUTTON_DOWN)
 		{
 			SendFakeMouseClick(true);
 		}
-
-
 
 		if (vKey == VIRTUAL_DPAD_BUTTON_UP)
 		{
@@ -490,7 +537,10 @@ void OnGamepadButton(VariantList *m_pVList)
 
 	}
 
-//	LogMsg("`6Gamepad `w%d``: `#%s`` is `$%s````", gamepadID, ProtonVirtualKeyToString(vKey).c_str(), action.c_str());
+#ifdef _DEBUG
+	LogMsg("`6Gamepad `w%d``: `#%s`` is `$%s````", gamepadID, ProtonVirtualKeyToString(vKey).c_str(), action.c_str());
+#endif
+
 }
 
 Variant* App::GetVar(const string& keyName)
@@ -589,7 +639,6 @@ FontLanguageInfo * App::GetFreeTypeManager(string language)
 	}
 
 	return &m_vecFontInfo[languageID];
-
 }
 
 void App::SetViewMode(eViewMode viewMode)
@@ -630,8 +679,56 @@ void OnTakeScreenshot()
 	GetApp()->m_pGameLogicComp->OnTakeScreenshot();
 }
 
-void OnTranslateButton()
+void TurnOffRenderDisplay(VariantList* pVList)
 {
+	GetApp()->m_pGameLogicComp->UpdateStatusMessage("");
+
+	if (!GetApp()->IsInputDesktop() && GetHelpMenu() != NULL)
+	{
+		KillHelpMenu();
+		return;
+	}
+
+	GetApp()->m_sig_kill_all_text();
+	GetApp()->SetCaptureMode(CAPTURE_MODE_WAITING);
+	GetApp()->m_pGameLogicComp->m_escapiManager.SetPauseCapture(false);
+	//GetAudioManager()->Play("audio/blip2.wav");
+
+	if (GetApp()->IsInputDesktop())
+	{
+		LogMsg("Hiding window");
+		GetApp()->m_hotKeyHandler.OnHideWindow();
+	}
+
+
+	if (GetApp()->m_cursorShouldBeRestoredToStartPos)
+	{
+		GetApp()->m_cursorShouldBeRestoredToStartPos = false;
+
+
+
+		if (GetApp()->m_oldHWND != 0)
+		{
+			LogMsg("Restoring hwnd");
+			SetForegroundWindow(GetApp()->m_oldHWND);
+		}
+
+		RestoreCursorPos();
+
+	}
+
+	GetApp()->m_oldHWND = 0;
+}
+
+void OnTranslateButton()
+{ 
+// 	if (GetApp()->IsInputDesktop() && GetHelpMenu() != NULL)
+// 	{
+// 		GetApp()->m_hotKeyHandler.OnHideWindow();
+// 		return;
+// 	}
+
+	
 	if (GetApp()->GetCaptureMode() == CAPTURE_MODE_DRAGRECT)
 	{
 		LogMsg("Ignoring translate button, currently dragging rect");
@@ -642,11 +739,22 @@ void OnTranslateButton()
 	
 		GetApp()->m_sig_kill_all_text();
 		GetApp()->m_pGameLogicComp->m_escapiManager.SetPauseCapture(true);
-		GetApp()->m_pGameLogicComp->StartProcessingFrameForText();
-		GetApp()->m_oldHWND = GetForegroundWindow();
 
+		GetApp()->m_oldHWND = GetForegroundWindow();
 		MoveWindow(g_hWnd, GetApp()->m_window_pos_x, GetApp()->m_window_pos_y, GetApp()->m_capture_width, GetApp()->m_capture_height, false);
 
+		if (GetApp()->IsInputDesktop())
+		{
+			//hack to lose focus causing libretro to flush the GL buffer.  I don't understand it either
+// 			SetForegroundWindow(g_hWnd);
+// 			Sleep(50);
+// 			SetForegroundWindow(GetApp()->m_oldHWND);
+		}
+
+		GetApp()->m_pGameLogicComp->StartProcessingFrameForText();
+
+
+	
 		LogMsg("Foreground is %d", GetApp()->m_oldHWND);
 		GetApp()->SetCaptureMode(CAPTURE_MODE_SHOWING);
 		AudioHandle handle = GetAudioManager()->Play("audio/wall.mp3");
@@ -655,26 +763,10 @@ void OnTranslateButton()
 	}
 	else
 	{
-		GetApp()->m_pGameLogicComp->UpdateStatusMessage("");
+		GetMessageManager()->CallStaticFunction(TurnOffRenderDisplay, 100, NULL);
 
-		if (!GetApp()->IsInputDesktop() && GetHelpMenu() != NULL)
-		{
-			KillHelpMenu();
-			return;
-		}
-
-		GetApp()->m_sig_kill_all_text();
-		GetApp()->SetCaptureMode(CAPTURE_MODE_WAITING);
-		GetApp()->m_pGameLogicComp->m_escapiManager.SetPauseCapture(false);
-		//GetAudioManager()->Play("audio/blip2.wav");
 		
-		if (GetApp()->IsInputDesktop())
-		{
-			LogMsg("Hiding window");
-			GetApp()->m_hotKeyHandler.OnHideWindow();
-		}
-
-		GetApp()->m_oldHWND = 0;
+	
 	}
 }
 
@@ -704,8 +796,8 @@ void App::ShowHelp()
 {
 	string msg;
 	msg += "Dismiss translation screen - SPACE\n";
-	msg += "Read text outloud - Left click\n";
-	msg += "Read text outload as alternate language Shift-Left click\n";
+	msg += "Read text out loud - Left click\n";
+	msg += "Read text out load as alternate language Shift-Left click\n";
 	msg += "Next/previous language (languages set in config.txt) - [ and ]\n";
 	msg += "Quick set target language - 1 through 9\n";
 	msg += "Force line by line translation mode - L\n";
@@ -1084,6 +1176,18 @@ int DivisibleByFour(int num, int max)
 	return num;
 }
 
+void App::ScanActiveWindow()
+{
+	RECT pos;
+	GetWindowRect(GetForegroundWindow(), &pos);
+	m_window_pos_x = pos.left;
+	m_window_pos_y = pos.top;
+	m_capture_width = pos.right - pos.left;
+	m_capture_height = pos.bottom - pos.top;
+	m_capture_width = DivisibleByFour(m_capture_width, 0);
+	ScanSubArea();
+}
+
 void App::HandleHotKeyPushed(HotKeySetting setting)
 {
 
@@ -1120,20 +1224,9 @@ void App::HandleHotKeyPushed(HotKeySetting setting)
 
 	if (setting.hotKeyAction == "hotkey_to_scan_active_window")
 	{
-		
-		RECT pos;
-		
-		GetWindowRect(GetForegroundWindow(), &pos);
-		
-		m_window_pos_x = pos.left;
-		m_window_pos_y = pos.top;
-		
-		m_capture_width = pos.right- pos.left;
-		m_capture_height = pos.bottom-pos.top;
-	
-		m_capture_width = DivisibleByFour(m_capture_width, 0);
 
-		ScanSubArea();
+		ScanActiveWindow();
+		return;
 	}
 
 	if (setting.hotKeyAction == "hotkey_to_scan_draggable_area")
@@ -1395,6 +1488,8 @@ bool App::LoadConfigFile()
 		{
 			m_source_language_hint = ts.GetParmString("source_language_hint", 1);
 		}
+
+		m_gamepad_button_to_scan_active_window = StringToProtonVirtualKey(ToLowerCaseString(ts.GetParmString("gamepad_button_to_scan_active_window", 1)));
 
 		
 		m_hotkey_for_whole_desktop = GetHotKeyDataFromConfig(ts.GetParmString("hotkey_to_scan_whole_desktop", 1), "hotkey_to_scan_whole_desktop");
