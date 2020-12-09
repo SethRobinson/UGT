@@ -460,14 +460,22 @@ void TextAreaComponent::OnTouchStart(VariantList *pVList)
 		return;
 	}
 	
-	
-	if (! (GetKeyState(VK_SHIFT) & 0x8000))
+	if (GetKeyState(VK_DOWN) & 0x8000)
 	{
 		//right mouse button
 		vector<unsigned short> utf16line;
 		utf8::utf8to16(m_textArea.text.begin(), m_textArea.text.end(), back_inserter(utf16line));
 		SetClipboardTextW(&utf16line[0], utf16line.size());
-		ShowQuickMessage("Copied text to clipboard");
+		ShowQuickMessage("Copied original text to clipboard");
+		return;
+	}
+	else if (! (GetKeyState(VK_SHIFT) & 0x8000))
+	{
+		//right mouse button
+		vector<unsigned short> utf16line;
+		utf8::utf8to16(m_translatedString.begin(), m_translatedString.end(), back_inserter(utf16line));
+		SetClipboardTextW(&utf16line[0], utf16line.size());
+		ShowQuickMessage("Copied translated text to clipboard");
 		return;
 	}
 	else
