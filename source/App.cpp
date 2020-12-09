@@ -805,7 +805,8 @@ void App::ShowHelp()
 	msg += "Show original image - Hold UP ARROW\n";
 	msg += "Show pre translated OCR results - Hold DOWN ARROW\n";
 	msg += "To look up kanji from original - Shift-Right click kanji on original image\n";
-	msg += "To copy original text - Right click on original text block\n";
+	msg += "To copy translated text - Right click on translated text block\n";
+	msg += "To copy original text - Hold DOWN ARROW and right click on original text block\n";
 	msg += "Take screenshot - S\n";
 	string title = "UGT "+m_version+" - Hotkeys";
 
