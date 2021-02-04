@@ -18,6 +18,9 @@ xcopy bin\SourceHanSerif-Medium.ttc tempbuild
 xcopy bin\siddhanta.ttf tempbuild
 xcopy bin\lohit.punjabi.1.1.ttf tempbuild
 xcopy bin\lohit_punjabi_1_1_ttf_license.txt tempbuild
+mkdir tempbuild\htmlexport
+xcopy bin\htmlexport\*.txt tempbuild\htmlexport
+xcopy bin\htmlexport\*.css tempbuild\htmlexport
 
 :Do the signing, not required, uses RTsoft's signing key with obviously isn't included on the GIT
 copy tempbuild\ugt.exe ..\Signing

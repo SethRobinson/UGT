@@ -2,7 +2,9 @@ Universal Game Translator
 
 It's a pretty jank translation utility designed to work in two modes:
 
-Desktop mode - Useful for games running in windows, webpages, or pictures
+Desktop mode - Useful for games running in windows, webpages, or pictures. It can be controlled
+by a gamepad as well.  Some gamepads (XBOX pads/etc) can be used to initiate a capture, even
+while using the same pad to play the game.  (By default, clicking down on the right stick will do it)
 
 Camera mode - Snaps pictures from an HDMI input.  Tested with
 Elgato Game Capture and Elgato Cam-Link.  Camera mode is designed
