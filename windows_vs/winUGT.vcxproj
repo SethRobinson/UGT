@@ -749,6 +749,7 @@
     <ClCompile Include="..\source\App.cpp" />
     <ClCompile Include="..\source\AutoPlayManager.cpp" />
     <ClCompile Include="..\source\CursorComponent.cpp" />
+    <ClCompile Include="..\source\ExportToHTML.cpp" />
     <ClCompile Include="..\Source\FreeTypeManager.cpp" />
     <ClCompile Include="..\source\GameLogicComponent.cpp" />
     <ClCompile Include="..\source\GUIHelp.cpp" />
@@ -879,6 +880,7 @@
     <ClInclude Include="..\source\App.h" />
     <ClInclude Include="..\source\AutoPlayManager.h" />
     <ClInclude Include="..\source\CursorComponent.h" />
+    <ClInclude Include="..\source\ExportToHTML.h" />
     <ClInclude Include="..\Source\FreeTypeManager.h" />
     <ClInclude Include="..\source\GameLogicComponent.h" />
     <ClInclude Include="..\source\GUIHelp.h" />

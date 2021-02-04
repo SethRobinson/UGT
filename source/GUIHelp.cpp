@@ -95,7 +95,7 @@ Entity * CreateHelpMenu(Entity *pRoot)
 	}
 	msg += "Source language hint: `$" + GetApp()->m_source_language_hint+"``\n";
 
-	msg += "\nVersion "+GetApp()->GetAppVersion()+" by Seth A. Robinson (c) 2019-2020\n";
+	msg += "\nVersion "+GetApp()->GetAppVersion()+" by Seth A. Robinson (c) 2019-2021\n";
 
 	Entity *pText = CreateTextBoxEntity(pBG, "Text", CL_Vec2f(100, 180), CL_Vec2f(800, 800), msg);
 

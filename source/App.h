@@ -13,6 +13,7 @@
 class GameLogicComponent;
 class AutoPlayManager;
 class WinDragRect;
+class ExportToHTML;
 
 enum eViewMode
 {
@@ -109,6 +110,8 @@ public:
 	boost::signal<void(void)> m_sig_target_language_changed;
 	boost::signal<void(void)> m_sig_kill_all_text;
 	AutoPlayManager* GetAutoPlayManager() { return m_pAutoPlayManager; }
+	ExportToHTML* GetExportToHTML() { return m_pExportToHTML; }
+
 	eVirtualKeys m_gamepad_button_to_scan_active_window;
 	//we'll wire these to connect to some signals we care about
 	void OnAccel(VariantList *pVList);
@@ -160,6 +163,7 @@ public:
 	bool m_bTestMode = false;
 	int m_energy = 0;
 	GameLogicComponent *m_pGameLogicComp = NULL;
+	GameLogicComponent * GetGameLogicComponent() { return m_pGameLogicComp; }
 	eViewMode m_viewMode = VIEW_MODE_DEFAULT;
 	bool m_bDidPostInit;
 	Surface m_surf; //for testing
@@ -168,6 +172,7 @@ public:
 	HotKeySetting GetHotKeyDataFromConfig(string data, string action);
 	AutoPlayManager* m_pAutoPlayManager;
 	POINT m_hidingOverlayMousePosStart;
+	ExportToHTML* m_pExportToHTML;
 
 	bool m_bHidingOverlays = false;
 };

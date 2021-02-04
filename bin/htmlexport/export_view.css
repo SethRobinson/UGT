@@ -1,0 +1,22 @@
+
+body {
+  background-image: url('background.jpg');
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  position: absolute;
+  white-space:nowrap;
+  margin: 0;
+  padding: 0;
+}
+
+p {
+        color: white;
+        font-weight: bold;
+        background-color: rgba(0, 0, 0, 0.7);
+        display: inline-block;
+        position: absolute;
+        margin: 0;
+        padding: 0;
+    }
+
+

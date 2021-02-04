@@ -673,6 +673,9 @@
     <ClCompile Include="..\..\shared\Gamepad\GamepadXInput.cpp">
       <Filter>shared\Gamepad</Filter>
     </ClCompile>
+    <ClCompile Include="..\source\ExportToHTML.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\source\App.h">
@@ -1044,6 +1047,9 @@
     </ClInclude>
     <ClInclude Include="..\..\shared\Gamepad\GamepadXInput.h">
       <Filter>shared\Gamepad</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ExportToHTML.h">
+      <Filter>source</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
