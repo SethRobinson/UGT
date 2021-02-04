@@ -37,6 +37,7 @@ public:
 	bool IsStillPlayingOrPlanningToPlay();
 	bool IsDownloadingAudio();
 	bool FinishedWithTranslation();
+	bool IsDialog(bool bIsTranslating);
 
 protected:
 
@@ -44,7 +45,6 @@ protected:
 	bool ReadAudioFromJSON(char* pData);
 	void RequestTranslation();
 	glColorBytes GetTextColor(bool bIsDialog);
-	bool IsDialog(bool bIsTranslating);
 	void OnSelected(VariantList* pVList);
 	void OnTargetLanguageChanged();
 

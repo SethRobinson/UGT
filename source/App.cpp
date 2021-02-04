@@ -19,6 +19,7 @@
 #include "GUIHelp.h"
 #include "AutoPlayManager.h"
 #include "WinDragRect.h"
+#include "ExportToHTML.h"
 
 #ifdef WINAPI
 extern HWND				g_hWnd;
@@ -54,6 +55,7 @@ App *g_pApp = NULL;
 void OnTranslateButton();
 void OnGamepadButton(VariantList *m_pVList);
 void OnTakeScreenshot();
+void TurnOffRenderDisplay(VariantList* pVList);
 
 string RunLinuxShell(string command)
 {
@@ -122,8 +124,10 @@ App * GetApp()
 
 App::App()
 {
+		m_pExportToHTML = NULL;
+		m_pAutoPlayManager = NULL;
 		m_usedSubAreaScan = false;
-		m_version = "0.64 Beta";
+		m_version = "0.65 Beta";
 		m_bDidPostInit = false;
 		m_gamepad_button_to_scan_active_window = VIRTUAL_KEY_NONE;
 		m_cursorShouldBeRestoredToStartPos = false;
@@ -133,6 +137,8 @@ App::App()
 App::~App()
 {
 	//EnableTV(true);
+	SAFE_DELETE(m_pAutoPlayManager);
+	SAFE_DELETE(m_pExportToHTML);
 	SAFE_DELETE(m_pWinDragRect);
 }
 
@@ -330,6 +336,8 @@ bool App::Init()
 
 
 	m_pAutoPlayManager = new AutoPlayManager();
+	m_pExportToHTML = new ExportToHTML();
+
 	return true;
 }
 
@@ -485,6 +493,19 @@ void OnGamepadButton(VariantList *m_pVList)
 
 			}
 			return;
+		}
+		else
+		{
+			if ( /*g_bHasFocus &&*/ GetApp()->m_captureMode == CAPTURE_MODE_SHOWING)
+			{
+				if (vKey == GetApp()->m_gamepad_button_to_scan_active_window)
+				{
+					LogMsg("Closing capture window");
+					GetMessageManager()->CallStaticFunction(TurnOffRenderDisplay, 200, NULL);
+
+				}
+			}
+
 		}
 
 		action = "Pressed";
@@ -763,10 +784,8 @@ void OnTranslateButton()
 	}
 	else
 	{
-		GetMessageManager()->CallStaticFunction(TurnOffRenderDisplay, 100, NULL);
+		GetMessageManager()->CallStaticFunction(TurnOffRenderDisplay, 200, NULL);
 
-		
-	
 	}
 }
 
@@ -805,8 +824,8 @@ void App::ShowHelp()
 	msg += "Show original image - Hold UP ARROW\n";
 	msg += "Show pre translated OCR results - Hold DOWN ARROW\n";
 	msg += "To look up kanji from original - Shift-Right click kanji on original image\n";
-	msg += "To copy original text - Right click on original text block\n";
-	msg += "Take screenshot - S\n";
+	msg += "To copy text - Right click on it\n";
+	msg += "Take screenshot - S, E to export to html\n";
 	string title = "UGT "+m_version+" - Hotkeys";
 
 	MessageBox(g_hWnd, _T(msg.c_str()), title.c_str(), NULL);
@@ -921,6 +940,11 @@ void AppInput(VariantList *pVList)
 			if (key == '-')
 			{
 				GetApp()->ModLanguageByIndex(-1);
+			}
+
+			if (key == 'e')
+			{
+				GetApp()->GetExportToHTML()->Export();
 			}
 
 
