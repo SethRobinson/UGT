@@ -12,7 +12,7 @@ WinDesktopCapture::~WinDesktopCapture()
 
 bool WinDesktopCapture::Capture(int x, int y, int width, int height)
 {
-	LogMsg("Doing capture...");
+	LogMsg("Doing capture at %d:%d of size %d, %d", x, y, width, height);
 	HDC hdc = GetDC(NULL); // get the desktop device context
 	HDC hDest = CreateCompatibleDC(hdc); // create a device context to use yourself
 

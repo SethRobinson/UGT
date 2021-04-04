@@ -85,7 +85,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>dinput8.lib;escapi.lib;libcurl.dll.a;audiere.lib;opengl32.lib;zlibwapi.lib;wsock32.lib;freetype.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>shcore.lib;dinput8.lib;escapi.lib;libcurl.dll.a;audiere.lib;opengl32.lib;zlibwapi.lib;wsock32.lib;freetype.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>..\..\shared\win\lib\64;..\..\shared\win\audiere\lib64;..\..\shared\win\lib\x64;..\..\shared\win\freetype\win64;bin\x64\Debug;D:\pro\dxsdk\Lib\x64;..\..\shared\win\fmodstudio\api\lowlevel\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -108,7 +108,7 @@
       <DisableSpecificWarnings>4267;4244;4244;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>dinput8.lib;escapi.lib;freetype.lib;libcurl.dll.a;audiere.lib;opengl32.lib;zlibwapi.lib;wsock32.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>shcore.lib;dinput8.lib;escapi.lib;freetype.lib;libcurl.dll.a;audiere.lib;opengl32.lib;zlibwapi.lib;wsock32.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>..\..\shared\win\lib\64;..\..\shared\win\fmod\api\lib;..\..\shared\win\lib\x64;..\..\shared\win\freetype\win64;..\..\shared\win\EasyCam\Release;bin\x64\Release;D:\pro\dxsdk\Lib\x64;..\..\shared\win\fmodstudio\api\lowlevel\lib;..\..\shared\win\audiere\lib64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -132,7 +132,7 @@
       <DisableSpecificWarnings>4267;4244;4244;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>dinput8.lib;escapi.lib;freetype.lib;libcurl.dll.a;audiere.lib;fmod64_vc.lib;opengl32.lib;zlibwapi.lib;wsock32.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>shcore.lib;dinput8.lib;escapi.lib;freetype.lib;libcurl.dll.a;audiere.lib;fmod64_vc.lib;opengl32.lib;zlibwapi.lib;wsock32.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>..\..\shared\win\lib\64;..\..\shared\win\fmod\api\lib;..\..\shared\win\lib\x64;..\..\shared\win\freetype\win64;..\..\shared\win\EasyCam\Release;bin\x64\Release;D:\pro\dxsdk\Lib\x64;..\..\shared\win\fmodstudio\api\lowlevel\lib;..\..\shared\win\audiere\lib64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>

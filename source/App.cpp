@@ -127,7 +127,7 @@ App::App()
 		m_pExportToHTML = NULL;
 		m_pAutoPlayManager = NULL;
 		m_usedSubAreaScan = false;
-		m_version = "0.65 Beta";
+		m_version = "0.67 Beta";
 		m_bDidPostInit = false;
 		m_gamepad_button_to_scan_active_window = VIRTUAL_KEY_NONE;
 		m_cursorShouldBeRestoredToStartPos = false;
@@ -1230,7 +1230,6 @@ void App::HandleHotKeyPushed(HotKeySetting setting)
 	if (setting.hotKeyAction == "hotkey_to_scan_whole_desktop")
 	{
 	
-
 		HWND        hDesktopWnd = GetDesktopWindow();
 		HDC         hDesktopDC = GetDC(hDesktopWnd);
 		int windowWidth = GetDeviceCaps(hDesktopDC, HORZRES);
@@ -1248,8 +1247,16 @@ void App::HandleHotKeyPushed(HotKeySetting setting)
 
 	if (setting.hotKeyAction == "hotkey_to_scan_active_window")
 	{
+		if (GetApp()->m_usedSubAreaScan)
+		{
+			//they've previously scanned a sub area by hand, so let's use that
+			GetApp()->ScanSubArea();
+		}
+		else
+		{
+			GetApp()->ScanActiveWindow();
 
-		ScanActiveWindow();
+		}
 		return;
 	}
 

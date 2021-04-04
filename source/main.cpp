@@ -7,6 +7,7 @@
 #include "BaseApp.h"
 #include "App.h"
 #include "WinDragRect.h"
+#include "shellscalingapi.h"
 //avoid needing to define _WIN32_WINDOWS > 0x0400.. although I guess we could in PlatformPrecomp's win stuff...
 #ifndef WM_MOUSEWHEEL
 	#define WM_MOUSEWHEEL                   0x020A
@@ -1751,6 +1752,9 @@ void CheckIfMouseLeftWindowArea()
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, TCHAR *lpCmdLine, int nCmdShow)
 {
+
+	HRESULT r = SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE);
+	assert(r == S_OK);
 
 	HANDLE hMutex = OpenMutex(MUTEX_ALL_ACCESS, 0, _T("UGT_")); // mutex will be automatically deleted when process ends. 
 	if (!hMutex)
