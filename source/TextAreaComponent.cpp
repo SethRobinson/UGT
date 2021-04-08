@@ -473,7 +473,13 @@ void TextAreaComponent::OnTouchStart(VariantList *pVList)
 	{
 		//right mouse button
 		vector<unsigned short> utf16line;
-		utf8::utf8to16(m_translatedString.begin(), m_translatedString.end(), back_inserter(utf16line));
+		string textToTranslate = m_translatedString;
+		if (m_translatedString.empty())
+		{
+			//no translation was done, maybe because it was already the desired language.  Let's use the original for the cut and paste
+			textToTranslate = m_textArea.text;
+		}
+		utf8::utf8to16(textToTranslate.begin(), textToTranslate.end(), back_inserter(utf16line));
 		SetClipboardTextW(&utf16line[0], utf16line.size());
 		ShowQuickMessage("Copied translated text to clipboard");
 		return;
@@ -528,16 +534,15 @@ void TextAreaComponent::OnKillAllText()
 	GetParent()->SetTaggedForDeletion();
 }
 
+
 bool TextAreaComponent::TranslatingToAsianLanguage()
 {
-	return (GetApp()->m_target_language == "ja"
-		|| GetApp()->m_target_language == "zh-CN" || GetApp()->m_target_language == "zh-TW");
+	return IsAsianLanguage(GetApp()->m_target_language);
 }
 
 bool TextAreaComponent::TranslatingFromAsianLanguage()
 {
-	return (m_textArea.language == "ja"
-		|| m_textArea.language == "zh-CN" || m_textArea.language == "zh-TW");
+	return IsAsianLanguage(m_textArea.language);
 }
 
 void TextAreaComponent::FitText(float *pHeightInOut, float widthMod, float trueCharCount)

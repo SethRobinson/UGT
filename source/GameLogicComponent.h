@@ -99,4 +99,5 @@ private:
 
 void RestoreCursorPos();
 void SaveCursorPos();
+bool IsAsianLanguage(string languageCode);
 #endif // GameLogicComponent_h__

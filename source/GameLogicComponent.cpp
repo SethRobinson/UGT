@@ -68,6 +68,12 @@ void GameLogicComponent::OnSelected(VariantList* pVList) //0=vec2 point of click
 	//GetEntityRoot()->PrintTreeAsText(); //useful for debugging
 }
 
+bool IsAsianLanguage(string languageCode)
+{
+	return (languageCode == "ja"
+		|| languageCode == "zh-CN" || languageCode == "zh-TW");
+}
+
 void RestoreCursorPos()
 {
 	SetCursorPos(GetApp()->m_cursorPosAtStart.x, GetApp()->m_cursorPosAtStart.y);
@@ -303,7 +309,11 @@ bool GameLogicComponent::ReadFromParagraph(const cJSON *paragraph, TextArea &tex
 		
 		if (!lineText.empty())
 		{
-			lineText += " ";
+			//Asian langueges don't need a space?
+			if (!IsAsianLanguage(textArea.language))
+			{
+				lineText += " ";
+			} 
 		}
 
 		bDidCR = false;
