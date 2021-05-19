@@ -22,6 +22,7 @@
 //string g_fileName = "big_text_test.jpg";
 //string g_fileName = "hello_world.png";
 //string g_fileName = "nhk_news.png";
+//string g_fileName = "bug.jpg";
 string g_fileName;
 #else
 string g_fileName;
@@ -307,7 +308,7 @@ bool GameLogicComponent::ReadFromParagraph(const cJSON *paragraph, TextArea &tex
 		
 		if (!lineText.empty())
 		{
-			//Asian langueges don't need a space?
+			//Asian languages don't need a space?
 			if (!IsAsianLanguage(textArea.language))
 			{
 				lineText += " ";
@@ -387,8 +388,15 @@ bool GameLogicComponent::ReadFromParagraph(const cJSON *paragraph, TextArea &tex
 	textArea.text += finalText;
 	textArea.rawText += finalTextRaw;
 	utf8::utf8to16(finalTextRaw.begin(), finalTextRaw.end(), back_inserter(textArea.wideText));
-	textArea.m_rect = totalRect;
-
+	if (textArea.m_rect == CL_Rect(0, 0, 0, 0))
+	{
+		textArea.m_rect = totalRect;
+	}
+	else
+	{
+		//We have an existing chunk of text we're continuing, it's one of those "multi paragraphs" google will throw at us
+		textArea.m_rect.bounding_rect(totalRect);
+	}
 	//1 means centered, 0 is far left, 2 is far right
 	float centeringFactorX = textArea.m_rect.get_center().x / (GetApp()->m_capture_width / 2);
 	float centeringFactorY = textArea.m_rect.get_center().y / (GetApp()->m_capture_height / 2);
@@ -579,7 +587,7 @@ bool GameLogicComponent::BuildDatabase(char *pJson)
 			//textArea.m_vPoints[j] = CL_Vec2f(x, y);
 	
 
-			//LogMsg("Block %d, vert %d is X: %f and Y: %f", i, j, (float)x, (float)y);
+			LogMsg("Block %d, vert %d is X: %f and Y: %f", i, j, (float)x, (float)y);
 		}
 		
 		//textArea.m_rect = CL_Rectf(textArea.m_vPoints[0].x, textArea.m_vPoints[1].y, textArea.m_vPoints[2].x, textArea.m_vPoints[3].y);
@@ -604,15 +612,13 @@ bool GameLogicComponent::BuildDatabase(char *pJson)
 		int paraCount = 0;
 		cJSON_ArrayForEach(paragraph, paragraphs)
 		{
-		//	assert(paraCount == 0 && "Should only be one of these!");
 			ReadFromParagraph(paragraph, textArea);
-
-
-
-			if (textArea.m_rect.get_width() > 5 && textArea.m_rect.get_height() > 5)
-				m_textareas.push_back(textArea);
 			paraCount++;
 		}
+
+		if (textArea.m_rect.get_width() > 5 && textArea.m_rect.get_height() > 5)
+			m_textareas.push_back(textArea);
+
 
 		//now let's get the actual letters from the paragraph
 #ifdef _DEBUG

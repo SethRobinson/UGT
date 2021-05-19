@@ -27,6 +27,15 @@ void ExportToHTML::AddOverlays(string* pHTML, const string itemTemplate)
 		TextAreaComponent *comp = GetApp()->GetGameLogicComponent()->m_textComps[i];
 		string work = itemTemplate;
 
+		//either way, we want these substitions:
+
+		StringReplace("[TRANSLATED_TEXT]", toString(comp->GetTranslatedText()), work);
+		StringReplace("[END_X]", toString(comp->m_textArea.m_rect.right), work);
+		StringReplace("[END_Y]", toString(comp->m_textArea.m_rect.bottom), work);
+		StringReplace("[WIDTH]", toString(comp->m_textArea.m_rect.get_width()), work);
+		StringReplace("[HEIGHT]", toString(comp->m_textArea.m_rect.get_height()), work);
+
+
 		//all together as one block
 		if (comp->m_textArea.m_bIsDialog)
 		{

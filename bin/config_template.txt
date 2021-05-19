@@ -58,7 +58,7 @@ source_language_hint|auto
 google_text_detection_command|DOCUMENT_TEXT_DETECTION
 
 ;When uploading the screenshot to google for scanning, 100 means perfect quality (big image) and 0 would mean horrible quality.  95 is probably good
-jpg_quality_for_scan|100
+jpg_quality_for_scan|85
 
 ;Audio can be set to "fmod" or "audiere".  "none" means it won't even try to initialize the audio or play any sounds.
 ;If this wasn't compiled with FMOD support, audiere will be used instead.  (RTsoft releases will have it though)

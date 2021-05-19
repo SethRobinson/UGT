@@ -335,8 +335,7 @@ void TextAreaComponent::OnSelected(VariantList* pVList) //0=vec2 point of click,
 void TextAreaComponent::Init(TextArea textArea)
 {
 	m_textArea = textArea;
-	//apparently this is ok to be negative now?
-	//assert(m_textArea.m_rect.left >= 0);
+	assert(m_textArea.m_rect.left >= 0);
 
 	SetSize2DEntity(GetParent(), textArea.m_rect.get_size_vec2());
 	SetPos2DEntity(GetParent(), m_textArea.m_rect.get_top_left());
@@ -673,7 +672,7 @@ vector<CL_Vec2f> TextAreaComponent::ComputeLocalLineOffsets()
 		offsets.push_back(m_textArea.m_lineStarts[i]- m_textAreaRect.get_top_left());
 		//offsets.at(i).y += 20;
 		
-		//assert(offsets.at(i).x >= 0 && offsets.at(i).y >= 0 &&  "Huh?  These shouldn't be negative");
+		assert(offsets.at(i).x >= 0 && offsets.at(i).y >= 0 &&  "Huh?  These shouldn't be negative");
 	}
 
 	return offsets;

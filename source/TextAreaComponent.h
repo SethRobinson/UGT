@@ -38,6 +38,7 @@ public:
 	bool IsDownloadingAudio();
 	bool FinishedWithTranslation();
 	bool IsDialog(bool bIsTranslating);
+	string GetTranslatedText() { return m_translatedString; }
 
 protected:
 
