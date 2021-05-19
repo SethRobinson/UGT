@@ -53,6 +53,10 @@ add_switchable_language|pa|Punjabi
 ;you would change "auto" to "pa" below.  Warning, this does BREAK most other languages though, so not recommended unless you have to.
 source_language_hint|auto
 
+;Google allows you request TEXT_DETECTION or DOCUMENT_TEXT_DETECTION for the OCR phase.  DOCUMENT_TEXT_DETECTION generally gives better results,
+;menus/dialogs, but worse for skewed/hard to read text, for example, from a building or sign in a 3D game that isn't facing the player.
+google_text_detection_command|DOCUMENT_TEXT_DETECTION
+
 ;When uploading the screenshot to google for scanning, 100 means perfect quality (big image) and 0 would mean horrible quality.  95 is probably good
 jpg_quality_for_scan|100
 

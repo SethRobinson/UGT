@@ -1904,11 +1904,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, TCHAR *lpCmdLin
 
 		if (g_fpsLimit != 0)
 		{
-			while (fpsTimer > GetSystemTimeAccurate())
+			double currSystemTime = GetSystemTimeAccurate();
+			while (fpsTimer > currSystemTime)
 			{
-				Sleep(0);
+				Sleep(1);
+				currSystemTime = GetSystemTimeAccurate();
 			}
-			fpsTimer = float(GetSystemTimeAccurate())+(1000.0f/ (float(g_fpsLimit)));
+			fpsTimer = currSystemTime + (1000.0 / (double(g_fpsLimit)));
 		}
 
 		while (!GetBaseApp()->GetOSMessages()->empty())

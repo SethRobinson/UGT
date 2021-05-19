@@ -148,6 +148,7 @@ public:
 	bool m_audio_stop_when_window_is_closed = false;
 	string m_audio_default_language = "ja";
 	string m_source_language_hint = "auto";
+	string m_google_text_detection_command = "DOCUMENT_TEXT_DETECTION";
 	vector<LanguageSetting> m_languages;
 	string m_inputMode = "desktop";
 	void SetTargetLanguage(string languageCode, string languageName, bool bShowMessage = true);

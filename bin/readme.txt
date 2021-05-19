@@ -2,6 +2,15 @@ Universal Game Translator
 
 It's a pretty jank translation utility designed to work in two modes:
 
+Features:
+
+ * Does optical character recognition (Images to text)
+ * Does text translation (from and to most languages)
+ * Does text to speech (can hear the from or to language)
+ * Can press E to export to a webpage (Useful for language study, for example, using Rikichan on kanji)
+
+Uses Google's Vision API under the hood for everything. 
+
 Desktop mode - Useful for games running in windows, webpages, or pictures. It can be controlled
 by a gamepad as well.  Some gamepads (XBOX pads/etc) can be used to initiate a capture, even
 while using the same pad to play the game.  (By default, clicking down on the right stick will do it)

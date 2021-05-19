@@ -170,8 +170,6 @@ void GameLogicComponent::OnAdd(Entity *pEnt)
 		}
 	}
 
-	
-	
 }
 
 bool GameLogicComponent::ReadFromParagraph(const cJSON *paragraph, TextArea &textArea)
@@ -696,13 +694,17 @@ void GameLogicComponent::StartProcessingFrameForText()
           'image': {
              'content': ')";
 
+
 	string postDataOCR_b = R"('
           },
           'features': [
             {
-              'type': 'TEXT_DETECTION'
+              'type': 'REPLACE_THIS'
             }
           ])";
+
+	//replace with DOCUMENT_TEXT_DETECTION or whatever was set in the config
+	StringReplace("REPLACE_THIS", GetApp()->m_google_text_detection_command, postDataOCR_b);
 
 	string hint = GetApp()->m_source_language_hint;
 	string postDataOCR_c = "";

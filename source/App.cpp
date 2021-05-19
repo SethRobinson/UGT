@@ -127,11 +127,13 @@ App::App()
 		m_pExportToHTML = NULL;
 		m_pAutoPlayManager = NULL;
 		m_usedSubAreaScan = false;
-		m_version = "0.68 Beta";
+		m_version = "0.69 Beta";
 		m_bDidPostInit = false;
 		m_gamepad_button_to_scan_active_window = VIRTUAL_KEY_NONE;
 		m_cursorShouldBeRestoredToStartPos = false;
 		m_cursorPosAtStart.x = m_cursorPosAtStart.y = 0;
+		//m_bTestMode = true;
+		
 }
 
 App::~App()
@@ -315,6 +317,7 @@ bool App::Init()
 	GetGamepadManager()->AddProvider(pTempDirectX); //use directx joysticks
 
 	
+	SetFPSLimit(100);
 #endif
 
 	//arcade input component is a way to tie keys/etc to send signals through GetBaseApp()->m_sig_arcade_input
@@ -776,10 +779,17 @@ void OnTranslateButton()
 
 
 	
-		LogMsg("Foreground is %d", GetApp()->m_oldHWND);
+		//LogMsg("Foreground is %d", GetApp()->m_oldHWND);
 		GetApp()->SetCaptureMode(CAPTURE_MODE_SHOWING);
-		AudioHandle handle = GetAudioManager()->Play("audio/wall.mp3");
-		GetAudioManager()->SetVol(handle, 0.34f);
+	
+		if (GetApp()->GetShared()->GetVar("check_disable_sounds")->GetUINT32() == 0)
+		{
+			AudioHandle handle = GetAudioManager()->Play("audio/wall.mp3");
+			GetAudioManager()->SetVol(handle, 0.34f);
+		}
+				
+		
+		
 		GetApp()->m_hotKeyHandler.OnShowWindow();
 	}
 	else
@@ -1519,10 +1529,13 @@ bool App::LoadConfigFile()
 		{
 			m_source_language_hint = ts.GetParmString("source_language_hint", 1);
 		}
+		if (ts.GetParmString("google_text_detection_command", 1) != "")
+		{
+			m_google_text_detection_command = ts.GetParmString("google_text_detection_command", 1);
+		}
 
 		m_gamepad_button_to_scan_active_window = StringToProtonVirtualKey(ToLowerCaseString(ts.GetParmString("gamepad_button_to_scan_active_window", 1)));
 
-		
 		m_hotkey_for_whole_desktop = GetHotKeyDataFromConfig(ts.GetParmString("hotkey_to_scan_whole_desktop", 1), "hotkey_to_scan_whole_desktop");
 		m_hotkey_for_active_window = GetHotKeyDataFromConfig(ts.GetParmString("hotkey_to_scan_active_window", 1), "hotkey_to_scan_active_window");
 		m_hotkey_for_draggable_area = GetHotKeyDataFromConfig(ts.GetParmString("hotkey_to_scan_draggable_area", 1),"hotkey_to_scan_draggable_area");

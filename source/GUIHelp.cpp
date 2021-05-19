@@ -30,6 +30,15 @@ void HelpMenuOnSelect(VariantList *pVList) //0=vec2 point of click, 1=entity sen
 		GetApp()->GetShared()->GetVar("check_hide_overlay")->Set(uint32(bChecked));
 	}
 
+	if (pEntClicked->GetName() == "check_disable_sounds")
+	{
+		bool bChecked = IsCheckboxChecked(pEntClicked);
+		GetApp()->GetShared()->GetVar("check_disable_sounds")->Set(uint32(bChecked));
+
+
+
+	}
+
 	if (pEntClicked->GetName() == "Hide")
 	{
 		if (GetApp()->IsInputDesktop())
@@ -111,7 +120,7 @@ Entity * CreateHelpMenu(Entity *pRoot)
 	y += spacerY;
 
 	bool bPlaySrc = GetApp()->GetVar("check_src_audio")->GetUINT32() != 0;
-	pEnt = CreateCheckbox(pBG, "check_src_audio", "Autoplay/clicking speaks pre-translated text", startX, y, bPlaySrc, FONT_SMALL, 1.0f);
+	pEnt = CreateCheckbox(pBG, "check_src_audio", "Speak pre-translated text", startX, y, bPlaySrc, FONT_SMALL, 1.0f);
 	pEnt->GetFunction("OnButtonSelected")->sig_function.connect(&HelpMenuOnSelect);
 	y += GetSize2DEntity(pEnt).y;
 	y += spacerY;
@@ -121,6 +130,18 @@ Entity * CreateHelpMenu(Entity *pRoot)
 	pEnt->GetFunction("OnButtonSelected")->sig_function.connect(&HelpMenuOnSelect);
 	y += GetSize2DEntity(pEnt).y;
 	y += spacerY;
+
+	//second column of options
+	startX = 520;
+	y = 420;
+
+	bool bDisableSounds = GetApp()->GetVar("check_disable_sounds")->GetUINT32() != 0;
+	pEnt = CreateCheckbox(pBG, "check_disable_sounds", "Disable capture sound", startX, y, bDisableSounds, FONT_SMALL, 1.0f);
+	pEnt->GetFunction("OnButtonSelected")->sig_function.connect(&HelpMenuOnSelect);
+	y += GetSize2DEntity(pEnt).y;
+	y += spacerY;
+
+
 
 	if (GetApp()->GetGoogleKey() == "yourkeygoeshere")
 	{
