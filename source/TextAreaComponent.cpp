@@ -232,11 +232,11 @@ bool TextAreaComponent::IsDownloadingAudio()
 	return false;
 }
 
-void TextAreaComponent::RequestTranslation()
+void TextAreaComponent::RequestTranslationGoogle()
 {
 
 	string url = "https://translation.googleapis.com";
-	string urlappend = "/language/translate/v2?key=" + GetApp()->GetGoogleKey();
+	string urlappend = "language/translate/v2?key=" + GetApp()->GetGoogleKey();
 
 	unsigned int originalFileSize = 0;
 
@@ -271,6 +271,59 @@ void TextAreaComponent::RequestTranslation()
 	m_netHTTP.AddPostData("", (const byte*)postData.c_str(), postData.length());
 	m_netHTTP.Start();
 	m_bWaitingForTranslation = true;
+}
+
+void TextAreaComponent::RequestTranslationDeepL()
+{
+
+	if (GetApp()->GetDeepLKey().empty())
+	{
+		string error = "Can't do deepl translation, API key missing";
+		
+		ShowQuickMessage(error);
+
+		return;
+	}
+	string url = "https://api-free.deepl.com";
+	
+	unsigned int originalFileSize = 0;
+
+	string sourceLanguage = m_textArea.language;
+	string destLanguage = GetApp()->m_target_language;
+
+	string textToTranslate;
+
+	if (IsDialog(true))
+	{
+		textToTranslate = m_textArea.rawText;
+	}
+	else
+	{
+		textToTranslate = m_textArea.text;
+	}
+
+	string urlappend = "v2/translate";
+	
+	m_netHTTP.Setup(url, 80, urlappend, NetHTTP::END_OF_DATA_SIGNAL_HTTP);
+	
+	m_netHTTP.AddPostData("auth_key", (const byte*)GetApp()->GetDeepLKey().c_str(), GetApp()->GetDeepLKey().length());
+	m_netHTTP.AddPostData("text", (const byte*)textToTranslate.c_str(), textToTranslate.length());
+	m_netHTTP.AddPostData("target_lang", (const byte*)ToUpperCaseString(destLanguage).c_str(), destLanguage.length());
+
+	m_netHTTP.Start();
+	m_bWaitingForTranslation = true;
+}
+
+void TextAreaComponent::RequestTranslation()
+{
+	if (GetApp()->GetTranslationEngine() == TRANSLATION_ENGINE_GOOGLE)
+	{
+		RequestTranslationGoogle();
+	}
+	else
+	{
+		RequestTranslationDeepL();
+	}
 }
 
 glColorBytes TextAreaComponent::GetTextColor(bool bIsDialog)
@@ -342,7 +395,6 @@ void TextAreaComponent::Init(TextArea textArea)
 	if (m_textArea.language != GetApp()->m_target_language)
 	{
 		RequestTranslation();
-		
 	}
 	else
 	{
@@ -371,7 +423,7 @@ void TextAreaComponent::Init(TextArea textArea)
 	float wordWrapX = 0;
 	
 	
-	m_pSourceLanguageSurf = GetApp()->GetFreeTypeManager(m_textArea.language)->m_vecFreeTypeManager.TextToSurface(tempRect.get_size_vec2(), textArea.text,
+	m_pSourceLanguageSurf = GetApp()->GetFreeTypeManager(m_textArea.language)->GetFont()->TextToSurface(tempRect.get_size_vec2(), textArea.text,
 		height, glColorBytes(0,0,0,0), GetTextColor(IsDialog(false)), m_textArea.language == "ja", &offsets, 
 		wordWrapX);
 
@@ -447,7 +499,6 @@ void TextAreaComponent::OnTouchStart(VariantList *pVList)
 				bToggleLanguage = true;
 			}
 		}
-
 
 		if (GetAudioManager()->IsPlaying(m_audioHandle))
 		{
@@ -572,7 +623,6 @@ void TextAreaComponent::FitText(float *pHeightInOut, float widthMod, float trueC
 
 void TextAreaComponent::TweakForSending(const string &text, CL_Rectf &rect, float &height, bool isTranslated)
 {
-	height = rect.get_height(); // *0.9f;
 
 	vector<string> lines = StringTokenize(text, "\n");
 	height = m_textArea.m_averageTextHeight;
@@ -587,7 +637,7 @@ void TextAreaComponent::TweakForSending(const string &text, CL_Rectf &rect, floa
 		{
 			if (!TranslatingToAsianLanguage())
 			{
-				widthMod = 0.56f; //we need more room generally
+				widthMod = 0.5f; //we need more room generally
 			}
 		}
 		else
@@ -597,6 +647,11 @@ void TextAreaComponent::TweakForSending(const string &text, CL_Rectf &rect, floa
 				widthMod = 1.0f; //they don't need more room
 			}
 		}
+	}
+	else
+	{
+		//widthMod = 0.34f; //without this, text tends to be a little big for some reason
+
 	}
 
 	float temp = 0;
@@ -635,7 +690,7 @@ void TextAreaComponent::TweakForSending(const string &text, CL_Rectf &rect, floa
 			FitText(&height, widthMod, trueCharCount);
 
 			rtRectf textRect;
-			GetApp()->GetFreeTypeManager(GetApp()->m_target_language)->m_vecFreeTypeManager.MeasureText(&textRect, (WCHAR*) &m_textArea.wideText.at(0), m_textArea.wideText.size(), height, true);
+			GetApp()->GetFreeTypeManager(GetApp()->m_target_language)->GetFont()->MeasureText(&textRect, (WCHAR*) &m_textArea.wideText.at(0), m_textArea.wideText.size(), height, true);
 #ifdef _DEBUG
 			LogMsg("Rect: %s", PrintRect(textRect).c_str());
 #endif
@@ -657,6 +712,12 @@ void TextAreaComponent::TweakForSending(const string &text, CL_Rectf &rect, floa
 		//LogMsg("Height changed to %.2f", height);
 	}
 	
+	if (!isTranslated)
+	{
+		height *= GetApp()->GetFreeTypeManager(m_textArea.language)->m_preTranslatedHeightMod;
+	}
+
+
 	//let's add extra space for no reason
 	float expanderRatio = 1.5f;
 	rect.set_height(rect.get_height()*expanderRatio);
@@ -694,7 +755,7 @@ void TextAreaComponent::RenderLineByLine()
 	}
 	SAFE_DELETE(m_pDestLanguageSurf);
 
-	m_pDestLanguageSurf = GetApp()->GetFreeTypeManager(GetApp()->m_target_language)->m_vecFreeTypeManager.TextToSurface(tempRect.get_size_vec2(), m_translatedString,
+	m_pDestLanguageSurf = GetApp()->GetFreeTypeManager(GetApp()->m_target_language)->GetFont()->TextToSurface(tempRect.get_size_vec2(), m_translatedString,
 		height, glColorBytes(0, 0, 0, 0), GetTextColor(IsDialog(true)), GetApp()->m_target_language == "ja",
 		&offsets, wordWrapX);
 }
@@ -702,12 +763,13 @@ void TextAreaComponent::RenderLineByLine()
 void TextAreaComponent::FitAndWordWrapToRect(const CL_Rectf &tempRect,  wstring &wtext, deque<wstring> &wlinesOut,
 	CL_Vec2f &wrappedSizeOut, bool bUseActualWidthForSpacing, float &pixelHeightOut)
 {
-	pixelHeightOut = m_textArea.m_averageTextHeight;
+	if (pixelHeightOut == 0)
+		pixelHeightOut = m_textArea.m_averageTextHeight;
 
 	wrappedSizeOut = CL_Vec2f(2000000, 200000);
 	bool bFirstTime = true;
 
-	while (wrappedSizeOut.y > tempRect.get_height())
+	while (wrappedSizeOut.y > (tempRect.get_height()*1.0f))
 	{
 		if (!bFirstTime)
 		{
@@ -717,12 +779,12 @@ void TextAreaComponent::FitAndWordWrapToRect(const CL_Rectf &tempRect,  wstring 
 		bFirstTime = false;
 		wlinesOut.clear();
 		//LogMsg("Trying size %.2f", pixelHeightOut);
-		GetApp()->GetFreeTypeManager(GetApp()->m_target_language)->m_vecFreeTypeManager.MeasureTextAndAddByLinesIntoDeque(tempRect.get_size_vec2(), wtext, &wlinesOut,
+		GetApp()->GetFreeTypeManager(GetApp()->m_target_language)->GetFont()->MeasureTextAndAddByLinesIntoDeque(tempRect.get_size_vec2(), wtext, &wlinesOut,
 			pixelHeightOut, wrappedSizeOut, GetApp()->m_target_language == "ja");
 	}
 }
 
-void TextAreaComponent::RenderAsDialog()
+void TextAreaComponent::RenderAsDialog(float defaultFontHeightOrZeroForAuto)
 {
 	//build version with word wrapping
  	CL_Rectf tempRect = m_textAreaRect;
@@ -734,9 +796,15 @@ void TextAreaComponent::RenderAsDialog()
 	wstring wtext(utf16line.begin(), utf16line.end());
 	
 	CL_Vec2f wrappedSize;
-	float pixelHeight;
+	float pixelHeight = defaultFontHeightOrZeroForAuto;
+
+
+	//LogMsg("Hey");
 
 	FitAndWordWrapToRect(tempRect, wtext, wlines, wrappedSize, GetApp()->m_target_language == "ja", pixelHeight);
+
+	//LogMsg("Ho");
+
 
 	//LogMsg("Final output size: %s", PrintVector2(wrappedSize));
 
@@ -752,13 +820,13 @@ void TextAreaComponent::RenderAsDialog()
 	vector<uint16> vec (finalSingle.begin(), finalSingle.end());
 
 	//Render it at that size
-	m_pDestLanguageSurf = GetApp()->GetFreeTypeManager(GetApp()->m_target_language)->m_vecFreeTypeManager.TextToSurface(tempRect.get_size_vec2(), vec,
+	m_pDestLanguageSurf = GetApp()->GetFreeTypeManager(GetApp()->m_target_language)->GetFont()->TextToSurface(tempRect.get_size_vec2(), vec,
 		pixelHeight, glColorBytes(0, 0, 0, 0), GetTextColor(IsDialog(true)), GetApp()->m_target_language == "ja",
 		NULL, 0);
 
 }
 
-bool TextAreaComponent::ReadTranslationFromJSON(char *pData)
+bool TextAreaComponent::ReadTranslationFromJSONGoogle(char *pData)
 {
 
 	m_bWaitingForTranslation = false;
@@ -787,10 +855,13 @@ bool TextAreaComponent::ReadTranslationFromJSON(char *pData)
 
 		float desiredHeight = m_textAreaRect.get_height();
 		m_translatedString = translatedText->valuestring;
+		float height = 0;
+		CL_Rectf tempRect = m_textAreaRect;
+		TweakForSending(m_translatedString, tempRect, height, true);
 
 		if (IsDialog(true))
 		{
-			RenderAsDialog();
+			RenderAsDialog(height);
 		}
 		else
 		{
@@ -798,6 +869,61 @@ bool TextAreaComponent::ReadTranslationFromJSON(char *pData)
 		}
 	}
 	
+	return true;
+}
+
+bool TextAreaComponent::ReadTranslationFromJSONDeepl(char* pData)
+{
+
+	m_bWaitingForTranslation = false;
+	cJSON* root = cJSON_Parse(pData);
+	cJSON* error = cJSON_GetObjectItemCaseSensitive(root, "message");
+	//cJSON* data = cJSON_GetObjectItemCaseSensitive(root, "data");
+	cJSON* translations = cJSON_GetObjectItemCaseSensitive(root, "translations");
+	cJSON* translation;
+
+	if (m_netHTTP.GetDownloadedBytes() < 5)
+	{
+		ShowQuickMessage("Deepl sent a blank reply?  Probably bad API key!");
+		return false;
+	}
+
+	if (error != NULL)
+	{
+		ShowQuickMessage(string("Deepl says: ")+error->valuestring+" View error.txt!");
+		FILE* fp = fopen("error.txt", "wb");
+		fwrite(m_netHTTP.GetDownloadedData(), m_netHTTP.GetDownloadedBytes(), 1, fp);
+		fclose(fp);
+		return false;
+	}
+
+
+	cJSON_ArrayForEach(translation, translations)
+	{
+		cJSON* translatedText = cJSON_GetObjectItemCaseSensitive(translation, "text");
+		if (m_pTextBox)
+			SetTextEntity(m_pTextBox, translatedText->valuestring);
+
+		SAFE_DELETE(m_pDestLanguageSurf);
+
+		float desiredHeight = m_textAreaRect.get_height();
+		m_translatedString = translatedText->valuestring;
+
+	
+		float height = 0;
+		CL_Rectf tempRect = m_textAreaRect;
+		TweakForSending(m_translatedString , tempRect, height, true);
+
+		if (IsDialog(true))
+		{
+			RenderAsDialog(height);
+		}
+		else
+		{
+			RenderLineByLine();
+		}
+	}
+
 	return true;
 }
 
@@ -882,10 +1008,20 @@ void TextAreaComponent::OnUpdate(VariantList *pVList)
 		fclose(fp);
 #endif
 
-		if (!ReadTranslationFromJSON((char*)m_netHTTP.GetDownloadedData()))
- 		{
- 			LogMsg("Error parsing json translation reply from google");
- 		}
+		if (GetApp()->GetTranslationEngine() == TRANSLATION_ENGINE_GOOGLE)
+		{
+			if (!ReadTranslationFromJSONGoogle((char*)m_netHTTP.GetDownloadedData()))
+			{
+				LogMsg("Error parsing json translation reply from google");
+			}
+		}
+		else
+		{
+			if (!ReadTranslationFromJSONDeepl((char*)m_netHTTP.GetDownloadedData()))
+			{
+				LogMsg("Error parsing json translation reply from deepl");
+			}
+		}
 		
 		m_netHTTP.Reset(true);
 	}

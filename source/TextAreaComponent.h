@@ -27,8 +27,9 @@ public:
 	virtual void OnAdd(Entity *pEnt);
 
 	void OnTouchStart(VariantList *pVList);
-	bool ReadTranslationFromJSON(char *pData);
-	void OnUpdate(VariantList *pVList);
+	bool ReadTranslationFromJSONGoogle(char *pData);
+	bool ReadTranslationFromJSONDeepl(char* pData);
+	void OnUpdate(VariantList* pVList);
 	void DrawWordRectsForLine(LineInfo line);
 	void DrawHighlightRectIfAudioIsPlaying();
 	void OnRender(VariantList *pVList);
@@ -44,6 +45,8 @@ protected:
 
 	void StopSoundIfItWasPlaying();
 	bool ReadAudioFromJSON(char* pData);
+	void RequestTranslationGoogle();
+	void RequestTranslationDeepL();
 	void RequestTranslation();
 	glColorBytes GetTextColor(bool bIsDialog);
 	void OnSelected(VariantList* pVList);
@@ -58,7 +61,7 @@ protected:
 	void RenderLineByLine();
 	void FitAndWordWrapToRect(const CL_Rectf &tempRect, wstring &wtext, deque<wstring> &wlinesOut, CL_Vec2f &wrappedSizeOut,
 		bool bUseActualWidthForSpacing, float &pixelHeightOut);
-	void RenderAsDialog();
+	void RenderAsDialog(float defaultFontHeightOrZeroForAuto);
 
 	Entity *m_pTextBox = NULL;
 	NetHTTP m_netHTTP;

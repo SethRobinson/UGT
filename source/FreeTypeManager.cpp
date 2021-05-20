@@ -250,6 +250,7 @@ void FreeTypeManager::MeasureTextAndAddByLinesIntoDeque(const CL_Vec2f &textBoun
 
 	if (textBounds.x == 0)
 	{
+
 		LogError("MeasureTextAndAddByLinesIntoDeque: Can't word wrap with boundsX being 0!");
 		return;
 	}

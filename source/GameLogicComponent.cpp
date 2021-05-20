@@ -22,7 +22,8 @@
 //string g_fileName = "big_text_test.jpg";
 //string g_fileName = "hello_world.png";
 //string g_fileName = "nhk_news.png";
-//string g_fileName = "bug.jpg";
+//string g_fileName = "bug2.jpg";
+//string g_fileName = "bug3.png";
 string g_fileName;
 #else
 string g_fileName;
@@ -587,7 +588,7 @@ bool GameLogicComponent::BuildDatabase(char *pJson)
 			//textArea.m_vPoints[j] = CL_Vec2f(x, y);
 	
 
-			LogMsg("Block %d, vert %d is X: %f and Y: %f", i, j, (float)x, (float)y);
+			//LogMsg("Block %d, vert %d is X: %f and Y: %f", i, j, (float)x, (float)y);
 		}
 		
 		//textArea.m_rect = CL_Rectf(textArea.m_vPoints[0].x, textArea.m_vPoints[1].y, textArea.m_vPoints[2].x, textArea.m_vPoints[3].y);

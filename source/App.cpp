@@ -139,6 +139,13 @@ App::App()
 App::~App()
 {
 	//EnableTV(true);
+	for (int i = 0; i < m_vecFontInfo.size(); i++)
+	{
+		SAFE_DELETE(m_vecFontInfo[i]);
+	}
+
+	m_vecFontInfo.clear();
+
 	SAFE_DELETE(m_pAutoPlayManager);
 	SAFE_DELETE(m_pExportToHTML);
 	SAFE_DELETE(m_pWinDragRect);
@@ -237,13 +244,17 @@ void App::UpdateCursor()
 	}
 }
 
-void App::AddFontOverride(string fontName, string language, float widthOverride)
+void App::AddFontOverride(string fontName, string language, float widthOverride, float preTranslatedHeightMod = 1.0f)
 {
 
 	m_vecFontInfo.resize(m_vecFontInfo.size() + 1);
-	m_vecFontInfo[m_vecFontInfo.size() - 1].m_vecFreeTypeManager.SetFontName(fontName);
-	m_vecFontInfo[m_vecFontInfo.size() - 1].m_widthOverride = widthOverride;
-	m_vecFontInfo[m_vecFontInfo.size() - 1].m_vecFontOverrideName = language;
+	m_vecFontInfo[m_vecFontInfo.size() - 1] = new FontLanguageInfo();
+	if (fontName.length() > 1)
+		m_vecFontInfo[m_vecFontInfo.size() - 1]->SetupFont(fontName);
+	m_vecFontInfo[m_vecFontInfo.size() - 1]->m_widthOverride = widthOverride;
+	m_vecFontInfo[m_vecFontInfo.size() - 1]->m_preTranslatedHeightMod = preTranslatedHeightMod;
+
+	m_vecFontInfo[m_vecFontInfo.size() - 1]->m_vecFontOverrideName = language;
 
 }
 
@@ -265,9 +276,12 @@ bool App::Init()
 		//SetManualRotationMode(true); //don't use manual, it may be faster (33% on a 3GS) but we want iOS's smooth rotations
 	}
 
-	AddFontOverride("SourceHanSerif-Medium.ttc", "", 0.0f);
+	AddFontOverride("SourceHanSerif-Medium.ttc", "", 0.0f); //default font
 	AddFontOverride("siddhanta.ttf", "hi", 0.47f);
 	AddFontOverride("lohit.punjabi.1.1.ttf", "pa", 0.45f);
+	
+	//if we wanted Japanese to be smaller we could do this
+	//AddFontOverride("", "ja", 0.0f, 0.88f); //use default font, but apply this size override
 
 	bool bExisted = false;
 
@@ -651,18 +665,13 @@ FontLanguageInfo * App::GetFreeTypeManager(string language)
 
 	for (int i = 0; i < m_vecFontInfo.size(); i++)
 	{
-		if (m_vecFontInfo[i].m_vecFontOverrideName == language)
+		if (m_vecFontInfo[i]->m_vecFontOverrideName == language)
 		{
 			languageID = i;
 		}
 	}
 
-	if (!m_vecFontInfo[languageID].m_vecFreeTypeManager.IsLoaded())
-	{
-		m_vecFontInfo[languageID].m_vecFreeTypeManager.Init();
-	}
-
-	return &m_vecFontInfo[languageID];
+	return m_vecFontInfo[languageID];
 }
 
 void App::SetViewMode(eViewMode viewMode)
@@ -675,6 +684,22 @@ void ShowQuickMessage(string msg)
 	ShowTextMessage(msg, 1000, 0);
 }
 
+void App::ToggleTranslationEngine()
+{
+	eTranslationEngine oldEngine = m_translationEngine;
+	m_translationEngine = (eTranslationEngine)mod( ((int)m_translationEngine + 1), (int)TRANSLATION_ENGINE_COUNT);
+
+	string translationEngine = "Google";
+	if (m_translationEngine == TRANSLATION_ENGINE_DEEPL)
+	{
+		translationEngine = "Deepl";
+	}
+
+	ShowQuickMessage("Translation engine is " + translationEngine);
+	GetAudioManager()->Play("audio/alert.wav");
+
+	m_sig_target_language_changed();
+}
 void App::SetTargetLanguage(string languageCode, string languageName, bool bShowMessage)
 {
 	if (bShowMessage)
@@ -902,6 +927,7 @@ void AppInput(VariantList *pVList)
 			if (key == '8')  GetApp()->SetTargetLanguage("es", "Spanish");
 			if (key == '9')  GetApp()->SetTargetLanguage("ru", "Russian");
 			if (key == '0')  GetApp()->SetTargetLanguage("hi", "Hindi");
+			if (key == 't')  GetApp()->ToggleTranslationEngine();
 
 			if (key == '[')  GetApp()->ModLanguageByIndex(-1, true);
 			if (key == ']')  GetApp()->ModLanguageByIndex(1, true);
@@ -1498,6 +1524,7 @@ bool App::LoadConfigFile()
 		m_window_pos_y = StringToInt(ts.GetParmString("window_pos_y", 1));
 		m_show_live_video = StringToInt(ts.GetParmString("show_live_video", 1));
 		m_google_api_key = ts.GetParmString("google_api_key", 1);
+		m_deepl_api_key = ts.GetParmString("deepl_api_key", 1);
 		m_jpg_quality_for_scan = StringToInt(ts.GetParmString("jpg_quality_for_scan", 1));
 		m_inputMode = ts.GetParmString("input", 1);
 		
@@ -1525,6 +1552,13 @@ bool App::LoadConfigFile()
 		{
 			m_audio_default_language = ts.GetParmString("audio_default_language", 1);
 		}
+		string translationEngine = ToLowerCaseString(ts.GetParmString("translation_engine", 1));
+		if (translationEngine == "deepl")
+		{
+			m_translationEngine = TRANSLATION_ENGINE_DEEPL;
+			LogMsg("Using Deepl for translation, I hope you set its API key.");
+		}
+		
 		if (ts.GetParmString("source_language_hint", 1) != "")
 		{
 			m_source_language_hint = ts.GetParmString("source_language_hint", 1);
@@ -1715,4 +1749,26 @@ bool App::OnPreInitVideo()
 	SetPrimaryScreenSize(windowWidth, windowHeight);
 	SetupScreenInfo(windowWidth, windowHeight, ORIENTATION_DONT_CARE);
 	return true; //no error
+}
+
+void FontLanguageInfo::SetupFont(string fontName)
+{
+	m_pVecFreeTypeManager = new FreeTypeManager();
+	m_pVecFreeTypeManager->SetFontName(fontName);
+}
+
+FreeTypeManager* FontLanguageInfo::GetFont()
+{
+	if (m_pVecFreeTypeManager)
+	{
+
+		if (!m_pVecFreeTypeManager->IsLoaded())
+		{
+			m_pVecFreeTypeManager->Init();
+		}
+
+		return m_pVecFreeTypeManager;
+	}
+	
+	return GetApp()->GetFreeTypeManager("")->GetFont(); //default font as none is set
 }

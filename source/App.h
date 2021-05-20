@@ -37,6 +37,15 @@ enum eTextHinting
 	HINTING_LINE_BY_LINE
 };
 
+enum eTranslationEngine
+{
+	TRANSLATION_ENGINE_GOOGLE,
+	TRANSLATION_ENGINE_DEEPL,
+
+	//add more above here
+	TRANSLATION_ENGINE_COUNT
+};
+
 class LanguageSetting
 {
 public:
@@ -63,10 +72,19 @@ public:
 	{
 		m_widthOverride = 0.0f;
 	}
+	~FontLanguageInfo()
+	{
+		SAFE_DELETE(m_pVecFreeTypeManager);
+	}
+	void SetupFont(string fontName);
 
 	string m_vecFontOverrideName;
-	FreeTypeManager m_vecFreeTypeManager;
 	float m_widthOverride;
+	float m_preTranslatedHeightMod = 1.0f;
+
+	FreeTypeManager* GetFont();
+private:
+	FreeTypeManager* m_pVecFreeTypeManager = NULL;
 
 };
 
@@ -80,7 +98,7 @@ public:
 	bool IsInputDesktop();
 	void OnGamepadStickUpdate(VariantList* pVList);
 	void UpdateCursor();
-	void AddFontOverride(string fontName, string language, float widthOverride);
+	void AddFontOverride(string fontName, string language, float widthOverride, float preTranslatedHeightMod);
 	virtual bool Init();
 	virtual void Kill();
 	virtual void Draw();
@@ -99,6 +117,7 @@ public:
 	void HandleHotKeyPushed(HotKeySetting setting);
 	void OnExitApp(VariantList *pVarList);
 	string GetGoogleKey() { return m_google_api_key; }
+	string GetDeepLKey() { return m_deepl_api_key; }
 	void StartHidingOverlays();
 	void HidingOverlayUpdate();
 	bool IsHidingOverlays() { return m_bHidingOverlays; }
@@ -119,6 +138,7 @@ public:
 	FontLanguageInfo* GetFreeTypeManager(string language);
 	eViewMode GetViewMode() { return m_viewMode; }
 	void SetViewMode(eViewMode viewMode);
+	void ToggleTranslationEngine();
 	eCaptureMode GetCaptureMode() { return m_captureMode; }
 	void SetCaptureMode(eCaptureMode mode) { m_captureMode = mode; }
 
@@ -139,6 +159,7 @@ public:
 	int m_window_pos_y = 0;
 	int m_show_live_video = 0;
 	string m_google_api_key;
+	string m_deepl_api_key;
 	int m_jpg_quality_for_scan = 95;
 	string m_kanji_lookup_website = "https://jisho.org/search/";
 	int m_currentLanguageIndex = -1;
@@ -150,6 +171,7 @@ public:
 	string m_source_language_hint = "auto";
 	string m_google_text_detection_command = "DOCUMENT_TEXT_DETECTION";
 	vector<LanguageSetting> m_languages;
+	eTranslationEngine GetTranslationEngine() { return m_translationEngine; }
 	string m_inputMode = "desktop";
 	void SetTargetLanguage(string languageCode, string languageName, bool bShowMessage = true);
 	void ModLanguageByIndex(int mod, bool bShowMessage = true);
@@ -160,7 +182,7 @@ public:
 	HWND m_oldHWND = 0;
 	VariantDB m_varDB; //holds all data we want to save/load
 	WinDragRect *m_pWinDragRect;
-
+	eTranslationEngine m_translationEngine = TRANSLATION_ENGINE_GOOGLE;
 	bool m_bTestMode = false;
 	int m_energy = 0;
 	GameLogicComponent *m_pGameLogicComp = NULL;
@@ -168,7 +190,7 @@ public:
 	eViewMode m_viewMode = VIEW_MODE_DEFAULT;
 	bool m_bDidPostInit;
 	Surface m_surf; //for testing
-	vector<FontLanguageInfo> m_vecFontInfo;
+	vector<FontLanguageInfo*> m_vecFontInfo;
 	eCaptureMode m_captureMode = CAPTURE_MODE_WAITING;
 	HotKeySetting GetHotKeyDataFromConfig(string data, string action);
 	AutoPlayManager* m_pAutoPlayManager;

@@ -9,8 +9,20 @@
 ;You also need to enable the Text To Speech API so it can talk:  https://console.cloud.google.com/flows/enableapi?apiid=texttospeech.googleapis.com
 ;Note: it will use the WaveNet voices when it can for the highest quality.
 
-;Note:  Don't share your google API key!
-google_api_key|yourkeygoeshere
+;Note:  Don't share your google API key!  A google API key looks like (don't include quotes or anything):  AIzaSyAvhMEcxpKSBD25ze06p5AlU_IuYtZ2b_g
+google_api_key|yourownkeygoeshere
+
+;Optional Deepl API key. This requires that you register at deepl.com.  Even if you use deepl, you
+;still need the Google key above as well, as that's still used for the OCR and text to speech features.
+;Note: you also need to set the "translation_engine" below to use deepl instead of google
+;A deepl API key looks like (don't include quotes or anything): 263f19ba-b010-428c-77cf-cc18c977ef4b:fx
+deepl_api_key|yourownkeygoeshere
+
+;Choose which API to use for text translations.  Valid options:  google, deepl.  If you use deepl, you must set your API key above.
+;Note: A hotkey to toggle translation engine is T, useful for comparing results
+;While Deepl offers better translations, keep in mind it doesn't support as many target languages.  It's missing Korean and Hindi for example and will
+;give a "Unsupport target_lang" error.
+translation_engine|google
 
 ;Set the mode to work in. 
 
@@ -28,6 +40,7 @@ google_api_key|yourkeygoeshere
 input|desktop
 
 ;when using camera mode and you have more than one camera available, you can set to id 1 or 2 etc instead of the default which is 0
+;Note:  It only seems to recognize actual device driver based capture devices/cameras, Virtual Cameras like OBS's don't show up
 input_camera_device_id|0
 
 ;Enter a full or partial name of an audio device to use that instead.  Check the log.txt for a list of them, it's
