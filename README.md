@@ -16,6 +16,8 @@ It's hacked to only work on Windows (due to the low level nature of
 writing something that can do screen captures) but in theory those pieces could be
 abstracted out to be more platform agnostic.
 
+Direct download to Seth's latest Windows 64bit compiled/codesigned build: https://www.rtsoft.com/files/UniversalGameTranslator_Windows.zip
+
 Special thanks:
 
 * Jari Komppa, I use his webcam lib Escapi (included with Proton to make compiling this easier) https://github.com/jarikomppa/escapi to see his project.
