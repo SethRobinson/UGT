@@ -795,7 +795,6 @@ bool GameLogicComponent::BuildDatabase(char *pJson)
 
 	for (int i = 0; i < blockCount; i++)
 	{
-		TextArea textArea;
 		
 		cJSON *block = cJSON_GetArrayItem(blocks, i);
 		cJSON *boundingBox = cJSON_GetObjectItem(block, "boundingBox");
@@ -828,38 +827,41 @@ bool GameLogicComponent::BuildDatabase(char *pJson)
 		const cJSON *detectedLanguages = cJSON_GetObjectItemCaseSensitive(property, "detectedLanguages");
 		const cJSON *detectedLanguage;
 
+		string myLanguage = "";
+
 		cJSON_ArrayForEach(detectedLanguage, detectedLanguages)
 		{
 			const cJSON *languageCode = cJSON_GetObjectItemCaseSensitive(detectedLanguage, "languageCode");
-			textArea.language = languageCode->valuestring;
+			myLanguage = languageCode->valuestring;
 			//LogMsg("Found language %s", languageCode->valuestring);
+			//We can't really understand or handle more than one language,
+			//can we?  I guess just ignore if multiple languages are set.  Using the first instead of
+			//the last set as per Meerkov's suggestion
+			break;
 		}
 		
 		const cJSON *paragraph;
 		const cJSON *paragraphs = cJSON_GetObjectItemCaseSensitive(block, "paragraphs");
 		
 		int paraCount = 0;
+
 		cJSON_ArrayForEach(paragraph, paragraphs)
 		{
+			TextArea textArea;
+			textArea.language = myLanguage;
+
 			ReadFromParagraph(paragraph, textArea);
+			if (textArea.m_rect.get_width() > 5 && textArea.m_rect.get_height() > 5)
+				m_textareas.push_back(textArea);
 			paraCount++;
 		}
 
-		if (textArea.m_rect.get_width() > 5 && textArea.m_rect.get_height() > 5)
-			m_textareas.push_back(textArea);
-
-
-		//now let's get the actual letters from the paragraph
 #ifdef _DEBUG
 		//LogMsg("Got %s", textArea.text.c_str());
-		
 #endif
-		
-		//assert(textArea.m_rect.left >= 0);
 	}
 
 	ConstructEntitiesFromTextAreas();
-
 	cJSON_Delete(root);
 	return true; //ok
 }
@@ -1038,7 +1040,7 @@ void GameLogicComponent::OnUpdate(VariantList *pVList)
 	if (m_netHTTP.GetState() == NetHTTP::STATE_FINISHED)
 	{
 #ifdef _DEBUG
-		FILE *fp = fopen("crap.json", "wb");
+		FILE *fp = fopen("ocr_response_from_google.json", "wb");
 		fwrite(m_netHTTP.GetDownloadedData(), m_netHTTP.GetDownloadedBytes(), 1, fp);
 		fclose(fp);
 #endif

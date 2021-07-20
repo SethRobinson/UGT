@@ -251,7 +251,11 @@ void TextAreaComponent::RequestTranslationGoogle()
 	}
 	else
 	{
-		textToTranslate = m_textArea.text;
+
+		for (int i = 0; i < m_textArea.m_lines.size(); i++)
+		{
+			textToTranslate += m_textArea.m_lines[i].m_text + "\n";
+		}
 	}
 
 	//create json
@@ -303,7 +307,12 @@ void TextAreaComponent::RequestTranslationDeepL()
 	}
 	else
 	{
-		textToTranslate = m_textArea.text;
+	
+		for (int i = 0; i < m_textArea.m_lines.size(); i++)
+		{
+			textToTranslate += m_textArea.m_lines[i].m_text + "\n";
+		}
+
 	}
 
 	string urlappend = "v2/translate";
