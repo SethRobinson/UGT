@@ -264,7 +264,11 @@ void TextAreaComponent::RequestTranslationGoogle()
 	string postData(cJSON_Print(root));
 
 #ifdef _DEBUG
-	//LogMsg(postData.c_str());
+	LogMsg(postData.c_str());
+	//let's see what we're sending, write it to a txt file so notepad can read the kanji or whatever right
+	FILE* fp = fopen("translation_request.txt", "wb");
+	fwrite(postData.c_str(), postData.length(), 1, fp);
+	fclose(fp);
 #endif
 
 	m_netHTTP.Setup(url, 80, urlappend, NetHTTP::END_OF_DATA_SIGNAL_HTTP);
@@ -303,9 +307,19 @@ void TextAreaComponent::RequestTranslationDeepL()
 	}
 
 	string urlappend = "v2/translate";
+
+
+#ifdef _DEBUG
+	LogMsg(textToTranslate.c_str());
+	//let's see what we're sending, write it to a txt file so notepad can read the kanji or whatever right
+	FILE* fp = fopen("translation_request.txt", "wb");
+	fwrite(textToTranslate.c_str(), textToTranslate.length(), 1, fp);
+	fclose(fp);
+
+#endif
+
 	
 	m_netHTTP.Setup(url, 80, urlappend, NetHTTP::END_OF_DATA_SIGNAL_HTTP);
-	
 	m_netHTTP.AddPostData("auth_key", (const byte*)GetApp()->GetDeepLKey().c_str(), GetApp()->GetDeepLKey().length());
 	m_netHTTP.AddPostData("text", (const byte*)textToTranslate.c_str(), textToTranslate.length());
 	m_netHTTP.AddPostData("target_lang", (const byte*)ToUpperCaseString(destLanguage).c_str(), destLanguage.length());
@@ -422,8 +436,14 @@ void TextAreaComponent::Init(TextArea textArea)
 	vector<CL_Vec2f> offsets = ComputeLocalLineOffsets();
 	float wordWrapX = 0;
 	
-	
-	m_pSourceLanguageSurf = GetApp()->GetFreeTypeManager(m_textArea.language)->GetFont()->TextToSurface(tempRect.get_size_vec2(), textArea.text,
+	//rebuild version with line feeds as we're just displaying this as close as to the original as possible, no translation here as this is the source
+	string versionWithLineFeeds;
+	for (int i = 0; i < m_textArea.m_lines.size(); i++)
+	{
+		versionWithLineFeeds += m_textArea.m_lines[i].m_text+"\n";
+	}
+
+	m_pSourceLanguageSurf = GetApp()->GetFreeTypeManager(m_textArea.language)->GetFont()->TextToSurface(tempRect.get_size_vec2(), versionWithLineFeeds,
 		height, glColorBytes(0,0,0,0), GetTextColor(IsDialog(false)), m_textArea.language == "ja", &offsets, 
 		wordWrapX);
 
@@ -1147,15 +1167,16 @@ void TextAreaComponent::OnRender(VariantList *pVList)
 		m_pSourceLanguageSurf->Blit(vFinalPos.x, vFinalPos.y);
 	}
 
-	/*
-	if (GetBaseApp()->GetTouch(0)->IsDown())
-	{
-		for (int i = 0; i < m_textArea.m_lines.size(); i++)
-		{
-			DrawWordRectsForLine(m_textArea.m_lines[i]);
-		}
-	}
-	*/
+	
+	
+	//if (GetBaseApp()->GetTouch(0)->IsDown())
+	//{
+	//	for (int i = 0; i < m_textArea.m_lines.size(); i++)
+	//	{
+	//		DrawWordRectsForLine(m_textArea.m_lines[i]);
+	//	}
+	//}
+	
 
 }
 

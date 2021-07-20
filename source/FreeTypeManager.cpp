@@ -326,7 +326,7 @@ Surface * FreeTypeManager::TextToSurface(CL_Vec2f surfaceSizeToCreate, string ms
 	glColorBytes bgColor, glColorBytes fgColor, bool bUseActualWidthForSpacing, vector<CL_Vec2f> *pOptionalLineStarts,
 	float wordWrapX)
 {
-	// Convert it to utf-16 to freetype can understand it
+	// Convert it to utf-16 so freetype can understand it
 	vector<unsigned short> utf16line;
 	utf8::utf8to16(msg.begin(), msg.end(), back_inserter(utf16line));
 	

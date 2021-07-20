@@ -22,7 +22,7 @@
 #include "ExportToHTML.h"
 
 #ifdef WINAPI
-extern HWND				g_hWnd;
+extern HWND g_hWnd;
 #endif
 
 #include "Gamepad/GamepadManager.h"
@@ -64,13 +64,10 @@ string RunLinuxShell(string command)
 	temp = "\r\nRunning " + command + " ...\r\n";
 
 #ifndef WINAPI
-
 	system(command.c_str());
 	return temp;
-
 #else
 	return "Doesn't work in windows, can't run " + command;
-
 #endif
 }
 
@@ -83,7 +80,6 @@ void DoResync(VariantList *pVList)
 
 void ResyncWithCapture()
 {
-
 	ShowQuickMessage("Resyncing with capture...");
 	GetMessageManager()->CallStaticFunction(DoResync, 100);
 }
@@ -127,13 +123,12 @@ App::App()
 		m_pExportToHTML = NULL;
 		m_pAutoPlayManager = NULL;
 		m_usedSubAreaScan = false;
-		m_version = "0.69 Beta";
+		m_version = "0.70 Beta";
 		m_bDidPostInit = false;
 		m_gamepad_button_to_scan_active_window = VIRTUAL_KEY_NONE;
 		m_cursorShouldBeRestoredToStartPos = false;
 		m_cursorPosAtStart.x = m_cursorPosAtStart.y = 0;
 		//m_bTestMode = true;
-		
 }
 
 App::~App()
@@ -253,9 +248,7 @@ void App::AddFontOverride(string fontName, string language, float widthOverride,
 		m_vecFontInfo[m_vecFontInfo.size() - 1]->SetupFont(fontName);
 	m_vecFontInfo[m_vecFontInfo.size() - 1]->m_widthOverride = widthOverride;
 	m_vecFontInfo[m_vecFontInfo.size() - 1]->m_preTranslatedHeightMod = preTranslatedHeightMod;
-
 	m_vecFontInfo[m_vecFontInfo.size() - 1]->m_vecFontOverrideName = language;
-
 }
 
 bool App::Init()
@@ -329,7 +322,6 @@ bool App::Init()
 	GamepadProviderDirectX *pTempDirectX = new GamepadProviderDirectX;
 	pTempDirectX->SetIgnoreXInputCapableDevices(true);
 	GetGamepadManager()->AddProvider(pTempDirectX); //use directx joysticks
-
 	
 	SetFPSLimit(100);
 #endif
@@ -1582,8 +1574,6 @@ bool App::LoadConfigFile()
 		return false;
 	}
 
-
-
 	//another scan
 	for (int i = 0; i < ts.GetLineCount(); i++)
 	{
@@ -1602,7 +1592,6 @@ bool App::LoadConfigFile()
 	}
 
 	this->ModLanguageByIndex(1, false); //go to first language
-
 
 	if (audio == "sdl" || audio == "fmod")
 	{
@@ -1626,10 +1615,7 @@ bool App::LoadConfigFile()
 	}
 
 	g_pAudioManager->SetPreferOGG(false);
-
 	GetAudioManager()->SetRequestedDriverByName(audioDevice);
-
-
 	return true;
 }
 
@@ -1648,7 +1634,6 @@ void OnAppLostFocus()
 #endif
 
 	GetBaseApp()->GetTouch(0)->SetIsDown(false);
-
 
 	Gamepad* pPad = GetGamepadManager()->GetDefaultGamepad();
 	if (pPad)
@@ -1679,7 +1664,6 @@ void OnAppGotFocus()
 		
 		if (GetApp()->m_pGameLogicComp && GetHelpMenu() == NULL)
 		{
-			
 				CreateHelpMenu(GetApp()->m_pGameLogicComp->GetParent());
 		}
 
@@ -1713,7 +1697,6 @@ void App::SetSizeForGUIIfNeeded()
 	SetPrimaryScreenSize(guiWidth, guiHeight);
 	SetupScreenInfo(guiWidth, guiHeight, ORIENTATION_DONT_CARE);
 	GetBaseApp()->SetVideoMode(guiWidth, guiHeight, false, 0);
-	
 }
 
 bool App::OnPreInitVideo()

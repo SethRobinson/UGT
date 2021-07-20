@@ -24,7 +24,7 @@ void ExportToHTML::AddOverlays(string* pHTML, const string itemTemplate)
 
 	for (int i = 0; i < GetApp()->GetGameLogicComponent()->m_textComps.size(); i++)
 	{
-		TextAreaComponent *comp = GetApp()->GetGameLogicComponent()->m_textComps[i];
+		TextAreaComponent* comp = GetApp()->GetGameLogicComponent()->m_textComps[i];
 		string work = itemTemplate;
 
 		//either way, we want these substitions:
@@ -39,24 +39,32 @@ void ExportToHTML::AddOverlays(string* pHTML, const string itemTemplate)
 		//all together as one block
 		if (comp->m_textArea.m_bIsDialog)
 		{
+			string finalText;
+		     
+			//we'll need to add our own line feeds
+			for (int j = 0; j < comp->m_textArea.m_lines.size(); j++)
+			{
+				finalText += comp->m_textArea.m_lines[j].m_text + "\n";
+			}
+
 			StringReplace("[X]", toString(comp->m_textArea.m_rect.left), work);
 			StringReplace("[Y]", toString(comp->m_textArea.m_rect.top), work);
 			StringReplace("[FONT_SIZE]", toString(comp->m_textArea.m_averageTextHeight*0.83f), work);
-			StringReplace("[TEXT]", toString(comp->m_textArea.text), work);
+			StringReplace("[TEXT]", toString(finalText), work);
 			StringReplace("\n", "<br>", work);
 			work += "\r\n";
 		}
 		else
 		{
-		//Line by line
-
+			
 			for (int j = 0; j < comp->m_textArea.m_lines.size(); j++)
 			{
 				StringReplace("[X]", toString(comp->m_textArea.m_lineStarts[j].x), work);
 				StringReplace("[Y]", toString(comp->m_textArea.m_lineStarts[j].y), work);
 				StringReplace("[FONT_SIZE]", toString(comp->m_textArea.m_lines[j].m_lineRect.get_size().height * 0.85f), work);
 				StringReplace("[TEXT]", toString(comp->m_textArea.m_lines[j].m_text), work);
-				work += "\r\n";
+				
+				work += "<BR>\r\n";
 			}
 		}
 		

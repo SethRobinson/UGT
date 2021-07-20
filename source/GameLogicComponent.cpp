@@ -12,6 +12,8 @@
 #include "util/TextScanner.h"
 
 #ifdef _DEBUG
+//If g_fileName is set to an image instead of blank, UGT will load and translate when started, makes debugging a test image quicker
+
 //string g_fileName = "positioning_test.png";
 //string g_fileName = "dink.png";
 //string g_fileName = "fukuyama.png";
@@ -23,7 +25,8 @@
 //string g_fileName = "hello_world.png";
 //string g_fileName = "nhk_news.png";
 //string g_fileName = "bug2.jpg";
-//string g_fileName = "bug3.png";
+//string g_fileName = "bug_english.png";
+//string g_fileName = "bug.jpg";
 string g_fileName;
 #else
 string g_fileName;
@@ -174,20 +177,20 @@ void GameLogicComponent::OnAdd(Entity *pEnt)
 
 }
 
-bool GameLogicComponent::ReadFromParagraph(const cJSON *paragraph, TextArea &textArea)
+bool ProcessParagraphManually(const cJSON* paragraph, TextArea& textArea)
 {
 	//get words
-	const cJSON *words = cJSON_GetObjectItemCaseSensitive(paragraph, "words");
-	const cJSON *word;
-	
+	const cJSON* words = cJSON_GetObjectItemCaseSensitive(paragraph, "words");
+	const cJSON* word;
+
 	string finalText;
 
 	CL_Vec2f lastVerts[4];
 	for (int i = 0; i < 4; i++)
 	{
-		lastVerts[0] = CL_Vec2f(0, 0);
+		lastVerts[i] = CL_Vec2f(0, 0);
 	}
-	
+
 	bool bDidCR = false;
 	string lineText;
 	string finalTextRaw;
@@ -200,26 +203,25 @@ bool GameLogicComponent::ReadFromParagraph(const cJSON *paragraph, TextArea &tex
 	CL_Rect totalRect;
 	vector<WordInfo> wordInfo;
 
-
 	cJSON_ArrayForEach(word, words)
 	{
-	//	LogMsg("Got a word");
-		const cJSON *symbols = cJSON_GetObjectItemCaseSensitive(word, "symbols");
-		const cJSON *symbol;
+		//	LogMsg("Got a word");
+		const cJSON* symbols = cJSON_GetObjectItemCaseSensitive(word, "symbols");
+		const cJSON* symbol;
 
 		//get the bounding box of this word
-		const cJSON *boundingBox = cJSON_GetObjectItemCaseSensitive(word, "boundingBox");
-		const cJSON *vertices = cJSON_GetObjectItemCaseSensitive(boundingBox, "vertices");
-		const cJSON *vert;
+		const cJSON* boundingBox = cJSON_GetObjectItemCaseSensitive(word, "boundingBox");
+		const cJSON* vertices = cJSON_GetObjectItemCaseSensitive(boundingBox, "vertices");
+		const cJSON* vert;
 
 		CL_Vec2f verts[4];
 		int vertCount = 0;
-	
+
 		cJSON_ArrayForEach(vert, vertices)
 		{
 			float x, y;
 
-			cJSON *tempObj = cJSON_GetObjectItem(vert, "x");
+			cJSON* tempObj = cJSON_GetObjectItem(vert, "x");
 			if (tempObj)
 			{
 				x = tempObj->valuedouble;
@@ -228,7 +230,7 @@ bool GameLogicComponent::ReadFromParagraph(const cJSON *paragraph, TextArea &tex
 			{
 				x = 0;
 			}
-			
+
 			tempObj = cJSON_GetObjectItem(vert, "y");
 			if (tempObj)
 			{
@@ -245,25 +247,25 @@ bool GameLogicComponent::ReadFromParagraph(const cJSON *paragraph, TextArea &tex
 			vertCount++;
 		}
 
-		
+
 		if (lastVerts[2].y != 0)
 		{
 			//has valid info, check to see if this word overlaps with the last word drawn in this block.  This is to
 			//add the linefeeds which google decides not to include here
-			
+
 			float allowedOverlapPixels = 9;
-			
+
 			float spaceBetweenWords = verts[0].x - lastVerts[2].x;
-			
+
 			if (spaceBetweenWords < (-allowedOverlapPixels))
 			{
-				
+
 				//new line, it's to the left of the last word
-				
+
 #ifdef _DEBUG
 				//LogMsg("Rect of %s is %s", lineText.c_str(), PrintRect(rectOfLastLine).c_str());
 #endif
-				
+
 				LineInfo lineInfo;
 				lineInfo.m_lineRect = rectOfLastLine;
 				lineInfo.m_words = wordInfo; wordInfo.clear();
@@ -271,7 +273,7 @@ bool GameLogicComponent::ReadFromParagraph(const cJSON *paragraph, TextArea &tex
 				textArea.m_lines.push_back(lineInfo);
 				textArea.m_lineStarts.push_back(rectOfLastLine.get_top_left());
 				finalText += lineText;
-				finalTextRaw += lineText+" ";
+				finalTextRaw += lineText + " ";
 				lineText = "";
 				bRectSet = false;
 				finalText += "\n";
@@ -306,26 +308,26 @@ bool GameLogicComponent::ReadFromParagraph(const cJSON *paragraph, TextArea &tex
 		{
 			lastVerts[i] = verts[i];
 		}
-		
+
 		if (!lineText.empty())
 		{
 			//Asian languages don't need a space?
 			if (!IsAsianLanguage(textArea.language))
 			{
 				lineText += " ";
-			} 
+			}
 		}
 
 		bDidCR = false;
 
 		cJSON_ArrayForEach(symbol, symbols)
 		{
-			const cJSON *text = cJSON_GetObjectItemCaseSensitive(symbol, "text");
+			const cJSON* text = cJSON_GetObjectItemCaseSensitive(symbol, "text");
 			lineText += text->valuestring;
 
 			//what about the exact rect of this text?
 
-			const cJSON *boundingBox2 = cJSON_GetObjectItemCaseSensitive(symbol, "boundingBox");
+			const cJSON* boundingBox2 = cJSON_GetObjectItemCaseSensitive(symbol, "boundingBox");
 
 			vertices = cJSON_GetObjectItemCaseSensitive(boundingBox2, "vertices");
 			vertCount = 0;
@@ -334,8 +336,8 @@ bool GameLogicComponent::ReadFromParagraph(const cJSON *paragraph, TextArea &tex
 			{
 				float x, y;
 
-				cJSON *tempObj = cJSON_GetObjectItem(vert, "x");
-				
+				cJSON* tempObj = cJSON_GetObjectItem(vert, "x");
+
 				if (tempObj)
 				{
 					x = tempObj->valuedouble;
@@ -344,7 +346,7 @@ bool GameLogicComponent::ReadFromParagraph(const cJSON *paragraph, TextArea &tex
 				{
 					x = 0;
 				}
-				
+
 				tempObj = cJSON_GetObjectItem(vert, "y");
 				if (tempObj)
 				{
@@ -365,16 +367,16 @@ bool GameLogicComponent::ReadFromParagraph(const cJSON *paragraph, TextArea &tex
 				w.m_rect = CL_Rectf(verts[0].x, verts[0].y, verts[2].x, verts[2].y);
 				w.m_word = text->valuestring;
 				wordInfo.push_back(w);
-			} 
+			}
 
 		}
-	
+
 		wordsProcessed++;
 	}
 
 	LineInfo lineInfo;
 	lineInfo.m_words = wordInfo; wordInfo.clear();
-	
+
 	lineInfo.m_lineRect = rectOfLastLine;
 	lineInfo.m_text = lineText;
 	textArea.m_lines.push_back(lineInfo);
@@ -398,6 +400,236 @@ bool GameLogicComponent::ReadFromParagraph(const cJSON *paragraph, TextArea &tex
 		//We have an existing chunk of text we're continuing, it's one of those "multi paragraphs" google will throw at us
 		textArea.m_rect.bounding_rect(totalRect);
 	}
+
+	return true;
+}
+
+bool ProcessParagraphGoogleWay(const cJSON* paragraph, TextArea& textArea)
+{
+
+	CL_Rect rectOfLastLine;
+	bool bRectSet = false;
+	int wordsProcessed = 0;
+	//get words
+	const cJSON* words = cJSON_GetObjectItemCaseSensitive(paragraph, "words");
+	const cJSON* word;
+
+	string finalText;
+
+	CL_Vec2f lastVerts[4];
+	for (int i = 0; i < 4; i++)
+	{
+		lastVerts[i] = CL_Vec2f(0, 0);
+	}
+	CL_Rect totalRect;
+	vector<WordInfo> wordInfo;
+
+
+	string lineText;
+	string finalTextRaw;
+
+
+	cJSON_ArrayForEach(word, words)
+	{
+		//	LogMsg("Got a word");
+		const cJSON* symbols = cJSON_GetObjectItemCaseSensitive(word, "symbols");
+		const cJSON* symbol;
+
+		//get the bounding box of this word
+		const cJSON* boundingBox = cJSON_GetObjectItemCaseSensitive(word, "boundingBox");
+		const cJSON* vertices = cJSON_GetObjectItemCaseSensitive(boundingBox, "vertices");
+		const cJSON* vert;
+
+		CL_Vec2f verts[4];
+		int vertCount = 0;
+
+		cJSON_ArrayForEach(vert, vertices)
+		{
+			float x, y;
+
+			cJSON* tempObj = cJSON_GetObjectItem(vert, "x");
+			if (tempObj)
+			{
+				x = tempObj->valuedouble;
+			}
+			else
+			{
+				x = 0;
+			}
+
+			tempObj = cJSON_GetObjectItem(vert, "y");
+			if (tempObj)
+			{
+				y = tempObj->valuedouble;
+			}
+			else
+			{
+				y = 0;
+			}
+
+			verts[vertCount] = CL_Vec2f(x, y);
+			assert(verts[vertCount] >= 0);
+
+			vertCount++;
+		}
+
+		if (!bRectSet)
+		{
+			//LogMsg("Setting rect for first word");
+			if (wordsProcessed == 0)
+			{
+				rectOfLastLine = CL_Rectf(verts[0].x, verts[0].y, verts[2].x, verts[2].y);
+				totalRect = rectOfLastLine;
+			}
+			else
+			{
+				rectOfLastLine = CL_Rectf(verts[0].x, verts[0].y, verts[2].x, verts[2].y);
+				totalRect.bounding_rect(rectOfLastLine);
+			}
+			bRectSet = true;
+		}
+		else
+		{
+			CL_Rect newWord = CL_Rectf(verts[0].x, verts[0].y, verts[2].x, verts[2].y);
+
+			rectOfLastLine.bounding_rect(newWord);
+			totalRect.bounding_rect(newWord);
+		}
+
+		for (int i = 0; i < 4; i++)
+		{
+			lastVerts[i] = verts[i];
+		}
+
+		if (!lineText.empty())
+		{
+			//lineText += " ";
+		}
+
+		cJSON_ArrayForEach(symbol, symbols)
+		{
+			const cJSON* text = cJSON_GetObjectItemCaseSensitive(symbol, "text");
+			lineText += text->valuestring;
+
+
+			//what about the exact rect of this text?
+
+			const cJSON* boundingBox2 = cJSON_GetObjectItemCaseSensitive(symbol, "boundingBox");
+
+			vertices = cJSON_GetObjectItemCaseSensitive(boundingBox2, "vertices");
+			vertCount = 0;
+
+			cJSON_ArrayForEach(vert, vertices)
+			{
+				float x, y;
+
+				cJSON* tempObj = cJSON_GetObjectItem(vert, "x");
+
+				if (tempObj)
+				{
+					x = tempObj->valuedouble;
+				}
+				else
+				{
+					x = 0;
+				}
+
+				tempObj = cJSON_GetObjectItem(vert, "y");
+				if (tempObj)
+				{
+					y = tempObj->valuedouble;
+				}
+				else
+				{
+					y = 0;
+				}
+
+				//assert(x >= 0 && y >= 0);
+				verts[vertCount] = CL_Vec2f(x, y);
+				vertCount++;
+			}
+			if (vertCount == 4)
+			{
+				WordInfo w;
+				w.m_rect = CL_Rectf(verts[0].x, verts[0].y, verts[2].x, verts[2].y);
+				w.m_word = text->valuestring;
+				wordInfo.push_back(w);
+
+			}
+
+			const cJSON* symbolProperty = cJSON_GetObjectItemCaseSensitive(symbol, "property");
+			const cJSON* linebreak = cJSON_GetObjectItemCaseSensitive(symbolProperty, "detectedBreak");
+			if (linebreak != NULL)
+			{
+				const cJSON* detectedBreak = cJSON_GetObjectItemCaseSensitive(linebreak, "type");
+				const string space("SPACE");
+				const string eolspace("EOL_SURE_SPACE");
+
+
+				if (space.compare(detectedBreak->valuestring) == 0)
+				{
+					lineText += " ";
+				}
+				else
+				{
+					LogMsg("Break type: %s", detectedBreak->valuestring);
+			
+					if (eolspace.compare(detectedBreak->valuestring) == 0)
+					{
+						
+						//lineText += "\n"; // Seems better if EOL space is treated as a newline? (old behavior)
+						if (IsAsianLanguage(textArea.language))
+						{
+							//kanji doesn't need spaces just because we hit a CR
+							lineText += "";
+						}
+						else
+						{
+							lineText += " ";
+						}
+
+					}
+					else 
+					{
+						lineText += "\n";
+					}
+
+					LineInfo lineInfo;
+					lineInfo.m_lineRect = rectOfLastLine;
+					lineInfo.m_words = wordInfo; wordInfo.clear();
+					lineInfo.m_text = lineText;
+					textArea.m_lines.push_back(lineInfo);
+					textArea.m_lineStarts.push_back(rectOfLastLine.get_top_left());
+					finalText += lineText;
+					finalTextRaw += lineText;
+					lineText = "";
+					bRectSet = false;
+				}
+			}
+			
+
+		}
+
+		wordsProcessed++;
+	}
+
+	textArea.text += finalText;
+	textArea.rawText += finalTextRaw;
+	utf8::utf8to16(finalTextRaw.begin(), finalTextRaw.end(), back_inserter(textArea.wideText));
+	textArea.m_rect = totalRect;
+
+	return true;
+}
+
+
+bool GameLogicComponent::ReadFromParagraph(const cJSON* paragraph, TextArea& textArea)
+{
+	ProcessParagraphGoogleWay(paragraph, textArea);
+	//ProcessParagraphManually(paragraph, textArea);
+
+	// The original is the same from here on...
+	float isDialogFuzzyLogic = 0;
+
 	//1 means centered, 0 is far left, 2 is far right
 	float centeringFactorX = textArea.m_rect.get_center().x / (GetApp()->m_capture_width / 2);
 	float centeringFactorY = textArea.m_rect.get_center().y / (GetApp()->m_capture_height / 2);
@@ -411,14 +643,13 @@ bool GameLogicComponent::ReadFromParagraph(const cJSON *paragraph, TextArea &tex
 	}
 
 #ifdef _DEBUG
-
-/*
-	LogMsg("Fuzzy tests for %s:", finalText.c_str());
-	LogMsg("centeringFactorX: %.2f  centeringFactorY: %.2f", centeringFactorX, centeringFactorY);
-	LogMsg("percentUsedOfScreenWidth : %.2f  percentUsedOfScreenHeight: %.2f", percentUsedOfScreenWidth, percentUsedOfScreenHeight);
+	/*
+		LogMsg("Fuzzy tests for %s:", finalText.c_str());
+		LogMsg("centeringFactorX: %.2f  centeringFactorY: %.2f", centeringFactorX, centeringFactorY);
+		LogMsg("percentUsedOfScreenWidth : %.2f  percentUsedOfScreenHeight: %.2f", percentUsedOfScreenWidth, percentUsedOfScreenHeight);
 	*/
 #endif
-	//recompute the rawtext to look better based on how the text is laid out
+		//recompute the rawtext to look better based on how the text is laid out
 	if (textArea.m_lines.size() > 1)
 	{
 		string newFinal;
@@ -467,21 +698,19 @@ bool GameLogicComponent::ReadFromParagraph(const cJSON *paragraph, TextArea &tex
 			}
 			else
 			{
-				newFinal += " ";
+				//todo, add space for non kanji?
+				newFinal += "";
 			}
-
 
 			textArea.m_averageTextHeight += textArea.m_lines[i].m_lineRect.get_height();
 			textArea.m_ySpacingToNextLineAverage += ySpacingToNextLinePercent;
-
 		}
 
 		textArea.m_averageTextHeight += textArea.m_lines[textArea.m_lines.size() - 1].m_lineRect.get_height();
 		textArea.m_ySpacingToNextLineAverage /= (textArea.m_lines.size() - 1);
 		textArea.m_averageTextHeight /= textArea.m_lines.size();
 
-
-		newFinal += textArea.m_lines[textArea.m_lines.size()-1].m_text; //the last line
+		newFinal += textArea.m_lines[textArea.m_lines.size() - 1].m_text; //the last line
 
 		textArea.rawText = newFinal;
 		//scan if it's dialog or not
@@ -499,7 +728,6 @@ bool GameLogicComponent::ReadFromParagraph(const cJSON *paragraph, TextArea &tex
 		{
 			textArea.m_bIsDialog = true;
 		}
-
 	}
 	else
 	{
