@@ -99,6 +99,7 @@ public:
 	void OnGamepadStickUpdate(VariantList* pVList);
 	void UpdateCursor();
 	void AddFontOverride(string fontName, string language, float widthOverride, float preTranslatedHeightMod);
+	bool InitFonts();
 	virtual bool Init();
 	virtual void Kill();
 	virtual void Draw();
@@ -162,6 +163,8 @@ public:
 	string m_deepl_api_key;
 	int m_jpg_quality_for_scan = 95;
 	string m_kanji_lookup_website = "https://jisho.org/search/";
+	string m_log_capture_text_to_file = "disabled";
+	string m_place_capture_text_on_clipboard = "disabled";
 	int m_currentLanguageIndex = -1;
 	int m_min_chars_required_to_be_dialog = 8;
 	int m_input_camera_device_id = 0;
@@ -169,7 +172,7 @@ public:
 	bool m_audio_stop_when_window_is_closed = false;
 	string m_audio_default_language = "ja";
 	string m_source_language_hint = "auto";
-	string m_google_text_detection_command = "DOCUMENT_TEXT_DETECTION";
+	string m_google_text_detection_command = "TEXT_DETECTION";  //"DOCUMENT_TEXT_DETECTION";
 	vector<LanguageSetting> m_languages;
 	eTranslationEngine GetTranslationEngine() { return m_translationEngine; }
 	string m_inputMode = "desktop";

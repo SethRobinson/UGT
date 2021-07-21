@@ -10,7 +10,7 @@ extern AudioHandle g_lastAudioHandle;
 
 void HandleWMHotkey(UINT message, WPARAM wParam, LPARAM lParam)
 {
-	int ID = wParam;
+	int ID = (int)wParam;
 	//LogMsg("Got hotkey %d, %d, ID: %d", message, lParam, ID);
 	
 	GetApp()->HandleHotKeyPushed(GetApp()->m_hotKeyHandler.GetHotKeyByID(ID));

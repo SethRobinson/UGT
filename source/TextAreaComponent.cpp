@@ -11,7 +11,7 @@
 #include "util/TextScanner.h"
 
 int g_counter = 0;
-
+ 
 
 AudioHandle g_lastAudioHandle = AUDIO_HANDLE_BLANK;
 
@@ -206,7 +206,7 @@ void TextAreaComponent::RequestAudio(bool bUseSrcLanguage, bool bShowMessage)
 #endif
 
 	m_netAudioHTTP.Setup(url, 80, urlappend, NetHTTP::END_OF_DATA_SIGNAL_HTTP);
-	m_netAudioHTTP.AddPostData("", (const byte*)postData.c_str(), postData.length());
+	m_netAudioHTTP.AddPostData("", (const byte*)postData.c_str(), (int)postData.length());
 	m_netAudioHTTP.Start();
 }
 
@@ -276,7 +276,7 @@ void TextAreaComponent::RequestTranslationGoogle()
 #endif
 
 	m_netHTTP.Setup(url, 80, urlappend, NetHTTP::END_OF_DATA_SIGNAL_HTTP);
-	m_netHTTP.AddPostData("", (const byte*)postData.c_str(), postData.length());
+	m_netHTTP.AddPostData("", (const byte*)postData.c_str(), (int)postData.length());
 	m_netHTTP.Start();
 	m_bWaitingForTranslation = true;
 }
@@ -329,9 +329,9 @@ void TextAreaComponent::RequestTranslationDeepL()
 
 	
 	m_netHTTP.Setup(url, 80, urlappend, NetHTTP::END_OF_DATA_SIGNAL_HTTP);
-	m_netHTTP.AddPostData("auth_key", (const byte*)GetApp()->GetDeepLKey().c_str(), GetApp()->GetDeepLKey().length());
-	m_netHTTP.AddPostData("text", (const byte*)textToTranslate.c_str(), textToTranslate.length());
-	m_netHTTP.AddPostData("target_lang", (const byte*)ToUpperCaseString(destLanguage).c_str(), destLanguage.length());
+	m_netHTTP.AddPostData("auth_key", (const byte*)GetApp()->GetDeepLKey().c_str(), (int)GetApp()->GetDeepLKey().length());
+	m_netHTTP.AddPostData("text", (const byte*)textToTranslate.c_str(), (int)textToTranslate.length());
+	m_netHTTP.AddPostData("target_lang", (const byte*)ToUpperCaseString(destLanguage).c_str(), (int)destLanguage.length());
 
 	m_netHTTP.Start();
 	m_bWaitingForTranslation = true;
@@ -545,7 +545,7 @@ void TextAreaComponent::OnTouchStart(VariantList *pVList)
 		//right mouse button
 		vector<unsigned short> utf16line;
 		utf8::utf8to16(m_textArea.text.begin(), m_textArea.text.end(), back_inserter(utf16line));
-		SetClipboardTextW(&utf16line[0], utf16line.size());
+		SetClipboardTextW(&utf16line[0], (int)utf16line.size());
 		ShowQuickMessage("Copied original text to clipboard");
 		return;
 	}
@@ -560,17 +560,15 @@ void TextAreaComponent::OnTouchStart(VariantList *pVList)
 			textToTranslate = m_textArea.text;
 		}
 		utf8::utf8to16(textToTranslate.begin(), textToTranslate.end(), back_inserter(utf16line));
-		SetClipboardTextW(&utf16line[0], utf16line.size());
+		SetClipboardTextW(&utf16line[0], (int)utf16line.size());
 		ShowQuickMessage("Copied translated text to clipboard");
 		return;
 	}
 	else
 	{
-
 		//LogMsg("Clicked %s", PrintVector2(pTouch->GetPos()).c_str());
 
 		//scroll through our letters?
-
 		for (int l = 0; l < m_textArea.m_lines.size(); l++)
 		{
 			for (int i = 0; i < m_textArea.m_lines[l].m_words.size(); i++)
@@ -605,7 +603,6 @@ void TextAreaComponent::OnTouchStart(VariantList *pVList)
 void TextAreaComponent::OnTargetLanguageChanged()
 {
 	SAFE_DELETE(m_pDestLanguageSurf);
-
 	RequestTranslation();
 }
 
@@ -613,7 +610,6 @@ void TextAreaComponent::OnKillAllText()
 {
 	GetParent()->SetTaggedForDeletion();
 }
-
 
 bool TextAreaComponent::TranslatingToAsianLanguage()
 {
@@ -625,7 +621,7 @@ bool TextAreaComponent::TranslatingFromAsianLanguage()
 	return IsAsianLanguage(m_textArea.language);
 }
 
-void TextAreaComponent::FitText(float *pHeightInOut, float widthMod, float trueCharCount)
+void TextAreaComponent::FitText(float *pHeightInOut, float widthMod, int trueCharCount)
 {
 
 	float bestHeightSoFar = *pHeightInOut;
@@ -709,7 +705,7 @@ void TextAreaComponent::TweakForSending(const string &text, CL_Rectf &rect, floa
 			vector<unsigned short> utf16line;
 			utf8::utf8to16(lines[i].begin(), lines[i].end(), back_inserter(utf16line));
 			float width = (utf16line.size()*height)*widthMod;
-			trueCharCount += utf16line.size();
+			trueCharCount += (int)utf16line.size();
 			maxWidth = rt_max(width, maxWidth);
 		}
 
@@ -719,7 +715,7 @@ void TextAreaComponent::TweakForSending(const string &text, CL_Rectf &rect, floa
 			FitText(&height, widthMod, trueCharCount);
 
 			rtRectf textRect;
-			GetApp()->GetFreeTypeManager(GetApp()->m_target_language)->GetFont()->MeasureText(&textRect, (WCHAR*) &m_textArea.wideText.at(0), m_textArea.wideText.size(), height, true);
+			GetApp()->GetFreeTypeManager(GetApp()->m_target_language)->GetFont()->MeasureText(&textRect, (WCHAR*) &m_textArea.wideText.at(0), (int)m_textArea.wideText.size(), height, true);
 #ifdef _DEBUG
 			LogMsg("Rect: %s", PrintRect(textRect).c_str());
 #endif
@@ -745,7 +741,6 @@ void TextAreaComponent::TweakForSending(const string &text, CL_Rectf &rect, floa
 	{
 		height *= GetApp()->GetFreeTypeManager(m_textArea.language)->m_preTranslatedHeightMod;
 	}
-
 
 	//let's add extra space for no reason
 	float expanderRatio = 1.5f;

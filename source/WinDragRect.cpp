@@ -103,7 +103,7 @@ LRESULT CALLBACK MyNewWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 
 void WinDragRect::OnPaint()
 {
-
+	
 	PAINTSTRUCT ps;
 	HDC hdc = BeginPaint(m_hWnd, &ps);
 
@@ -133,7 +133,7 @@ void WinDragRect::OnPaint()
 		//LogMsg("PS: %d, %d.  Cursor: %d, %d", ps.rcPaint.left, ps.rcPaint.right, pt.x, pt.y);
 		//FillRect(hdc, &rc, CreateSolidBrush(RGB(100, 40, 255)));
 
-		DrawText(hdc, Text.c_str(), Text.size(), &rc, DT_CENTER | DT_NOCLIP | DT_SINGLELINE);
+		DrawText(hdc, Text.c_str(), (int)Text.size(), &rc, DT_CENTER | DT_NOCLIP | DT_SINGLELINE);
 
 	}
 

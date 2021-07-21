@@ -10,7 +10,8 @@
 #include "Renderer/JPGSurfaceLoader.h"
 #include "util/utf8.h"
 #include "util/TextScanner.h"
-
+#include "ExportToHTML.h"
+ 
 #ifdef _DEBUG
 //If g_fileName is set to an image instead of blank, UGT will load and translate when started, makes debugging a test image quicker
 
@@ -130,6 +131,7 @@ void GameLogicComponent::OnAdd(Entity *pEnt)
 	LogMsg("GameLogic added");
 	GetParent()->GetFunction("OnUpdate")->sig_function.connect(1, boost::bind(&GameLogicComponent::OnUpdate, this, _1));
 	GetParent()->GetFunction("OnRender")->sig_function.connect(1, boost::bind(&GameLogicComponent::OnRender, this, _1));
+	GetApp()->m_sig_target_language_changed.connect(1, boost::bind(&GameLogicComponent::OnTargetLanguageChanged, this));
 
 	//hack to process a file image on startup, used for testing
 	if (!g_fileName.empty())
@@ -143,12 +145,12 @@ void GameLogicComponent::OnAdd(Entity *pEnt)
 		ZoomToPositionFromThisOffsetEntity(m_pScreenShot, CL_Vec2f(0, -GetScreenSizeYf() / 2), 1000, INTERPOLATE_SMOOTHSTEP, 0);
 		CL_Vec2f size = GetSize2DEntity(m_pScreenShot);
 		assert(size.x != 0 && "Uh, your forced debug filename to load probably doesn't exist");
-		GetApp()->m_capture_width = size.x;
-		GetApp()->m_capture_height = size.y;
+		GetApp()->m_capture_width = (int) size.x;
+		GetApp()->m_capture_height = (int)size.y;
 		GetApp()->m_window_pos_x = 0;
 		GetApp()->m_window_pos_y = 0;
 
-		GetApp()->SetVideoMode(size.x, size.y, false);
+		GetApp()->SetVideoMode((int)size.x, (int)size.y, false);
 
 		GetApp()->m_sig_kill_all_text();
 		StartProcessingFrameForText();
@@ -174,7 +176,6 @@ void GameLogicComponent::OnAdd(Entity *pEnt)
 			LogMsg("Error with camera capture");
 		}
 	}
-
 }
 
 bool ProcessParagraphManually(const cJSON* paragraph, TextArea& textArea)
@@ -224,7 +225,7 @@ bool ProcessParagraphManually(const cJSON* paragraph, TextArea& textArea)
 			cJSON* tempObj = cJSON_GetObjectItem(vert, "x");
 			if (tempObj)
 			{
-				x = tempObj->valuedouble;
+				x = (float)tempObj->valuedouble;
 			}
 			else
 			{
@@ -234,7 +235,7 @@ bool ProcessParagraphManually(const cJSON* paragraph, TextArea& textArea)
 			tempObj = cJSON_GetObjectItem(vert, "y");
 			if (tempObj)
 			{
-				y = tempObj->valuedouble;
+				y = (float)tempObj->valuedouble;
 			}
 			else
 			{
@@ -247,7 +248,6 @@ bool ProcessParagraphManually(const cJSON* paragraph, TextArea& textArea)
 			vertCount++;
 		}
 
-
 		if (lastVerts[2].y != 0)
 		{
 			//has valid info, check to see if this word overlaps with the last word drawn in this block.  This is to
@@ -259,13 +259,10 @@ bool ProcessParagraphManually(const cJSON* paragraph, TextArea& textArea)
 
 			if (spaceBetweenWords < (-allowedOverlapPixels))
 			{
-
 				//new line, it's to the left of the last word
-
 #ifdef _DEBUG
 				//LogMsg("Rect of %s is %s", lineText.c_str(), PrintRect(rectOfLastLine).c_str());
 #endif
-
 				LineInfo lineInfo;
 				lineInfo.m_lineRect = rectOfLastLine;
 				lineInfo.m_words = wordInfo; wordInfo.clear();
@@ -340,7 +337,7 @@ bool ProcessParagraphManually(const cJSON* paragraph, TextArea& textArea)
 
 				if (tempObj)
 				{
-					x = tempObj->valuedouble;
+					x = (float)tempObj->valuedouble;
 				}
 				else
 				{
@@ -350,7 +347,7 @@ bool ProcessParagraphManually(const cJSON* paragraph, TextArea& textArea)
 				tempObj = cJSON_GetObjectItem(vert, "y");
 				if (tempObj)
 				{
-					y = tempObj->valuedouble;
+					y = (float)tempObj->valuedouble;
 				}
 				else
 				{
@@ -368,7 +365,6 @@ bool ProcessParagraphManually(const cJSON* paragraph, TextArea& textArea)
 				w.m_word = text->valuestring;
 				wordInfo.push_back(w);
 			}
-
 		}
 
 		wordsProcessed++;
@@ -424,10 +420,8 @@ bool ProcessParagraphGoogleWay(const cJSON* paragraph, TextArea& textArea)
 	CL_Rect totalRect;
 	vector<WordInfo> wordInfo;
 
-
 	string lineText;
 	string finalTextRaw;
-
 
 	cJSON_ArrayForEach(word, words)
 	{
@@ -450,7 +444,7 @@ bool ProcessParagraphGoogleWay(const cJSON* paragraph, TextArea& textArea)
 			cJSON* tempObj = cJSON_GetObjectItem(vert, "x");
 			if (tempObj)
 			{
-				x = tempObj->valuedouble;
+				x = (float)tempObj->valuedouble;
 			}
 			else
 			{
@@ -460,7 +454,7 @@ bool ProcessParagraphGoogleWay(const cJSON* paragraph, TextArea& textArea)
 			tempObj = cJSON_GetObjectItem(vert, "y");
 			if (tempObj)
 			{
-				y = tempObj->valuedouble;
+				y = (float)tempObj->valuedouble;
 			}
 			else
 			{
@@ -527,7 +521,7 @@ bool ProcessParagraphGoogleWay(const cJSON* paragraph, TextArea& textArea)
 
 				if (tempObj)
 				{
-					x = tempObj->valuedouble;
+					x = (float)tempObj->valuedouble;
 				}
 				else
 				{
@@ -537,7 +531,7 @@ bool ProcessParagraphGoogleWay(const cJSON* paragraph, TextArea& textArea)
 				tempObj = cJSON_GetObjectItem(vert, "y");
 				if (tempObj)
 				{
-					y = tempObj->valuedouble;
+					y = (float)tempObj->valuedouble;
 				}
 				else
 				{
@@ -809,9 +803,9 @@ bool GameLogicComponent::BuildDatabase(char *pJson)
 			float x = 0;
 			float y = 0;
 			cJSON *tempObj = cJSON_GetObjectItem(vert, "x");
-			if (tempObj) x = tempObj->valuedouble;
+			if (tempObj) x = (float)tempObj->valuedouble;
 			tempObj = cJSON_GetObjectItem(vert, "y");
-			if (tempObj) y = tempObj->valuedouble;
+			if (tempObj) y = (float)tempObj->valuedouble;
 			//textArea.m_vPoints[j] = CL_Vec2f(x, y);
 	
 
@@ -942,7 +936,7 @@ void GameLogicComponent::StartProcessingFrameForText()
 
 	//replace with DOCUMENT_TEXT_DETECTION or whatever was set in the config
 	StringReplace("REPLACE_THIS", GetApp()->m_google_text_detection_command, postDataOCR_b);
-
+	m_bCalledOnFinishedTranslations = false;
 	string hint = GetApp()->m_source_language_hint;
 	string postDataOCR_c = "";
 
@@ -973,7 +967,7 @@ string postDataOCR_d = R"(
 	string url = "https://vision.googleapis.com";
 	string urlappend = "/v1/images:annotate?key=" + GetApp()->GetGoogleKey();
 	m_netHTTP.Setup(url, 80, urlappend, NetHTTP::END_OF_DATA_SIGNAL_HTTP);
-	m_netHTTP.AddPostData("", (const byte*)requestWithEmbeddedFile.c_str(), requestWithEmbeddedFile.length());
+	m_netHTTP.AddPostData("", (const byte*)requestWithEmbeddedFile.c_str(), (int)requestWithEmbeddedFile.length());
 	m_netHTTP.Start();
 
 	UpdateStatusMessage("Sending image to google for OCR processing...");
@@ -1107,6 +1101,11 @@ void GameLogicComponent::OnUpdate(VariantList *pVList)
 			s += "(text to speech left: " + toString(ttsLeft) + ")";
 		}
 		
+		if (translationsLeft == 0 && !m_bCalledOnFinishedTranslations)
+		{
+			OnFinishedTranslations(); //good time to log to disk or whatever
+			m_bCalledOnFinishedTranslations = true;  //don't call this again unless we translate something else too
+		}
 		UpdateStatusMessage(s);
 	}
 }
@@ -1138,7 +1137,7 @@ void GameLogicComponent::OnRender(VariantList *pVList)
 				DrawRect(GetScreenRect(), MAKE_RGBA(150, 0, 0, 255), 3);
 				
 				CL_Rect r = GetScreenRect();
-				r.set_top_left(CL_Vec2i(GetScreenSizeXf() - 82, GetScreenSizeYf() - 20));
+				r.set_top_left(CL_Vec2i(GetScreenSizeX() - 82, GetScreenSizeY() - 20));
 				
 				if (GetScreenSizeYf() > 50)
 				{
@@ -1183,13 +1182,13 @@ void GameLogicComponent::OnRender(VariantList *pVList)
 	if (!m_status.empty())
 	{
 		CL_Rect r = GetScreenRect();
-		r.set_top_left(CL_Vec2i(0, GetScreenSizeYf() - 30));
+		r.set_top_left(CL_Vec2i(0, GetScreenSizeY() - 30));
 		//r.right = GetScreenSizeXf() - 300;
-		r.bottom = GetScreenSizeYf() - 0;
+		r.bottom = GetScreenSizeY() - 0;
 
 		DrawFilledRect(r, MAKE_RGBA(0, 0, 0, 200));
 
-		GetApp()->GetFont(FONT_SMALL)->DrawAligned(GetScreenSizeX() / 2, GetScreenSizeYf() - 5, m_status, ALIGNMENT_DOWN_CENTER, 1.0f, MAKE_RGBA(200,200,20,255), NULL, &g_globalBatcher);
+		GetApp()->GetFont(FONT_SMALL)->DrawAligned(GetScreenSizeXf() / 2, GetScreenSizeYf() - 5, m_status, ALIGNMENT_DOWN_CENTER, 1.0f, MAKE_RGBA(200,200,20,255), NULL, &g_globalBatcher);
 
 	}
 }
@@ -1218,8 +1217,8 @@ void GameLogicComponent::OnTakeScreenshot()
 	if (GetApp()->GetCaptureMode() == CAPTURE_MODE_SHOWING)
 	{
 			SoftSurface crap;
-			crap.Init(GetScreenSizeX(), GetScreenSizeYf(), SoftSurface::SURFACE_RGB, false);
-			crap.BlitFromScreen(0, 0, 0, 0, GetScreenSizeX(), GetScreenSizeYf());
+			crap.Init(GetScreenSizeX(), GetScreenSizeY(), SoftSurface::SURFACE_RGB, false);
+			crap.BlitFromScreen(0, 0, 0, 0, GetScreenSizeX(), GetScreenSizeY());
 			crap.FlipY();
 			JPGSurfaceLoader jpg;
 			jpg.SaveToFile(&crap, fileName, GetApp()->m_jpg_quality_for_scan);
@@ -1249,4 +1248,30 @@ void GameLogicComponent::OnTakeScreenshot()
 
 	ShowQuickMessage("Saved "+fileName);
 }
+
+void GameLogicComponent::OnFinishedTranslations()
+{
+	LogMsg("Finished all translations, let's do any logging if needed");
+
+	if (GetApp()->m_log_capture_text_to_file != "disabled")
+	{
+		AppendStringToFile("translation_log.txt", GetApp()->m_pExportToHTML->ExportToString(GetApp()->m_log_capture_text_to_file));
+	}
+
+	if (GetApp()->m_place_capture_text_on_clipboard != "disabled")
+	{
+		string text = GetApp()->m_pExportToHTML->ExportToString(GetApp()->m_place_capture_text_on_clipboard);
+
+		//clipboard doesn't work with unicode if I send the utf8, so I guess we'll go wide
+		vector<unsigned short> utf16line;
+		utf8::utf8to16(text.begin(), text.end(), back_inserter(utf16line));
+		SetClipboardTextW(&utf16line[0], (int)utf16line.size());
+	}
+}
+
+void GameLogicComponent::OnTargetLanguageChanged()
+{
+	m_bCalledOnFinishedTranslations = false; //make this get called again since we've changed the translation language
+}
+
 

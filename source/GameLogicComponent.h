@@ -74,6 +74,10 @@ public:
 	void OnRender(VariantList *pVList);
 	void OnTakeScreenshot();
 
+	void OnFinishedTranslations();
+
+	void OnTargetLanguageChanged();
+
 	Entity *m_pScreenShot;
 
 	NetHTTP m_netHTTP;
@@ -94,6 +98,7 @@ private:
 	void ConstructEntitiesFromTextAreas();
 	bool BuildDatabase(char *pJson);
 	Entity* m_pSettingsIcon = NULL;
+	bool m_bCalledOnFinishedTranslations = false;
 
 };
 

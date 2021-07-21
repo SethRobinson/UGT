@@ -224,12 +224,12 @@ void App::UpdateCursor()
 
 		if (fabs(pPad->GetLeftStick().x) > deadZone)
 		{
-			pt.x += (speed * pPad->GetLeftStick().x);
+			pt.x += (long)((speed * pPad->GetLeftStick().x));
 		}
 
 		if (fabs(pPad->GetLeftStick().y) > deadZone)
 		{
-			pt.y += (speed * pPad->GetLeftStick().y);
+			pt.y += (long)((speed * pPad->GetLeftStick().y));
 		}
 		SetCursorPos(pt.x, pt.y);
 	}
@@ -241,7 +241,6 @@ void App::UpdateCursor()
 
 void App::AddFontOverride(string fontName, string language, float widthOverride, float preTranslatedHeightMod = 1.0f)
 {
-
 	m_vecFontInfo.resize(m_vecFontInfo.size() + 1);
 	m_vecFontInfo[m_vecFontInfo.size() - 1] = new FontLanguageInfo();
 	if (fontName.length() > 1)
@@ -249,6 +248,38 @@ void App::AddFontOverride(string fontName, string language, float widthOverride,
 	m_vecFontInfo[m_vecFontInfo.size() - 1]->m_widthOverride = widthOverride;
 	m_vecFontInfo[m_vecFontInfo.size() - 1]->m_preTranslatedHeightMod = preTranslatedHeightMod;
 	m_vecFontInfo[m_vecFontInfo.size() - 1]->m_vecFontOverrideName = language;
+}
+
+bool App::InitFonts()
+{
+
+	TextScanner ts;
+	if (ts.LoadFile("fonts.txt"))
+	{
+
+		//another scan
+		for (int i = 0; i < ts.GetLineCount(); i++)
+		{
+			vector<string> words = ts.TokenizeLine(i);
+
+			if (words.size() > 1)
+			{
+				if (words[0] == "add_font")
+				{
+					//should probably do some basic validation to make sure we're getting the right stuff but nah
+					LogMsg( (string("Adding ") + words[1] + " font file").c_str());
+					AddFontOverride(words[1], words[2], StringToFloat(words[3]), StringToFloat(words[4]));
+				}
+			}
+		}
+	}
+	else
+	{
+		return false;
+	}
+
+	return true;
+
 }
 
 bool App::Init()
@@ -269,9 +300,13 @@ bool App::Init()
 		//SetManualRotationMode(true); //don't use manual, it may be faster (33% on a 3GS) but we want iOS's smooth rotations
 	}
 
-	AddFontOverride("SourceHanSerif-Medium.ttc", "", 0.0f); //default font
-	AddFontOverride("siddhanta.ttf", "hi", 0.47f);
-	AddFontOverride("lohit.punjabi.1.1.ttf", "pa", 0.45f);
+
+	if (!InitFonts())
+	{
+		LogMsg("Error loading fonts.txt file");
+		return false;
+	}
+
 	
 	//if we wanted Japanese to be smaller we could do this
 	//AddFontOverride("", "ja", 0.0f, 0.88f); //use default font, but apply this size override
@@ -564,7 +599,6 @@ void OnGamepadButton(VariantList *m_pVList)
 		{
 			SendFakeMouseClick(false);
 		}
-
 	}
 
 #ifdef _DEBUG
@@ -711,7 +745,7 @@ void AppInputRawKeyboard(VariantList *pVList)
 {
 	char key = (char) pVList->Get(0).GetUINT32();
 	bool bDown = pVList->Get(1).GetUINT32() != 0;
-	LogMsg("Raw key %c (%d)",key, (int)bDown);
+	//LogMsg("Raw key %c (%d)",key, (int)bDown);
 }
 
 void OnTakeScreenshot()
@@ -741,12 +775,9 @@ void TurnOffRenderDisplay(VariantList* pVList)
 		GetApp()->m_hotKeyHandler.OnHideWindow();
 	}
 
-
 	if (GetApp()->m_cursorShouldBeRestoredToStartPos)
 	{
 		GetApp()->m_cursorShouldBeRestoredToStartPos = false;
-
-
 
 		if (GetApp()->m_oldHWND != 0)
 		{
@@ -755,7 +786,6 @@ void TurnOffRenderDisplay(VariantList* pVList)
 		}
 
 		RestoreCursorPos();
-
 	}
 
 	GetApp()->m_oldHWND = 0;
@@ -763,13 +793,7 @@ void TurnOffRenderDisplay(VariantList* pVList)
 
 void OnTranslateButton()
 { 
-// 	if (GetApp()->IsInputDesktop() && GetHelpMenu() != NULL)
-// 	{
-// 		GetApp()->m_hotKeyHandler.OnHideWindow();
-// 		return;
-// 	}
 
-	
 	if (GetApp()->GetCaptureMode() == CAPTURE_MODE_DRAGRECT)
 	{
 		LogMsg("Ignoring translate button, currently dragging rect");
@@ -783,20 +807,7 @@ void OnTranslateButton()
 
 		GetApp()->m_oldHWND = GetForegroundWindow();
 		MoveWindow(g_hWnd, GetApp()->m_window_pos_x, GetApp()->m_window_pos_y, GetApp()->m_capture_width, GetApp()->m_capture_height, false);
-
-		if (GetApp()->IsInputDesktop())
-		{
-			//hack to lose focus causing libretro to flush the GL buffer.  I don't understand it either
-// 			SetForegroundWindow(g_hWnd);
-// 			Sleep(50);
-// 			SetForegroundWindow(GetApp()->m_oldHWND);
-		}
-
 		GetApp()->m_pGameLogicComp->StartProcessingFrameForText();
-
-
-	
-		//LogMsg("Foreground is %d", GetApp()->m_oldHWND);
 		GetApp()->SetCaptureMode(CAPTURE_MODE_SHOWING);
 	
 		if (GetApp()->GetShared()->GetVar("check_disable_sounds")->GetUINT32() == 0)
@@ -804,15 +815,11 @@ void OnTranslateButton()
 			AudioHandle handle = GetAudioManager()->Play("audio/wall.mp3");
 			GetAudioManager()->SetVol(handle, 0.34f);
 		}
-				
-		
-		
 		GetApp()->m_hotKeyHandler.OnShowWindow();
 	}
 	else
 	{
 		GetMessageManager()->CallStaticFunction(TurnOffRenderDisplay, 200, NULL);
-
 	}
 }
 
@@ -827,12 +834,12 @@ void App::ModLanguageByIndex(int change, bool bShowMessage)
 		}
 		else
 		{
-			m_currentLanguageIndex = m_languages.size() - 1;
+			m_currentLanguageIndex = (int)m_languages.size() - 1;
 		}
 	}
 	else
 	{
-		m_currentLanguageIndex = mod(m_currentLanguageIndex + change, m_languages.size());
+		m_currentLanguageIndex = mod(m_currentLanguageIndex + change, (int)m_languages.size());
 	}
 
 	SetTargetLanguage(m_languages[m_currentLanguageIndex].m_languageCode, m_languages[m_currentLanguageIndex].m_name, bShowMessage);
@@ -1519,7 +1526,11 @@ bool App::LoadConfigFile()
 		m_deepl_api_key = ts.GetParmString("deepl_api_key", 1);
 		m_jpg_quality_for_scan = StringToInt(ts.GetParmString("jpg_quality_for_scan", 1));
 		m_inputMode = ts.GetParmString("input", 1);
-		
+		 
+		m_log_capture_text_to_file = ts.GetParmString("log_capture_text_to_file", 1);
+		m_place_capture_text_on_clipboard = ts.GetParmString("place_capture_text_on_clipboard", 1);
+
+
 		audioDevice = ts.GetParmString("audio_device", 1);
 		if (ts.GetParmString("input_camera_device_id", 1) != "")
 		{

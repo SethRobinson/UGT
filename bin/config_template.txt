@@ -47,6 +47,13 @@ input_camera_device_id|0
 ;scanned and printed there on startup.  "default" means use the system default.
 audio_device|default
 
+;valid options for the below two settings are
+;disabled (this means don't do anything)
+;full (this means copy the pretranslated text boxes along with the translations)
+
+log_capture_text_to_file|disabled
+place_capture_text_on_clipboard|disabled
+
 ;target language codes are listed here: https://cloud.google.com/translate/docs/languages
 ;The first language added is the default, then the rest can be dynamically changed to by using [ and ] or L and R on control pad
 
@@ -67,7 +74,7 @@ add_switchable_language|pa|Punjabi
 source_language_hint|auto
 
 ;Google allows you request TEXT_DETECTION or DOCUMENT_TEXT_DETECTION for the OCR phase.  DOCUMENT_TEXT_DETECTION generally gives better results,
-;menus/dialogs, but worse for skewed/hard to read text, for example, from a building or sign in a 3D game that isn't facing the player.
+;but sometimes it lumps words from a menu together that should be separate.  If you want things "split up more", try setting to TEXT_DETECTION instead.
 google_text_detection_command|DOCUMENT_TEXT_DETECTION
 
 ;When uploading the screenshot to google for scanning, 100 means perfect quality (big image) and 0 would mean horrible quality.  95 is probably good
@@ -95,13 +102,13 @@ hotkey_to_scan_draggable_area|Control,F10|
 ;you can also set a global gamepad button to trigger scanning the active window.  This way you can scan while playing an emulator without touching the keyboard,
 ;or while watching video via an app showing HDMI capture or whatever.  Set to "none" or blank to turn this off.
 ;Note:  This will ONLY work if the controller is XInput compatible.  (This includes XBox 360 or Xbox One controllers)
-;Note:  To close the translation dialog window, it's always the right action button on the controller, the keys aren't configurable after it starts
-;doing its thang
 
 ;Possible gamepad button names you can use for below:
 ;left action button, right action button,up action button,down action button,left shoulder button,right shoulder button
 ;select button,start button,left trigger button,right trigger button
 ;left joystick button,right joystick button, none
+
+;Note, right joystick button means pushing down (er, in? so it clicks) on the right stick itself, not an actual button
 
 gamepad_button_to_scan_active_window|right joystick button
 

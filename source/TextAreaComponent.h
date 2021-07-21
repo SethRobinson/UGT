@@ -55,7 +55,7 @@ protected:
 	void OnKillAllText();
 	bool TranslatingToAsianLanguage();
 	bool TranslatingFromAsianLanguage();
-	void FitText(float *pHeightInOut, float widthMod,  float trueCharCount);
+	void FitText(float *pHeightInOut, float widthMod, int trueCharCount);
 	void TweakForSending(const string &text, CL_Rectf &rect, float &height, bool isTranslated);
 	vector<CL_Vec2f> ComputeLocalLineOffsets();
 	void RenderLineByLine();

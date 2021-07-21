@@ -16,6 +16,8 @@ public:
 	ExportToHTML();
 	virtual ~ExportToHTML();
 
+	string ExportToString(string mode);
+
 	bool Export();
 
 protected:

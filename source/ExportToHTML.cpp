@@ -19,6 +19,43 @@ ExportToHTML::~ExportToHTML()
 {
 }
 
+string ExportToHTML::ExportToString(string mode)
+{
+	string final;
+	
+	for (int i = 0; i < GetApp()->GetGameLogicComponent()->m_textComps.size(); i++)
+	{
+		TextAreaComponent* comp = GetApp()->GetGameLogicComponent()->m_textComps[i];
+
+		//add pre translated text?
+		if (mode == "full" || mode == "pre")
+		{
+			//all together as one block
+			if (comp->m_textArea.m_bIsDialog)
+			{
+				final += comp->m_textArea.rawText;
+			}
+			else
+			{
+				for (int j = 0; j < comp->m_textArea.m_lines.size(); j++)
+				{
+					final += comp->m_textArea.m_lines[j].m_text;
+				}
+			}
+		}
+
+		//add post translated text?
+		if (mode == "full" || mode == "post")
+		{
+			final += comp->GetTranslatedText();
+		}
+
+		final += "\r\n";
+
+	}
+	return final;
+}
+
 void ExportToHTML::AddOverlays(string* pHTML, const string itemTemplate)
 {
 
