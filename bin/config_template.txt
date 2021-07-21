@@ -49,7 +49,11 @@ audio_device|default
 
 ;valid options for the below two settings are
 ;disabled (this means don't do anything)
-;full (this means copy the pretranslated text boxes along with the translations)
+;full (this means copy the pretranslated text boxes along with the translations (if any was done))
+;pre (this means only the pretranslated text)
+;post (this means only the translated text, if any translation was done)
+
+;The log file created is called translation_log.txt
 
 log_capture_text_to_file|disabled
 place_capture_text_on_clipboard|disabled
