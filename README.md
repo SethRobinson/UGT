@@ -27,4 +27,4 @@ License:  BSD style attribution, see LICENSE.md
 Credits and links
 - Written by Seth A. Robinson (seth@rtsoft.com) twitter: @rtsoft - [Codedojo](https://www.codedojo.com), Seth's blog
 - [Proton SDK wiki/tutorial site](https://www.protonsdk.com)
-
+- Code/bugfix contributions by Meerkov
