@@ -137,6 +137,7 @@ public:
 	void OnAccel(VariantList *pVList);
 	void OnArcadeInput(VariantList *pVList);
 	FontLanguageInfo* GetFreeTypeManager(string language);
+	bool DoesFontHaveOverride(string language);
 	eViewMode GetViewMode() { return m_viewMode; }
 	void SetViewMode(eViewMode viewMode);
 	void ToggleTranslationEngine();

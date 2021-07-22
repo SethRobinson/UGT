@@ -289,7 +289,7 @@ bool App::Init()
 	{
 		return true;
 	}
-	LogMsg("Initting Universal Game Translator %s by Seth A. Robinson (www.rtsoft.com)", m_version.c_str());
+	LogMsg("Initting Grabfish: Universal Game Translator %s by Seth A. Robinson (www.rtsoft.com)", m_version.c_str());
 
 	if (!BaseApp::Init()) return false;
 
@@ -700,6 +700,19 @@ FontLanguageInfo * App::GetFreeTypeManager(string language)
 	return m_vecFontInfo[languageID];
 }
 
+bool App::DoesFontHaveOverride(string language)
+{
+	for (int i = 0; i < m_vecFontInfo.size(); i++)
+	{
+		if (m_vecFontInfo[i]->m_vecFontOverrideName == language)
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
 void App::SetViewMode(eViewMode viewMode)
 {
 	m_viewMode = viewMode;
@@ -860,7 +873,7 @@ void App::ShowHelp()
 	msg += "To look up kanji from original - Shift-Right click kanji on original image\n";
 	msg += "To copy text - Right click on it\n";
 	msg += "Take screenshot - S, E to export to html\n";
-	string title = "UGT "+m_version+" - Hotkeys";
+	string title = "Grabfish: UGT "+m_version+" - Hotkeys";
 
 	MessageBox(g_hWnd, _T(msg.c_str()), title.c_str(), NULL);
 }
@@ -1318,15 +1331,7 @@ void App::HandleHotKeyPushed(HotKeySetting setting)
 			LogMsg("Scanning draggable area");
 			GetApp()->SetCaptureMode(CAPTURE_MODE_DRAGRECT);
 			GetApp()->m_pWinDragRect->Start();
-
-			/*
-			string msg;
-			msg += "Hide this window first.";
-			string title = "UGT " + m_version + "";
-
-			MessageBox(g_hWnd, _T(msg.c_str()), title.c_str(), NULL);
-			*/
-			 
+ 
 		}
 	}
 }
@@ -1407,7 +1412,7 @@ void App::OnEnterForeground()
 	BaseApp::OnEnterForeground();
 }
 
-const char * GetAppName() {return "UGT";}
+const char * GetAppName() {return "Grabfish: UGT";}
 
 //the stuff below is for android/webos builds.  Your app needs to be named like this.
 
@@ -1417,11 +1422,11 @@ const char * GetBundlePrefix()
 {
 	const char * bundlePrefix = "com.rtsoft.";
 	return bundlePrefix;
-}
+}  
 
 const char * GetBundleName()
 {
-	const char * bundleName = "UGT";
+	const char * bundleName = "grabfish";
 	return bundleName;
 }
 

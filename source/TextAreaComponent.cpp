@@ -268,7 +268,7 @@ void TextAreaComponent::RequestTranslationGoogle()
 	string postData(cJSON_Print(root));
 
 #ifdef _DEBUG
-	LogMsg(postData.c_str());
+	//LogMsg(postData.c_str());
 	//let's see what we're sending, write it to a txt file so notepad can read the kanji or whatever right
 	FILE* fp = fopen("translation_request.txt", "wb");
 	fwrite(postData.c_str(), postData.length(), 1, fp);
@@ -310,16 +310,18 @@ void TextAreaComponent::RequestTranslationDeepL()
 	
 		for (int i = 0; i < m_textArea.m_lines.size(); i++)
 		{
-			textToTranslate += m_textArea.m_lines[i].m_text + "\n";
+			if (i > 0)
+			{
+				textToTranslate += "\n";
+			}
+			textToTranslate += m_textArea.m_lines[i].m_text;
 		}
-
 	}
-
 	string urlappend = "v2/translate";
 
 
 #ifdef _DEBUG
-	LogMsg(textToTranslate.c_str());
+	//LogMsg(textToTranslate.c_str());
 	//let's see what we're sending, write it to a txt file so notepad can read the kanji or whatever right
 	FILE* fp = fopen("translation_request.txt", "wb");
 	fwrite(textToTranslate.c_str(), textToTranslate.length(), 1, fp);
@@ -648,54 +650,68 @@ void TextAreaComponent::FitText(float *pHeightInOut, float widthMod, int trueCha
 
 void TextAreaComponent::TweakForSending(const string &text, CL_Rectf &rect, float &height, bool isTranslated)
 {
-
-	vector<string> lines = StringTokenize(text, "\n");
-	height = m_textArea.m_averageTextHeight;
+	vector<string> lines;
 	
-	float widthMod = 0.60f;
-
-	float originalHeight = m_textArea.m_averageTextHeight;
-
 	if (isTranslated)
 	{
-		if (TranslatingFromAsianLanguage())
+		//well, we can't be sure how many \n's have been inserted by the translation, so we'll process it
+		lines = StringTokenize(text, "\n");
+		if (lines.size() > 0 && lines[lines.size() - 1] == "")
 		{
-			if (!TranslatingToAsianLanguage())
-			{
-				widthMod = 0.5f; //we need more room generally
-			}
-		}
-		else
-		{
-			if (TranslatingToAsianLanguage())
-			{
-				widthMod = 1.0f; //they don't need more room
-			}
+			//you know, we don't really need that blank entry after the \n. Just remove it
+			lines.resize(lines.size() - 1);
 		}
 	}
 	else
 	{
-		//widthMod = 0.34f; //without this, text tends to be a little big for some reason
-
+		for (int i = 0; i < m_textArea.m_lines.size(); i++)
+		{
+			lines.push_back(m_textArea.m_lines[i].m_text);
+		}
 	}
 
+	
+	
+	height = m_textArea.m_averageTextHeight;
+	float widthMod = 0.60f;
+	float originalHeight = m_textArea.m_averageTextHeight;
 	float temp = 0;
 
 	if (isTranslated)
 	{
 		temp = GetApp()->GetFreeTypeManager(GetApp()->m_target_language)->m_widthOverride;
+
+		if (IsAsianLanguage(GetApp()->m_target_language) && !GetApp()->DoesFontHaveOverride(GetApp()->m_target_language))
+		{
+			//no override and it's an asian language?  Hack it to work better with fat kanji
+			temp = 1.0f; //width is 0.8 of height on average
+		}
+		else
+		{
+			//default or override is fine
+			temp = GetApp()->GetFreeTypeManager(GetApp()->m_target_language)->m_widthOverride;
+		}
 	}
 	else
 	{
-		temp = GetApp()->GetFreeTypeManager(m_textArea.language)->m_widthOverride;
+		if (IsAsianLanguage(m_textArea.language) && !GetApp()->DoesFontHaveOverride(m_textArea.language))
+		{
+			//no override and it's an asian language?  Hack it to work better with fat kanji
+			temp = 1.0f; //width is 0.8 of height on average
+		}
+		else
+		{
+			//default or override is fine
+			temp = GetApp()->GetFreeTypeManager(m_textArea.language)->m_widthOverride;
+		}
+
 	}
+
 	if (temp != 0.0f)
 	{
 		widthMod = temp;
 	}
-
-
-	{
+	
 		//we might need more space
 		float maxWidth = 0;
 		int trueCharCount = 0;
@@ -704,7 +720,7 @@ void TextAreaComponent::TweakForSending(const string &text, CL_Rectf &rect, floa
 		{
 			vector<unsigned short> utf16line;
 			utf8::utf8to16(lines[i].begin(), lines[i].end(), back_inserter(utf16line));
-			float width = (utf16line.size()*height)*widthMod;
+			float width = utf16line.size()* widthMod * m_textArea.m_averageTextHeight;
 			trueCharCount += (int)utf16line.size();
 			maxWidth = rt_max(width, maxWidth);
 		}
@@ -727,16 +743,15 @@ void TextAreaComponent::TweakForSending(const string &text, CL_Rectf &rect, floa
 		}
 		else
 		{
+			//what is this?!
 			if (maxWidth > rect.get_width())
 			{
 				float ratio = rect.get_width() / maxWidth;
 				height = height * ratio;
 			}
 		}
-		
-		//LogMsg("Height changed to %.2f", height);
-	}
 	
+
 	if (!isTranslated)
 	{
 		height *= GetApp()->GetFreeTypeManager(m_textArea.language)->m_preTranslatedHeightMod;

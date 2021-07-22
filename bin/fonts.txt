@@ -4,13 +4,16 @@
 
 #Language codes are listed here: https://cloud.google.com/translate/docs/languages
 
-#width mod - The width is multiplied against this when guessing how much width it
+#width mod - The letter width is about the height multiplied by this.  It's a rough guess 
+
 #needs per letter on average (1.0 means no change, 0.5 means half size)
 
-#height mod - same thing, but for height.  
+#height mod - applies a mod to height, useful for fonts that have lots of dead space above/below
 
-#default for all languages
-add_font|SourceHanSerif-Medium.ttc||1.0|1.0|
+
+#default for all languages.  Asian languages will get width mod set to 0.5 internally if not set below.
+
+add_font|SourceHanSerif-Medium.ttc||0.5|1.0|
 
 #for hindi
 add_font|siddhanta.ttf|hi|0.47|1.0|

@@ -39,7 +39,7 @@ string ExportToHTML::ExportToString(string mode)
 			{
 				for (int j = 0; j < comp->m_textArea.m_lines.size(); j++)
 				{
-					final += comp->m_textArea.m_lines[j].m_text;
+					final += comp->m_textArea.m_lines[j].m_text+"\r\n";
 				}
 			}
 		}
@@ -81,7 +81,11 @@ void ExportToHTML::AddOverlays(string* pHTML, const string itemTemplate)
 			//we'll need to add our own line feeds
 			for (int j = 0; j < comp->m_textArea.m_lines.size(); j++)
 			{
-				finalText += comp->m_textArea.m_lines[j].m_text + "\n";
+				if (j > 0)
+				{
+					finalText += "\n";
+				}
+				finalText += comp->m_textArea.m_lines[j].m_text;
 			}
 
 			StringReplace("[X]", toString(comp->m_textArea.m_rect.left), work);
@@ -96,12 +100,14 @@ void ExportToHTML::AddOverlays(string* pHTML, const string itemTemplate)
 			
 			for (int j = 0; j < comp->m_textArea.m_lines.size(); j++)
 			{
+				if (j > 0)
+				{
+					work += "<BR>\r\n";
+				}
 				StringReplace("[X]", toString(comp->m_textArea.m_lineStarts[j].x), work);
 				StringReplace("[Y]", toString(comp->m_textArea.m_lineStarts[j].y), work);
 				StringReplace("[FONT_SIZE]", toString(comp->m_textArea.m_lines[j].m_lineRect.get_size().height * 0.85f), work);
 				StringReplace("[TEXT]", toString(comp->m_textArea.m_lines[j].m_text), work);
-				
-				work += "<BR>\r\n";
 			}
 		}
 		

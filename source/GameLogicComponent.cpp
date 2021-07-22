@@ -558,7 +558,7 @@ bool ProcessParagraphGoogleWay(const cJSON* paragraph, TextArea& textArea)
 				const cJSON* detectedBreak = cJSON_GetObjectItemCaseSensitive(linebreak, "type");
 				const string space("SPACE");
 				const string eolspace("EOL_SURE_SPACE");
-
+				bool bAddCR = false;
 
 				if (space.compare(detectedBreak->valuestring) == 0)
 				{
@@ -585,7 +585,7 @@ bool ProcessParagraphGoogleWay(const cJSON* paragraph, TextArea& textArea)
 					}
 					else 
 					{
-						lineText += "\n";
+						bAddCR = true; //we'll add, but only for the solid string version, not where we already broke it up into lines
 					}
 
 					LineInfo lineInfo;
@@ -594,6 +594,11 @@ bool ProcessParagraphGoogleWay(const cJSON* paragraph, TextArea& textArea)
 					lineInfo.m_text = lineText;
 					textArea.m_lines.push_back(lineInfo);
 					textArea.m_lineStarts.push_back(rectOfLastLine.get_top_left());
+					
+					if (bAddCR)
+					{
+						lineText += "\n";
+					}
 					finalText += lineText;
 					finalTextRaw += lineText;
 					lineText = "";
@@ -651,7 +656,7 @@ bool GameLogicComponent::ReadFromParagraph(const cJSON* paragraph, TextArea& tex
 		textArea.m_ySpacingToNextLineAverage = 0;
 		textArea.m_averageTextHeight = 0;
 
-		for (int i = 0; i < textArea.m_lines.size() - 1; i++)
+		for (int i = 0; i < textArea.m_lines.size(); i++)
 		{
 			bool bAddCR = false;
 
@@ -677,7 +682,8 @@ bool GameLogicComponent::ReadFromParagraph(const cJSON* paragraph, TextArea& tex
 
 			if (xPercentUsedOfTotalRect < 0.75f)
 			{
-				bAddCR = true;
+				//I guess we don't need this anymore
+				//bAddCR = true;
 			}
 #ifdef _DEBUG
 			/*
@@ -700,7 +706,6 @@ bool GameLogicComponent::ReadFromParagraph(const cJSON* paragraph, TextArea& tex
 			textArea.m_ySpacingToNextLineAverage += ySpacingToNextLinePercent;
 		}
 
-		textArea.m_averageTextHeight += textArea.m_lines[textArea.m_lines.size() - 1].m_lineRect.get_height();
 		textArea.m_ySpacingToNextLineAverage /= (textArea.m_lines.size() - 1);
 		textArea.m_averageTextHeight /= textArea.m_lines.size();
 

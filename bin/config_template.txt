@@ -1,4 +1,4 @@
-//UGT config file, read at startup.  THIS FILE MUST BE NAMED CONFIG.TXT!
+//Grabfish: UGT config file, read at startup.  THIS FILE MUST BE RENAMED config.txt!
 
 ;To use google vision you'll need your own Cloud Vision API key. (this is so google can see who is using it and charge you money if you
 ;hammer it too much.  More info here:  https://cloud.google.com/vision/docs/before-you-begin
@@ -21,7 +21,7 @@ deepl_api_key|yourownkeygoeshere
 ;Choose which API to use for text translations.  Valid options:  google, deepl.  If you use deepl, you must set your API key above.
 ;Note: A hotkey to toggle translation engine is T, useful for comparing results
 ;While Deepl offers better translations, keep in mind it doesn't support as many target languages.  It's missing Korean and Hindi for example and will
-;give a "Unsupport target_lang" error.
+;give a "Unsupport target_lang" error. Works great for Japanese though.
 translation_engine|google
 
 ;Set the mode to work in. 
