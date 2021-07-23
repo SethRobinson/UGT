@@ -1,7 +1,7 @@
 //Grabfish: UGT config file, read at startup.  THIS FILE MUST BE RENAMED config.txt!
 
-;To use google vision you'll need your own Cloud Vision API key. (this is so google can see who is using it and charge you money if you
-;hammer it too much.  More info here:  https://cloud.google.com/vision/docs/before-you-begin
+;To use google vision (which is required to work) you'll need your own Cloud Vision API key. (this is so google can see
+;who is using it and charge you money if you hammer it too much.  More info here:  https://cloud.google.com/vision/docs/before-you-begin
 ; You need an API key, not a "Service key".  To get that,
 ; Under "Credentials", choose "+Create Credentials" and then choose API key.   See pic:  https://prnt.sc/s5lc0j
 
@@ -47,14 +47,15 @@ input_camera_device_id|0
 ;scanned and printed there on startup.  "default" means use the system default.
 audio_device|default
 
-;valid options for the below two settings are
+;Set to disabled and we won't call https://www.rtsoft.com/ugt/checking_for_new_version.php?version=<current version> at startup
+;to see if anything newer has been released.  (this check happens in the background, won't slow down the app)
+check_for_update_on_startup|enabled
+
+;valid options for the below two settings (written to translation_log.txt and the clipboard):
 ;disabled (this means don't do anything)
 ;full (this means copy the pretranslated text boxes along with the translations (if any was done))
 ;pre (this means only the pretranslated text)
 ;post (this means only the translated text, if any translation was done)
-
-;The log file created is called translation_log.txt
-
 log_capture_text_to_file|disabled
 place_capture_text_on_clipboard|disabled
 

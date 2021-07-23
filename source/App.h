@@ -9,6 +9,7 @@
 #include "BaseApp.h"
 #include "FreeTypeManager.h"
 #include "HotKeyHandler.h"
+#include "UpdateChecker.h"
 
 class GameLogicComponent;
 class AutoPlayManager;
@@ -140,6 +141,7 @@ public:
 	bool DoesFontHaveOverride(string language);
 	eViewMode GetViewMode() { return m_viewMode; }
 	void SetViewMode(eViewMode viewMode);
+	string GetActiveTranslationEngineName();
 	void ToggleTranslationEngine();
 	eCaptureMode GetCaptureMode() { return m_captureMode; }
 	void SetCaptureMode(eCaptureMode mode) { m_captureMode = mode; }
@@ -175,6 +177,8 @@ public:
 	string m_source_language_hint = "auto";
 	string m_google_text_detection_command = "TEXT_DETECTION";  //"DOCUMENT_TEXT_DETECTION";
 	vector<LanguageSetting> m_languages;
+	int m_versionNum;
+	string m_check_for_update_on_startup = "enabled";
 	eTranslationEngine GetTranslationEngine() { return m_translationEngine; }
 	string m_inputMode = "desktop";
 	void SetTargetLanguage(string languageCode, string languageName, bool bShowMessage = true);
@@ -200,7 +204,7 @@ public:
 	AutoPlayManager* m_pAutoPlayManager;
 	POINT m_hidingOverlayMousePosStart;
 	ExportToHTML* m_pExportToHTML;
-
+	UpdateChecker m_updateChecker;
 	bool m_bHidingOverlays = false;
 };
 

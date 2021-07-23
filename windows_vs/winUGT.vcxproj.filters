@@ -676,6 +676,9 @@
     <ClCompile Include="..\source\ExportToHTML.cpp">
       <Filter>source</Filter>
     </ClCompile>
+    <ClCompile Include="..\source\UpdateChecker.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\source\App.h">
@@ -1051,6 +1054,7 @@
     <ClInclude Include="..\source\ExportToHTML.h">
       <Filter>source</Filter>
     </ClInclude>
+    <ClInclude Include="..\source\UpdateChecker.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\android\ant.properties">

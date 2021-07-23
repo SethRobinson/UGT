@@ -266,7 +266,7 @@ void TextAreaComponent::RequestTranslationGoogle()
 	cJSON_AddItemToObject(root, "format", cJSON_CreateString("text"));
 
 	string postData(cJSON_Print(root));
-
+	 
 #ifdef _DEBUG
 	//LogMsg(postData.c_str());
 	//let's see what we're sending, write it to a txt file so notepad can read the kanji or whatever right
@@ -328,8 +328,7 @@ void TextAreaComponent::RequestTranslationDeepL()
 	fclose(fp);
 
 #endif
-
-	
+		
 	m_netHTTP.Setup(url, 80, urlappend, NetHTTP::END_OF_DATA_SIGNAL_HTTP);
 	m_netHTTP.AddPostData("auth_key", (const byte*)GetApp()->GetDeepLKey().c_str(), (int)GetApp()->GetDeepLKey().length());
 	m_netHTTP.AddPostData("text", (const byte*)textToTranslate.c_str(), (int)textToTranslate.length());
@@ -735,6 +734,8 @@ void TextAreaComponent::TweakForSending(const string &text, CL_Rectf &rect, floa
 #ifdef _DEBUG
 			LogMsg("Rect: %s", PrintRect(textRect).c_str());
 #endif
+
+			//     Mr. Tanaka
 
 			if (height > m_textArea.m_averageTextHeight)
 			{

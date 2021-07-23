@@ -124,6 +124,7 @@ App::App()
 		m_pAutoPlayManager = NULL;
 		m_usedSubAreaScan = false;
 		m_version = "0.70 Beta";
+		m_versionNum = 70;
 		m_bDidPostInit = false;
 		m_gamepad_button_to_scan_active_window = VIRTUAL_KEY_NONE;
 		m_cursorShouldBeRestoredToStartPos = false;
@@ -289,7 +290,7 @@ bool App::Init()
 	{
 		return true;
 	}
-	LogMsg("Initting Grabfish: Universal Game Translator %s by Seth A. Robinson (www.rtsoft.com)", m_version.c_str());
+	LogMsg("Initting Comfish: Universal Game Translator %s by Seth A. Robinson (www.rtsoft.com)", m_version.c_str());
 
 	if (!BaseApp::Init()) return false;
 
@@ -378,10 +379,11 @@ bool App::Init()
 //		pPad->m_sig_right_stick.connect(1, boost::bind(&App::OnGamepadStickUpdate, this, _1));	
 	}
 
-
 	m_pAutoPlayManager = new AutoPlayManager();
 	m_pExportToHTML = new ExportToHTML();
 
+	//check for updates?
+	m_updateChecker.CheckForUpdate();
 	return true;
 }
 
@@ -723,18 +725,24 @@ void ShowQuickMessage(string msg)
 	ShowTextMessage(msg, 1000, 0);
 }
 
+string App::GetActiveTranslationEngineName()
+{
+	if (m_translationEngine == TRANSLATION_ENGINE_DEEPL)
+	{
+		return "Deepl";
+	}
+
+	return "Google";
+}
+
 void App::ToggleTranslationEngine()
 {
 	eTranslationEngine oldEngine = m_translationEngine;
 	m_translationEngine = (eTranslationEngine)mod( ((int)m_translationEngine + 1), (int)TRANSLATION_ENGINE_COUNT);
 
-	string translationEngine = "Google";
-	if (m_translationEngine == TRANSLATION_ENGINE_DEEPL)
-	{
-		translationEngine = "Deepl";
-	}
+	
 
-	ShowQuickMessage("Translation engine is " + translationEngine);
+	ShowQuickMessage("Translation engine is " + GetActiveTranslationEngineName());
 	GetAudioManager()->Play("audio/alert.wav");
 
 	m_sig_target_language_changed();
@@ -873,7 +881,7 @@ void App::ShowHelp()
 	msg += "To look up kanji from original - Shift-Right click kanji on original image\n";
 	msg += "To copy text - Right click on it\n";
 	msg += "Take screenshot - S, E to export to html\n";
-	string title = "Grabfish: UGT "+m_version+" - Hotkeys";
+	string title = "Comfish: UGT "+m_version+" - Hotkeys";
 
 	MessageBox(g_hWnd, _T(msg.c_str()), title.c_str(), NULL);
 }
@@ -1147,32 +1155,33 @@ void App::Update()
 	{
 		m_pWinDragRect->Update();
 	}
-	//if (!IsInputDesktop() ||  GetApp()->m_captureMode == CAPTURE_MODE_SHOWING || IsShowingHelp())
-	{
-		if (g_bHasFocus)
-		UpdateCursor();
-		//if (!IsInputDesktop())
-		//ShowCursor(true);
-	}
-	
 
-if (IsShowingHelp())
-	{
-		
-	} else
-	{
-		if (IsInputDesktop())
+	m_updateChecker.Update();
+
+		if (g_bHasFocus)
 		{
-			KillHelpMenu();
+			UpdateCursor();
+		}
+
+
+		if (IsShowingHelp())
+		{
+
 		}
 		else
 		{
-			if (GetApp()->m_captureMode == CAPTURE_MODE_WAITING)
+			if (IsInputDesktop())
 			{
 				KillHelpMenu();
 			}
+			else
+			{
+				if (GetApp()->m_captureMode == CAPTURE_MODE_WAITING)
+				{
+					KillHelpMenu();
+				}
+			}
 		}
-	}
 }
 
 void App::OnUnloadSurfaces()
@@ -1412,7 +1421,7 @@ void App::OnEnterForeground()
 	BaseApp::OnEnterForeground();
 }
 
-const char * GetAppName() {return "Grabfish: UGT";}
+const char * GetAppName() {return "Comfish: UGT";}
 
 //the stuff below is for android/webos builds.  Your app needs to be named like this.
 
@@ -1426,7 +1435,7 @@ const char * GetBundlePrefix()
 
 const char * GetBundleName()
 {
-	const char * bundleName = "grabfish";
+	const char * bundleName = "comfish";
 	return bundleName;
 }
 
@@ -1560,6 +1569,15 @@ bool App::LoadConfigFile()
 		{
 			m_audio_default_language = ts.GetParmString("audio_default_language", 1);
 		}
+		if (ts.GetParmString("check_for_update_on_startup", 1) != "")
+		{
+			m_check_for_update_on_startup = ts.GetParmString("check_for_update_on_startup", 1);
+		}
+
+
+		
+
+
 		string translationEngine = ToLowerCaseString(ts.GetParmString("translation_engine", 1));
 		if (translationEngine == "deepl")
 		{

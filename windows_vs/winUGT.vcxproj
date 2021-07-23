@@ -914,6 +914,7 @@
     <ClCompile Include="..\source\HotKeyHandler.cpp" />
     <ClCompile Include="..\source\main.cpp" />
     <ClCompile Include="..\Source\TextAreaComponent.cpp" />
+    <ClCompile Include="..\source\UpdateChecker.cpp" />
     <ClCompile Include="..\source\WinDesktopCapture.cpp" />
     <ClCompile Include="..\source\WinDragRect.cpp" />
   </ItemGroup>
@@ -1045,6 +1046,7 @@
     <ClInclude Include="..\source\GUIHelp.h" />
     <ClInclude Include="..\source\HotKeyHandler.h" />
     <ClInclude Include="..\Source\TextAreaComponent.h" />
+    <ClInclude Include="..\source\UpdateChecker.h" />
     <ClInclude Include="..\source\WinDesktopCapture.h" />
     <ClInclude Include="..\source\WinDragRect.h" />
     <ClInclude Include="resource.h" />
