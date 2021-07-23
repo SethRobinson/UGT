@@ -93,9 +93,11 @@ public:
 
 private:
 
+	bool ProcessParagraphGoogleWay(const cJSON* paragraph, TextArea& textArea);
 	bool ReadFromParagraph(const cJSON *paragraph, TextArea &textArea);
 	void ConstructEntityFromTextArea(TextArea &textArea);
 	void ConstructEntitiesFromTextAreas();
+	void MergeWithPreviousTextIfNeeded(TextArea& textArea);
 	bool BuildDatabase(char *pJson);
 	Entity* m_pSettingsIcon = NULL;
 	bool m_bCalledOnFinishedTranslations = false;

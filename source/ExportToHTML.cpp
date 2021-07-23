@@ -23,6 +23,7 @@ string ExportToHTML::ExportToString(string mode)
 {
 	string final;
 	
+
 	for (int i = 0; i < GetApp()->GetGameLogicComponent()->m_textComps.size(); i++)
 	{
 		TextAreaComponent* comp = GetApp()->GetGameLogicComponent()->m_textComps[i];
@@ -31,7 +32,7 @@ string ExportToHTML::ExportToString(string mode)
 		if (mode == "full" || mode == "pre")
 		{
 			//all together as one block
-			if (comp->m_textArea.m_bIsDialog)
+			if (comp->IsDialog(true))
 			{
 				final += comp->m_textArea.rawText;
 			}
@@ -44,13 +45,15 @@ string ExportToHTML::ExportToString(string mode)
 			}
 		}
 
+		final += "\r\n";
+
 		//add post translated text?
 		if (mode == "full" || mode == "post")
 		{
 			final += comp->GetTranslatedText();
 		}
 
-		final += "\r\n";
+		final += "\r\n\r\n";
 
 	}
 	return final;
@@ -74,7 +77,7 @@ void ExportToHTML::AddOverlays(string* pHTML, const string itemTemplate)
 
 
 		//all together as one block
-		if (comp->m_textArea.m_bIsDialog)
+		if (comp->IsDialog(true))
 		{
 			string finalText;
 		     

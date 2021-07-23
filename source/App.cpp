@@ -289,7 +289,7 @@ bool App::Init()
 	{
 		return true;
 	}
-	LogMsg("Initting Grabfish: Universal Game Translator %s by Seth A. Robinson (www.rtsoft.com)", m_version.c_str());
+	LogMsg("Initting Comfish: Universal Game Translator %s by Seth A. Robinson (www.rtsoft.com)", m_version.c_str());
 
 	if (!BaseApp::Init()) return false;
 
@@ -723,18 +723,24 @@ void ShowQuickMessage(string msg)
 	ShowTextMessage(msg, 1000, 0);
 }
 
+string App::GetActiveTranslationEngineName()
+{
+	if (m_translationEngine == TRANSLATION_ENGINE_DEEPL)
+	{
+		return "Deepl";
+	}
+
+	return "Google";
+}
+
 void App::ToggleTranslationEngine()
 {
 	eTranslationEngine oldEngine = m_translationEngine;
 	m_translationEngine = (eTranslationEngine)mod( ((int)m_translationEngine + 1), (int)TRANSLATION_ENGINE_COUNT);
 
-	string translationEngine = "Google";
-	if (m_translationEngine == TRANSLATION_ENGINE_DEEPL)
-	{
-		translationEngine = "Deepl";
-	}
+	
 
-	ShowQuickMessage("Translation engine is " + translationEngine);
+	ShowQuickMessage("Translation engine is " + GetActiveTranslationEngineName());
 	GetAudioManager()->Play("audio/alert.wav");
 
 	m_sig_target_language_changed();
@@ -873,7 +879,7 @@ void App::ShowHelp()
 	msg += "To look up kanji from original - Shift-Right click kanji on original image\n";
 	msg += "To copy text - Right click on it\n";
 	msg += "Take screenshot - S, E to export to html\n";
-	string title = "Grabfish: UGT "+m_version+" - Hotkeys";
+	string title = "Comfish: UGT "+m_version+" - Hotkeys";
 
 	MessageBox(g_hWnd, _T(msg.c_str()), title.c_str(), NULL);
 }
@@ -1412,7 +1418,7 @@ void App::OnEnterForeground()
 	BaseApp::OnEnterForeground();
 }
 
-const char * GetAppName() {return "Grabfish: UGT";}
+const char * GetAppName() {return "Comfish: UGT";}
 
 //the stuff below is for android/webos builds.  Your app needs to be named like this.
 
@@ -1426,7 +1432,7 @@ const char * GetBundlePrefix()
 
 const char * GetBundleName()
 {
-	const char * bundleName = "grabfish";
+	const char * bundleName = "comfish";
 	return bundleName;
 }
 

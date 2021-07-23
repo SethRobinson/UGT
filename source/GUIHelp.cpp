@@ -155,7 +155,7 @@ Entity * CreateHelpMenu(Entity *pRoot)
 	SetAlignmentEntity(pButtonEntity, ALIGNMENT_CENTER);
 
 
-	pButtonEntity = CreateTextButtonEntity(pBG, "Exit", width / 2, 660+60, "Quit (shutdown Grabfish: UGT)", false);
+	pButtonEntity = CreateTextButtonEntity(pBG, "Exit", width / 2, 660+60, "Quit (shutdown)", false);
 	//pButtonEntity->GetFunction("OnButtonSelected")->sig_function.connect(&HelpMenuOnSelect);
 
 	pButtonEntity->GetFunction("OnButtonSelected")->sig_function.connect(1, boost::bind(&App::OnExitApp, GetApp(), _1));

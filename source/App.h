@@ -140,6 +140,7 @@ public:
 	bool DoesFontHaveOverride(string language);
 	eViewMode GetViewMode() { return m_viewMode; }
 	void SetViewMode(eViewMode viewMode);
+	string GetActiveTranslationEngineName();
 	void ToggleTranslationEngine();
 	eCaptureMode GetCaptureMode() { return m_captureMode; }
 	void SetCaptureMode(eCaptureMode mode) { m_captureMode = mode; }

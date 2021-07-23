@@ -16,7 +16,6 @@
 //If g_fileName is set to an image instead of blank, UGT will load and translate when started, makes debugging a test image quicker
 
 //string g_fileName = "positioning_test.png";
-//string g_fileName = "dink.png";
 //string g_fileName = "fukuyama.png";
 //string g_fileName = "nes_dragon2.png";
 //string g_fileName = "space_game.png";
@@ -28,10 +27,15 @@
 //string g_fileName = "bug2.jpg";
 //string g_fileName = "bug_english.png";
 //string g_fileName = "bug.jpg";
+//string g_fileName = "temp_connect1.jpg";
+//string g_fileName = "dink.png";
 string g_fileName;
 #else
 string g_fileName;
 #endif
+
+const string C_TRANSLATION_LOG_FILE = "translation_log.txt";
+
 GameLogicComponent::GameLogicComponent()
 {
 	SetName("GameLogic");
@@ -400,7 +404,7 @@ bool ProcessParagraphManually(const cJSON* paragraph, TextArea& textArea)
 	return true;
 }
 
-bool ProcessParagraphGoogleWay(const cJSON* paragraph, TextArea& textArea)
+bool GameLogicComponent::ProcessParagraphGoogleWay(const cJSON* paragraph, TextArea& textArea)
 {
 
 	CL_Rect rectOfLastLine;
@@ -409,7 +413,6 @@ bool ProcessParagraphGoogleWay(const cJSON* paragraph, TextArea& textArea)
 	//get words
 	const cJSON* words = cJSON_GetObjectItemCaseSensitive(paragraph, "words");
 	const cJSON* word;
-
 	string finalText;
 
 	CL_Vec2f lastVerts[4];
@@ -422,6 +425,8 @@ bool ProcessParagraphGoogleWay(const cJSON* paragraph, TextArea& textArea)
 
 	string lineText;
 	string finalTextRaw;
+
+	bool bDidMergeWithPrevious = false;
 
 	cJSON_ArrayForEach(word, words)
 	{
@@ -469,8 +474,9 @@ bool ProcessParagraphGoogleWay(const cJSON* paragraph, TextArea& textArea)
 
 		if (!bRectSet)
 		{
+
 			//LogMsg("Setting rect for first word");
-			if (wordsProcessed == 0)
+			if (wordsProcessed == 0 && !bDidMergeWithPrevious)
 			{
 				rectOfLastLine = CL_Rectf(verts[0].x, verts[0].y, verts[2].x, verts[2].y);
 				totalRect = rectOfLastLine;
@@ -585,8 +591,41 @@ bool ProcessParagraphGoogleWay(const cJSON* paragraph, TextArea& textArea)
 					}
 					else 
 					{
-						bAddCR = true; //we'll add, but only for the solid string version, not where we already broke it up into lines
+						//actually, ignore this?  We assume everything is pure dialog for this part, later we'll add CRs per line if line by line mode is used for translation
+						//bAddCR = true; //we'll add, but only for the solid string version, not where we already broke it up into lines
 					}
+
+
+//************************* Auto merge stuff ******************
+					//Sometimes it's obvious that two lines of text should be grouped together, but for some reason Google doesn't catch it.
+					//The thing below does some checks and merged them if it notices that.
+
+					if (!m_textareas.empty() && m_textareas[m_textareas.size() - 1].m_lines.size() > 0)
+					{
+						//is this a logical extension of the previous paragraph?  How do we know? We'll have to compare rects I guess.
+						const TextArea& lastTextArea = m_textareas[m_textareas.size() - 1];
+						CL_Rect lineRect = rectOfLastLine;
+						//this is very.. uhh.. well, it's tuned to detect for left to right RPG style dialog boxes.
+
+						bool bEnableAutoMerged = true; //set to false to disable this whole automerge thing
+						float verticalSpacing = lineRect.top - lastTextArea.m_rect.bottom;
+						float allowedVerticalSpacing = lineRect.get_height() * 0.15f; //change this to adjust how easily it will group things together
+
+						if (bEnableAutoMerged && fabs(verticalSpacing) < allowedVerticalSpacing
+							&& lineRect.left+lastTextArea.m_rect.get_width()*0.3f >= lastTextArea.m_rect.left && lineRect.left <= lastTextArea.m_rect.right
+							)
+						{ 
+							//Yes, this line of text looks like it continues.  Merge it
+							//copy it to our area
+							textArea = lastTextArea;
+							//destroy the old one
+							totalRect = textArea.m_rect.bounding_rect(lineRect);
+
+							m_textareas.erase(m_textareas.begin() + (m_textareas.size() - 1)); //this is slow as it could require some copying.  But because it's the last item in the vector, probably not
+							bDidMergeWithPrevious = true;
+						}
+					}
+//***********************************************************************
 
 					LineInfo lineInfo;
 					lineInfo.m_lineRect = rectOfLastLine;
@@ -623,10 +662,15 @@ bool ProcessParagraphGoogleWay(const cJSON* paragraph, TextArea& textArea)
 
 bool GameLogicComponent::ReadFromParagraph(const cJSON* paragraph, TextArea& textArea)
 {
+
+	//We only need one of these... Google way trusts when google marks things as a wrap around with space or a new line.
 	ProcessParagraphGoogleWay(paragraph, textArea);
+
+	//Manual way we figure it out ourselves
 	//ProcessParagraphManually(paragraph, textArea);
 
-	// The original is the same from here on...
+	MergeWithPreviousTextIfNeeded(textArea);
+
 	float isDialogFuzzyLogic = 0;
 
 	//1 means centered, 0 is far left, 2 is far right
@@ -642,11 +686,11 @@ bool GameLogicComponent::ReadFromParagraph(const cJSON* paragraph, TextArea& tex
 	}
 
 #ifdef _DEBUG
-	/*
-		LogMsg("Fuzzy tests for %s:", finalText.c_str());
+	
+		//LogMsg("Fuzzy tests for %s:", finalText.c_str());
 		LogMsg("centeringFactorX: %.2f  centeringFactorY: %.2f", centeringFactorX, centeringFactorY);
 		LogMsg("percentUsedOfScreenWidth : %.2f  percentUsedOfScreenHeight: %.2f", percentUsedOfScreenWidth, percentUsedOfScreenHeight);
-	*/
+	
 #endif
 		//recompute the rawtext to look better based on how the text is laid out
 	if (textArea.m_lines.size() > 1)
@@ -691,16 +735,16 @@ bool GameLogicComponent::ReadFromParagraph(const cJSON* paragraph, TextArea& tex
 				startingXDiffFromNextLinePercent);
 				*/
 #endif
-			newFinal += textArea.m_lines[i].m_text;
-			if (bAddCR)
-			{
-				newFinal += "\n";
-			}
-			else
-			{
-				//todo, add space for non kanji?
-				newFinal += "";
-			}
+			//newFinal += textArea.m_lines[i].m_text;
+			//if (bAddCR)
+			//{
+			//	newFinal += "\n";
+			//}
+			//else
+			//{
+			//	//todo, add space for non kanji?
+			//	newFinal += "";
+			//}
 
 			textArea.m_averageTextHeight += textArea.m_lines[i].m_lineRect.get_height();
 			textArea.m_ySpacingToNextLineAverage += ySpacingToNextLinePercent;
@@ -709,9 +753,8 @@ bool GameLogicComponent::ReadFromParagraph(const cJSON* paragraph, TextArea& tex
 		textArea.m_ySpacingToNextLineAverage /= (textArea.m_lines.size() - 1);
 		textArea.m_averageTextHeight /= textArea.m_lines.size();
 
-		newFinal += textArea.m_lines[textArea.m_lines.size() - 1].m_text; //the last line
-
-		textArea.rawText = newFinal;
+		//newFinal += textArea.m_lines[textArea.m_lines.size() - 1].m_text; //the last line
+		//textArea.rawText = newFinal;
 		//scan if it's dialog or not
 
 		for (int i = 0; i < textArea.wideText.size(); i++)
@@ -772,6 +815,14 @@ void GameLogicComponent::ConstructEntitiesFromTextAreas()
 		UpdateStatusMessage("(nothing found)");
 	}
 }
+
+void GameLogicComponent::MergeWithPreviousTextIfNeeded(TextArea& textArea)
+{
+	if (m_textareas.empty()) return;
+
+
+}
+
 
 bool GameLogicComponent::BuildDatabase(char *pJson)
 {
@@ -1260,7 +1311,8 @@ void GameLogicComponent::OnFinishedTranslations()
 
 	if (GetApp()->m_log_capture_text_to_file != "disabled")
 	{
-		AppendStringToFile("translation_log.txt", GetApp()->m_pExportToHTML->ExportToString(GetApp()->m_log_capture_text_to_file));
+		AppendStringToFile(C_TRANSLATION_LOG_FILE, "[Translating to "+GetApp()->m_target_language+" with " + GetApp()->GetActiveTranslationEngineName()+" | "+ GetDateAndTimeAsString()+"]\r\n\r\n");
+		AppendStringToFile(C_TRANSLATION_LOG_FILE, GetApp()->m_pExportToHTML->ExportToString(GetApp()->m_log_capture_text_to_file));
 	}
 
 	if (GetApp()->m_place_capture_text_on_clipboard != "disabled")
