@@ -1764,7 +1764,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, TCHAR *lpCmdLin
 	else
 	{
 		//uh oh
-		MessageBox(NULL, _T("An instance of Comfish: UGT is already running.  Look for its box on your taskbar."), GetAppName(), NULL);
+		MessageBox(NULL, _T("An instance of PlayTrans: UGT is already running.  Look for its box on your taskbar."), GetAppName(), NULL);
 		return 0;
 	}
 

@@ -12,6 +12,7 @@ xcopy bin\curl-ca-bundle.crt tempbuild
 xcopy bin\siddhanta_font_license.txt tempbuild
 xcopy bin\SourceHanSerif-Medium_font_license.txt tempbuild
 xcopy bin\config_template.txt tempbuild
+xcopy bin\fonts.txt tempbuild
 xcopy bin\readme.txt tempbuild
 ECHO F|xcopy "bin\UGT_FMOD_Release_GL_x64.exe" tempbuild\ugt.exe
 xcopy bin\SourceHanSerif-Medium.ttc tempbuild

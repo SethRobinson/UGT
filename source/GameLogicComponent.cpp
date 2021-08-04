@@ -596,7 +596,7 @@ bool GameLogicComponent::ProcessParagraphGoogleWay(const cJSON* paragraph, TextA
 					}
 
 
-//************************* Auto merge stuff ******************
+//************************* Auto merge / auto-glue stuff ******************
 					//Sometimes it's obvious that two lines of text should be grouped together, but for some reason Google doesn't catch it.
 					//The thing below does some checks and merged them if it notices that.
 
@@ -609,10 +609,10 @@ bool GameLogicComponent::ProcessParagraphGoogleWay(const cJSON* paragraph, TextA
 
 						bool bEnableAutoMerged = true; //set to false to disable this whole automerge thing
 						float verticalSpacing = lineRect.top - lastTextArea.m_rect.bottom;
-						float allowedVerticalSpacing = lineRect.get_height() * 0.15f; //change this to adjust how easily it will group things together
+						float allowedVerticalSpacing = lineRect.get_height() * GetApp()->m_auto_glue_vertical_tolerance; 
 
 						if (bEnableAutoMerged && fabs(verticalSpacing) < allowedVerticalSpacing
-							&& lineRect.left+lastTextArea.m_rect.get_width()*0.3f >= lastTextArea.m_rect.left && lineRect.left <= lastTextArea.m_rect.right
+							&& lineRect.left+lastTextArea.m_rect.get_width()* GetApp()->m_auto_glue_horizontal_tolerance >= lastTextArea.m_rect.left && lineRect.left <= lastTextArea.m_rect.right
 							)
 						{ 
 							//Yes, this line of text looks like it continues.  Merge it
@@ -922,8 +922,7 @@ void GameLogicComponent::StartProcessingFrameForText()
 	m_textareas.clear();
 	unsigned int originalFileSize = 0;
 	byte * fileData = NULL;
-	GetApp()->SetGlobalTextHinting(HINTING_NORMAL);
-
+	
 	bool bPlayHide = GetApp()->GetVar("check_hide_overlay")->GetUINT32() != 0;
 	if (bPlayHide)
 	{

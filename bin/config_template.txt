@@ -1,4 +1,4 @@
-//Grabfish: UGT config file, read at startup.  THIS FILE MUST BE RENAMED config.txt!
+;PlayTrans: UGT config file, read at startup.  THIS FILE MUST BE RENAMED config.txt!
 
 ;To use google vision (which is required to work) you'll need your own Cloud Vision API key. (this is so google can see
 ;who is using it and charge you money if you hammer it too much.  More info here:  https://cloud.google.com/vision/docs/before-you-begin
@@ -81,6 +81,14 @@ source_language_hint|auto
 ;Google allows you request TEXT_DETECTION or DOCUMENT_TEXT_DETECTION for the OCR phase.  DOCUMENT_TEXT_DETECTION generally gives better results,
 ;but sometimes it lumps words from a menu together that should be separate.  If you want things "split up more", try setting to TEXT_DETECTION instead.
 google_text_detection_command|DOCUMENT_TEXT_DETECTION
+
+;Auto-glue is when vertical lines of text are "glued together" to be translated as a single block.  Great for dialog but bad for things that shouldn't be translated together.
+
+;set higher to auto-glue things more even when text is farther apart vertically
+auto_glue_vertical_tolerance|0.20
+
+;set higher to auto-glue things more even when the next line doesn't start at the same horizontal place
+auto_glue_horizontal_tolerance|0.30
 
 ;When uploading the screenshot to google for scanning, 100 means perfect quality (big image) and 0 would mean horrible quality.  95 is probably good
 jpg_quality_for_scan|85

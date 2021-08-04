@@ -123,8 +123,8 @@ App::App()
 		m_pExportToHTML = NULL;
 		m_pAutoPlayManager = NULL;
 		m_usedSubAreaScan = false;
-		m_version = "0.70 Beta";
-		m_versionNum = 70;
+		m_version = "0.71 Beta";
+		m_versionNum = 71;
 		m_bDidPostInit = false;
 		m_gamepad_button_to_scan_active_window = VIRTUAL_KEY_NONE;
 		m_cursorShouldBeRestoredToStartPos = false;
@@ -290,7 +290,7 @@ bool App::Init()
 	{
 		return true;
 	}
-	LogMsg("Initting Comfish: Universal Game Translator %s by Seth A. Robinson (www.rtsoft.com)", m_version.c_str());
+	LogMsg("Initting PlayTrans: Universal Game Translator %s by Seth A. Robinson (www.rtsoft.com)", m_version.c_str());
 
 	if (!BaseApp::Init()) return false;
 
@@ -874,29 +874,48 @@ void App::ShowHelp()
 	msg += "Read text out load as alternate language Shift-Left click\n";
 	msg += "Next/previous language (languages set in config.txt) - [ and ]\n";
 	msg += "Quick set target language - 1 through 9\n";
-	msg += "Force line by line translation mode - L\n";
-	msg += "Force dialog translation mode - D\n";
+	msg += "Toggle force line by line translation mode - L\n";
+	msg += "Toggle force dialog translation mode - D\n";
 	msg += "Show original image - Hold UP ARROW\n";
 	msg += "Show pre translated OCR results - Hold DOWN ARROW\n";
 	msg += "To look up kanji from original - Shift-Right click kanji on original image\n";
 	msg += "To copy text - Right click on it\n";
 	msg += "Take screenshot - S, E to export to html\n";
-	string title = "Comfish: UGT "+m_version+" - Hotkeys";
+	string title = "PlayTrans: UGT "+m_version+" - Hotkeys";
 
 	MessageBox(g_hWnd, _T(msg.c_str()), title.c_str(), NULL);
 }
 
+
+void App::SetGlobalTextHintingToAuto()
+{
+	SetGlobalTextHinting(HINTING_AUTO);
+	ShowQuickMessage("Toggling dialog translation mode to Auto");
+	GetApp()->m_sig_target_language_changed();
+}
+
 void App::SetDialogMode()
 {
+	if (GetGlobalTextHinting() == HINTING_DIALOG)
+	{
+		SetGlobalTextHintingToAuto();
+		return;
+	}
+	
 	GetApp()->SetGlobalTextHinting(HINTING_DIALOG);
-	ShowQuickMessage("Forcing dialog translation mode");
+	ShowQuickMessage("Toggling translation mode to force dialog");
 	GetApp()->m_sig_target_language_changed();
 }
 
 void App::SetLineByLineMode()
 {
+	if (GetGlobalTextHinting() == HINTING_LINE_BY_LINE)
+	{
+		SetGlobalTextHintingToAuto();
+		return;
+	}
 	GetApp()->SetGlobalTextHinting(HINTING_LINE_BY_LINE);
-	ShowQuickMessage("Forcing line by line translation mode");
+	ShowQuickMessage("Toggling translation mode to force line by line");
 	GetApp()->m_sig_target_language_changed();
 }
 
@@ -1421,7 +1440,7 @@ void App::OnEnterForeground()
 	BaseApp::OnEnterForeground();
 }
 
-const char * GetAppName() {return "Comfish: UGT";}
+const char * GetAppName() {return "PlayTrans: UGT";}
 
 //the stuff below is for android/webos builds.  Your app needs to be named like this.
 
@@ -1435,7 +1454,7 @@ const char * GetBundlePrefix()
 
 const char * GetBundleName()
 {
-	const char * bundleName = "comfish";
+	const char * bundleName = "playtrans";
 	return bundleName;
 }
 
@@ -1573,10 +1592,16 @@ bool App::LoadConfigFile()
 		{
 			m_check_for_update_on_startup = ts.GetParmString("check_for_update_on_startup", 1);
 		}
-
-
 		
+		if (ts.GetParmString("auto_glue_vertical_tolerance", 1) != "")
+		{
+			m_auto_glue_vertical_tolerance = StringToFloat(ts.GetParmString("auto_glue_vertical_tolerance", 1));
+		}
 
+		if (ts.GetParmString("auto_glue_horizontal_tolerance", 1) != "")
+		{
+			m_auto_glue_horizontal_tolerance = StringToFloat(ts.GetParmString("auto_glue_horizontal_tolerance", 1));
+		}
 
 		string translationEngine = ToLowerCaseString(ts.GetParmString("translation_engine", 1));
 		if (translationEngine == "deepl")
@@ -1647,6 +1672,8 @@ bool App::LoadConfigFile()
 		LogMsg("Audio set to none in config.txt, so disabling it.");
 		g_pAudioManager = new AudioManager(); //dummy base, won't play any audio
 	}
+
+	LogMsg("Auto-glue set to %.2f and %.2f.", m_auto_glue_vertical_tolerance, m_auto_glue_horizontal_tolerance);
 
 	g_pAudioManager->SetPreferOGG(false);
 	GetAudioManager()->SetRequestedDriverByName(audioDevice);

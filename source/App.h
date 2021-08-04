@@ -33,7 +33,7 @@ enum eCaptureMode
 
 enum eTextHinting
 {
-	HINTING_NORMAL,
+	HINTING_AUTO,
 	HINTING_DIALOG,
 	HINTING_LINE_BY_LINE
 };
@@ -151,7 +151,7 @@ public:
 	HotKeyHandler m_hotKeyHandler;
 	HotKeySetting m_hotkey_for_whole_desktop, m_hotkey_for_active_window, m_hotkey_for_draggable_area;
 	vector< KeyData> m_keyData;
-	eTextHinting m_globalHinting = HINTING_NORMAL;
+	eTextHinting m_globalHinting = HINTING_AUTO;
 	POINT m_cursorPosAtStart;
 	bool m_cursorShouldBeRestoredToStartPos;
 	
@@ -172,6 +172,9 @@ public:
 	int m_min_chars_required_to_be_dialog = 8;
 	int m_input_camera_device_id = 0;
 	int m_minimum_brightness_for_lumakey = 10;
+	float m_auto_glue_vertical_tolerance = 0.20f; //set higher to auto-glue things more even when text is farther apart vertically
+	float m_auto_glue_horizontal_tolerance = 0.3f; //set higher to auto-glue things more even when the next line doesn't start at the same horizontal place
+
 	bool m_audio_stop_when_window_is_closed = false;
 	string m_audio_default_language = "ja";
 	string m_source_language_hint = "auto";
@@ -184,6 +187,7 @@ public:
 	void SetTargetLanguage(string languageCode, string languageName, bool bShowMessage = true);
 	void ModLanguageByIndex(int mod, bool bShowMessage = true);
 	void ShowHelp();
+	void SetGlobalTextHintingToAuto();
 	void SetDialogMode();
 	void SetLineByLineMode();
 	HWND m_forceHWND = 0;
