@@ -16,7 +16,7 @@ public:
 	ExportToHTML();
 	virtual ~ExportToHTML();
 
-	string ExportToString(string mode);
+	string ExportToString(string mode, bool bAddEndingCRs);
 
 	bool Export();
 

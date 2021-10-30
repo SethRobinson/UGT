@@ -1359,12 +1359,12 @@ void GameLogicComponent::OnFinishedTranslations()
 	if (GetApp()->m_log_capture_text_to_file != "disabled")
 	{
 		AppendStringToFile(C_TRANSLATION_LOG_FILE, "[Translating to "+GetApp()->m_target_language+" with " + GetApp()->GetActiveTranslationEngineName()+" | "+ GetDateAndTimeAsString()+"]\r\n\r\n");
-		AppendStringToFile(C_TRANSLATION_LOG_FILE, GetApp()->m_pExportToHTML->ExportToString(GetApp()->m_log_capture_text_to_file));
+		AppendStringToFile(C_TRANSLATION_LOG_FILE, GetApp()->m_pExportToHTML->ExportToString(GetApp()->m_log_capture_text_to_file, true));
 	}
 
 	if (GetApp()->m_place_capture_text_on_clipboard != "disabled")
 	{
-		string text = GetApp()->m_pExportToHTML->ExportToString(GetApp()->m_place_capture_text_on_clipboard);
+		string text = GetApp()->m_pExportToHTML->ExportToString(GetApp()->m_place_capture_text_on_clipboard, false);
 
 		//clipboard doesn't work with unicode if I send the utf8, so I guess we'll go wide
 		vector<unsigned short> utf16line;

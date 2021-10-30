@@ -167,7 +167,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='FMOD_Release_GL|x64'">
     <ClCompile>
       <AdditionalIncludeDirectories>..\source;..\..\shared;..\..\shared\win\;..\..\shared\util\boost;..\..\shared\ClanLib-2.0\Sources;..\..\shared\win\include;..\..\shared\FliteTTS\include;..\..\shared\win\freetype\include;..\..\shared\win\escapi-master\common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_CRT_SECURE_NO_WARNINGS;BOOST_ALL_NO_LIB;C_GL_MODE;RT_PNG_SUPPORT;RT_USE_LIBCURL;RT_JPG_SUPPORT;C_BORDERLESS_WINDOW_MODE_FOR_SCREENSHOT_EASE;RT_RUNS_IN_BACKGROUND;RT_HANDLE_WM_HOTKEY;RT_ENABLE_FMOD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_CRT_SECURE_NO_WARNINGS;BOOST_ALL_NO_LIB;C_GL_MODE;RT_PNG_SUPPORT;RT_USE_LIBCURL;RT_JPG_SUPPORT;C_BORDERLESS_WINDOW_MODE_FOR_SCREENSHOT_EASE;RT_RUNS_IN_BACKGROUND;RT_HANDLE_WM_HOTKEY;RT_ENABLE_FMOD;_WINSOCK_DEPRECATED_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>PlatformPrecomp.h</PrecompiledHeaderFile>

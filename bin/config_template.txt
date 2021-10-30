@@ -12,11 +12,16 @@
 ;Note:  Don't share your google API key!  A google API key looks like (don't include quotes or anything):  AIzaSyAvhMEcxpKSBD25ze06p5AlU_IuYtZ2b_g
 google_api_key|yourownkeygoeshere
 
-;Optional Deepl API key. This requires that you register at deepl.com.  Even if you use deepl, you
+;Optional DeepL API key. This requires that you register at deepl.com.  Even if you use deepl, you
 ;still need the Google key above as well, as that's still used for the OCR and text to speech features.
 ;Note: you also need to set the "translation_engine" below to use deepl instead of google
-;A deepl API key looks like (don't include quotes or anything): 263f19ba-b010-428c-77cf-cc18c977ef4b:fx
+;A deepL API key looks like (don't include quotes or anything): 263f19ba-b010-428c-77cf-cc18c977ef4b:fx
 deepl_api_key|yourownkeygoeshere
+
+;URL to use for DeepL API calls (need to change this if you aren't using the free version of DeepL)
+;If you're using the free version, use https://api-free.deepl.com
+;if you're using the paid version, use https://api.deepl.com
+deepl_api_url|https://api-free.deepl.com
 
 ;Choose which API to use for text translations.  Valid options:  google, deepl.  If you use deepl, you must set your API key above.
 ;Note: A hotkey to toggle translation engine is T, useful for comparing results

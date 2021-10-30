@@ -19,7 +19,7 @@ ExportToHTML::~ExportToHTML()
 {
 }
 
-string ExportToHTML::ExportToString(string mode)
+string ExportToHTML::ExportToString(string mode, bool bAddEndingCRs)
 {
 	string final;
 	
@@ -43,17 +43,22 @@ string ExportToHTML::ExportToString(string mode)
 					final += comp->m_textArea.m_lines[j].m_text+"\r\n";
 				}
 			}
+
+			final += "\r\n";
+
 		}
 
-		final += "\r\n";
-
+	
 		//add post translated text?
 		if (mode == "full" || mode == "post")
 		{
 			final += comp->GetTranslatedText();
 		}
 
-		final += "\r\n\r\n";
+		if (bAddEndingCRs)
+		{
+			final += "\r\n\r\n";
+		}
 
 	}
 	return final;

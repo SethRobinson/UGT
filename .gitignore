@@ -16,3 +16,9 @@ NotShared/
 *.vcxproj.user
 **/bin/log.txt
 **/bin/*.exe
+/tempbuild
+/tempbuild_temp
+/UGT_old
+/windows_vs/bin
+/windows_vs/build
+/windows_vs/x64
