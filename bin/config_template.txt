@@ -67,6 +67,9 @@ place_capture_text_on_clipboard|disabled
 ;target language codes are listed here: https://cloud.google.com/translate/docs/languages
 ;The first language added is the default, then the rest can be dynamically changed to by using [ and ] or L and R on control pad
 
+;If you don't want any translations done, you can make the first language added be 00|None. (just uncomment the one below this)
+
+;add_switchable_language|00|None
 add_switchable_language|en|English
 add_switchable_language|ko|Korean
 add_switchable_language|ms|Maylay

@@ -23,36 +23,48 @@ string ExportToHTML::ExportToString(string mode, bool bAddEndingCRs)
 {
 	string final;
 	
-
 	for (int i = 0; i < GetApp()->GetGameLogicComponent()->m_textComps.size(); i++)
 	{
 		TextAreaComponent* comp = GetApp()->GetGameLogicComponent()->m_textComps[i];
 
+		string preTranslatedText;
+
 		//add pre translated text?
-		if (mode == "full" || mode == "pre")
-		{
 			//all together as one block
 			if (comp->IsDialog(true))
 			{
-				final += comp->m_textArea.rawText;
+				preTranslatedText += comp->m_textArea.rawText;
 			}
 			else
 			{
 				for (int j = 0; j < comp->m_textArea.m_lines.size(); j++)
 				{
-					final += comp->m_textArea.m_lines[j].m_text+"\r\n";
+					preTranslatedText += comp->m_textArea.m_lines[j].m_text+"\r\n";
 				}
 			}
 
-			final += "\r\n";
+			if (bAddEndingCRs)
+			{
+				preTranslatedText += "\r\n";
+			}
 
-		}
-
+			if (mode == "full" || mode == "pre")
+			{
+				final += preTranslatedText;
+			}
 	
 		//add post translated text?
 		if (mode == "full" || mode == "post")
 		{
-			final += comp->GetTranslatedText();
+			string translatedText = comp->GetTranslatedText();
+
+			final += translatedText;
+
+			if (translatedText.empty())
+			{
+				//well, since we don't have a translation, let's just put the original there I guess
+				final += preTranslatedText;
+			}
 		}
 
 		if (bAddEndingCRs)
@@ -72,20 +84,19 @@ void ExportToHTML::AddOverlays(string* pHTML, const string itemTemplate)
 		TextAreaComponent* comp = GetApp()->GetGameLogicComponent()->m_textComps[i];
 		string work = itemTemplate;
 
-		//either way, we want these substitions:
-
 		StringReplace("[TRANSLATED_TEXT]", toString(comp->GetTranslatedText()), work);
 		StringReplace("[END_X]", toString(comp->m_textArea.m_rect.right), work);
 		StringReplace("[END_Y]", toString(comp->m_textArea.m_rect.bottom), work);
 		StringReplace("[WIDTH]", toString(comp->m_textArea.m_rect.get_width()), work);
 		StringReplace("[HEIGHT]", toString(comp->m_textArea.m_rect.get_height()), work);
+		StringReplace("[X]", toString(comp->m_textArea.m_rect.left), work);
+		StringReplace("[Y]", toString(comp->m_textArea.m_rect.top), work);
+		StringReplace("[FONT_SIZE]", toString(comp->m_textArea.m_averageTextHeight * 0.83f), work);
 
+		string finalText;
 
-		//all together as one block
-		if (comp->IsDialog(true))
-		{
-			string finalText;
-		     
+		//if (comp->IsDialog(true)) //uh, I guess we don't actually treat dialog/line by line text differently now here
+		   
 			//we'll need to add our own line feeds
 			for (int j = 0; j < comp->m_textArea.m_lines.size(); j++)
 			{
@@ -95,36 +106,16 @@ void ExportToHTML::AddOverlays(string* pHTML, const string itemTemplate)
 				}
 				finalText += comp->m_textArea.m_lines[j].m_text;
 			}
-
-			StringReplace("[X]", toString(comp->m_textArea.m_rect.left), work);
-			StringReplace("[Y]", toString(comp->m_textArea.m_rect.top), work);
-			StringReplace("[FONT_SIZE]", toString(comp->m_textArea.m_averageTextHeight*0.83f), work);
-			StringReplace("[TEXT]", toString(finalText), work);
-			StringReplace("\n", "<br>", work);
-			work += "\r\n";
-		}
-		else
-		{
-			
-			for (int j = 0; j < comp->m_textArea.m_lines.size(); j++)
-			{
-				if (j > 0)
-				{
-					work += "<BR>\r\n";
-				}
-				StringReplace("[X]", toString(comp->m_textArea.m_lineStarts[j].x), work);
-				StringReplace("[Y]", toString(comp->m_textArea.m_lineStarts[j].y), work);
-				StringReplace("[FONT_SIZE]", toString(comp->m_textArea.m_lines[j].m_lineRect.get_size().height * 0.85f), work);
-				StringReplace("[TEXT]", toString(comp->m_textArea.m_lines[j].m_text), work);
-			}
-		}
 		
+		StringReplace("\n", "<br>", finalText);
+		StringReplace("[TEXT]", toString(finalText), work);
+
 		*pHTML += work;
-
-		//LogMsg("Found text comp %s", comp->m_textArea.rawText.c_str());
-		ShowQuickMessage("Exporting to htmlexport/index.html");
-
 	}
+
+	//LogMsg("Found text comp %s", comp->m_textArea.rawText.c_str());
+	ShowQuickMessage("Exporting to htmlexport/index.html");
+
 }
 
 bool ExportToHTML::Export()

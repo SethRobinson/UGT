@@ -341,6 +341,12 @@ void TextAreaComponent::RequestTranslationDeepL()
 
 void TextAreaComponent::RequestTranslation()
 {
+	if (GetApp()->m_target_language == "00")
+	{
+		m_bWaitingForTranslation = false;
+		return;
+	}
+
 	if (GetApp()->GetTranslationEngine() == TRANSLATION_ENGINE_GOOGLE)
 	{
 		RequestTranslationGoogle();
@@ -353,6 +359,7 @@ void TextAreaComponent::RequestTranslation()
 
 glColorBytes TextAreaComponent::GetTextColor(bool bIsDialog)
 {
+	//what am I even doing here.  I guess I stopped using coloring here because of how the font rendering to texture works, we color it during the blit or something now
 	if (bIsDialog)
 	{
 		return glColorBytes(255, 255, 255, 255);
@@ -409,7 +416,6 @@ void TextAreaComponent::OnSelected(VariantList* pVList) //0=vec2 point of click,
 	//GetEntityRoot()->PrintTreeAsText(); //useful for debugging
 }
 
-
 void TextAreaComponent::Init(TextArea textArea)
 {
 	m_textArea = textArea;
@@ -439,25 +445,7 @@ void TextAreaComponent::Init(TextArea textArea)
 	eFont fontID;
 	float fontScale = 1.0f;
 	*/
-	float height = 0;
-	CL_Rectf tempRect = m_textAreaRect;
-
-	TweakForSending(textArea.text, tempRect, height, false);
-
-	vector<CL_Vec2f> offsets = ComputeLocalLineOffsets();
-	float wordWrapX = 0;
-	
-	//rebuild version with line feeds as we're just displaying this as close as to the original as possible, no translation here as this is the source
-	string versionWithLineFeeds;
-	for (int i = 0; i < m_textArea.m_lines.size(); i++)
-	{
-		versionWithLineFeeds += m_textArea.m_lines[i].m_text+"\n";
-	}
-
-	m_pSourceLanguageSurf = GetApp()->GetFreeTypeManager(m_textArea.language)->GetFont()->TextToSurface(tempRect.get_size_vec2(), versionWithLineFeeds,
-		height, glColorBytes(0,0,0,0), GetTextColor(IsDialog(false)), m_textArea.language == "ja", &offsets, 
-		wordWrapX);
-
+	BuildSourceLanguageSurface();
 
 	if (m_textArea.m_bIsDialog && GetApp()->GetVar("check_autoplay_audio")->GetUINT32() != 0)
 	{
@@ -487,6 +475,29 @@ void TextAreaComponent::Init(TextArea textArea)
 	m_pSpeakerIconDest->GetFunction("OnButtonSelected")->sig_function.connect(1, boost::bind(&TextAreaComponent::OnSelected, this, _1));
 	SetTouchPaddingEntity(m_pSpeakerIconDest, CL_Rectf(0, 0, 0, 0));
 	*/
+
+}
+
+void TextAreaComponent::BuildSourceLanguageSurface()
+{
+	float height = 0;
+	CL_Rectf tempRect = m_textAreaRect;
+
+	TweakForSending(m_textArea.text, tempRect, height, false);
+
+	vector<CL_Vec2f> offsets = ComputeLocalLineOffsets();
+	float wordWrapX = 0;
+
+	//rebuild version with line feeds as we're just displaying this as close as to the original as possible, no translation here as this is the source
+	string versionWithLineFeeds;
+	for (int i = 0; i < m_textArea.m_lines.size(); i++)
+	{
+		versionWithLineFeeds += m_textArea.m_lines[i].m_text + "\n";
+	}
+
+	m_pSourceLanguageSurf = GetApp()->GetFreeTypeManager(m_textArea.language)->GetFont()->TextToSurface(tempRect.get_size_vec2(), versionWithLineFeeds,
+		height, glColorBytes(0, 0, 0, 0), GetTextColor(IsDialog(true)), m_textArea.language == "ja", &offsets,
+		wordWrapX);
 
 }
 
@@ -605,6 +616,8 @@ void TextAreaComponent::OnTouchStart(VariantList *pVList)
 void TextAreaComponent::OnTargetLanguageChanged()
 {
 	SAFE_DELETE(m_pDestLanguageSurf);
+	SAFE_DELETE(m_pSourceLanguageSurf);
+	BuildSourceLanguageSurface();
 	RequestTranslation();
 }
 
@@ -1181,10 +1194,21 @@ void TextAreaComponent::OnRender(VariantList *pVList)
 			m_pDestLanguageSurf->Blit(vFinalPos.x, vFinalPos.y);
 		}
 		
-	} else
-	if (m_pSourceLanguageSurf)
+	}
+	else
 	{
-		m_pSourceLanguageSurf->Blit(vFinalPos.x, vFinalPos.y);
+		if (IsDialog(true))
+		{
+			if (m_pSourceLanguageSurf)
+			{
+				m_pSourceLanguageSurf->Blit(vFinalPos.x, vFinalPos.y, MAKE_RGBA(0, 255, 0, 255));
+			}
+		} else
+		if (m_pSourceLanguageSurf)
+		{
+			m_pSourceLanguageSurf->Blit(vFinalPos.x, vFinalPos.y);
+		}
+
 	}
 
 	

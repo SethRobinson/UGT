@@ -34,10 +34,14 @@ void HelpMenuOnSelect(VariantList *pVList) //0=vec2 point of click, 1=entity sen
 	{
 		bool bChecked = IsCheckboxChecked(pEntClicked);
 		GetApp()->GetShared()->GetVar("check_disable_sounds")->Set(uint32(bChecked));
-
-
-
 	}
+
+	if (pEntClicked->GetName() == "check_invisible_mode")
+	{
+		bool bChecked = IsCheckboxChecked(pEntClicked);
+		GetApp()->GetShared()->GetVar("check_invisible_mode")->Set(uint32(bChecked));
+	}
+
 
 	if (pEntClicked->GetName() == "Hide")
 	{
@@ -141,6 +145,11 @@ Entity * CreateHelpMenu(Entity *pRoot)
 	y += GetSize2DEntity(pEnt).y;
 	y += spacerY;
 
+	bool bDisableVisuals = GetApp()->GetVar("check_invisible_mode")->GetUINT32() != 0;
+	pEnt = CreateCheckbox(pBG, "check_invisible_mode", "Invisible mode (no overlay)", startX, y, bDisableVisuals, FONT_SMALL, 1.0f);
+	pEnt->GetFunction("OnButtonSelected")->sig_function.connect(&HelpMenuOnSelect);
+	y += GetSize2DEntity(pEnt).y;
+	y += spacerY;
 
 
 	if (GetApp()->GetGoogleKey() == "yourkeygoeshere")

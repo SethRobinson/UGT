@@ -24,7 +24,7 @@ public:
 	virtual ~TextAreaComponent();
 
 	void Init(TextArea textArea);
-	virtual void OnAdd(Entity *pEnt);
+	virtual void OnAdd(Entity* pEnt);
 
 	void OnTouchStart(VariantList *pVList);
 	bool ReadTranslationFromJSONGoogle(char *pData);
@@ -62,6 +62,7 @@ protected:
 	void FitAndWordWrapToRect(const CL_Rectf &tempRect, wstring &wtext, deque<wstring> &wlinesOut, CL_Vec2f &wrappedSizeOut,
 		bool bUseActualWidthForSpacing, float &pixelHeightOut);
 	void RenderAsDialog(float defaultFontHeightOrZeroForAuto);
+	void BuildSourceLanguageSurface();
 
 	Entity *m_pTextBox = NULL;
 	NetHTTP m_netHTTP;

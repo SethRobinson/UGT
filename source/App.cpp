@@ -836,7 +836,18 @@ void OnTranslateButton()
 			AudioHandle handle = GetAudioManager()->Play("audio/wall.mp3");
 			GetAudioManager()->SetVol(handle, 0.34f);
 		}
-		GetApp()->m_hotKeyHandler.OnShowWindow();
+
+
+		if (GetApp()->GetShared()->GetVar("check_invisible_mode")->GetUINT32() != 0)
+		{
+			LogMsg("Auto closing window because 'invisible mode' is checked");
+			GetApp()->m_hotKeyHandler.OnHideWindow();
+		}
+		else
+		{
+			GetApp()->m_hotKeyHandler.OnShowWindow();
+		}
+
 	}
 	else
 	{
@@ -1237,10 +1248,20 @@ void App::OnLoadSurfaces()
 	m_hotKeyHandler.UnregisterAllHotkeys();
 	m_hotKeyHandler.ReregisterAllHotkeys();
 	
-	if (m_captureMode == CAPTURE_MODE_SHOWING)
+
+	if (GetApp()->GetShared()->GetVar("check_invisible_mode")->GetUINT32() != 0)
 	{
-		MoveWindow(g_hWnd, m_window_pos_x, m_window_pos_y, m_capture_width, m_capture_height, false);
-		GetApp()->m_hotKeyHandler.OnShowWindow();
+		LogMsg("Auto closing window because 'invisible mode' is checked");
+		GetApp()->m_hotKeyHandler.OnHideWindow();
+	}
+	else
+	{
+
+		if (m_captureMode == CAPTURE_MODE_SHOWING)
+		{
+			MoveWindow(g_hWnd, m_window_pos_x, m_window_pos_y, m_capture_width, m_capture_height, false);
+			GetApp()->m_hotKeyHandler.OnShowWindow();
+		}
 	}
 }
 
@@ -1264,9 +1285,15 @@ void App::ScanSubArea()
 	GetBaseApp()->SetVideoMode(m_capture_width, m_capture_height, false, 0);
 	SetPrimaryScreenSize(m_capture_width, m_capture_height);
 	SetupScreenInfo(m_capture_width, m_capture_height, ORIENTATION_DONT_CARE);
-	//g_bHasFocus = true;
+	
+
+	if (GetApp()->GetShared()->GetVar("check_invisible_mode")->GetUINT32() != 0)
+	{
+		LogMsg("Auto closing window because 'invisible mode' is checked");
+		GetApp()->m_hotKeyHandler.OnHideWindow();
+	}
+	
 	OnTranslateButton();
-	//GetApp()->m_hotKeyHandler.OnShowWindow();
 
 }
 

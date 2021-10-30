@@ -220,3 +220,4 @@ const char * GetAppName();
 const char * GetBundlePrefix();
 const char * GetBundleName();
 void ShowQuickMessage(string msg);
+void OnTranslateButton();

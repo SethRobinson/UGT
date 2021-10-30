@@ -162,7 +162,9 @@ void GameLogicComponent::OnAdd(Entity *pEnt)
 		
 		AudioHandle handle = GetAudioManager()->Play("audio/wall.mp3");
 		GetAudioManager()->SetVol(handle, 0.34f);
+
 		GetApp()->m_hotKeyHandler.OnShowWindow();
+
 	}
 
 	GetAudioManager()->Play("audio/intro.wav");
@@ -1020,6 +1022,8 @@ void GameLogicComponent::StartProcessingFrameForText()
 
 	ShowQuickMessage("Analyzing screen...");
 
+
+
 	//m_escapiManager.GetSoftSurface()->WriteBMPOut("temp.bmp");
 
 	string postDataOCR_a = R"({
@@ -1074,6 +1078,8 @@ string postDataOCR_d = R"(
 	m_netHTTP.Start();
 
 	UpdateStatusMessage("Sending image to google for OCR processing...");
+
+
 
 }
 
@@ -1133,6 +1139,7 @@ void GameLogicComponent::OnUpdate(VariantList *pVList)
 		}
 		UpdateStatusMessage(s);
 
+
 	}
 	if (m_netHTTP.GetState() == NetHTTP::STATE_FINISHED)
 	{
@@ -1168,10 +1175,7 @@ void GameLogicComponent::OnUpdate(VariantList *pVList)
 
 		m_netHTTP.Reset(true);
 
-		//if (!GetApp()->IsInputDesktop())
-		{
-			CreateExamineOverlay();
-		}
+		CreateExamineOverlay();
 	}
 
 
@@ -1208,8 +1212,17 @@ void GameLogicComponent::OnUpdate(VariantList *pVList)
 		{
 			OnFinishedTranslations(); //good time to log to disk or whatever
 			m_bCalledOnFinishedTranslations = true;  //don't call this again unless we translate something else too
+
+			if (GetApp()->GetShared()->GetVar("check_invisible_mode")->GetUINT32() != 0)
+			{
+				//artificially close the window which was hidden already
+				LogMsg("Auto closing window because 'invisible mode' is checked");
+				OnTranslateButton();
+			}
 		}
 		UpdateStatusMessage(s);
+
+		
 	}
 }
 
@@ -1226,9 +1239,7 @@ void GameLogicComponent::OnRender(VariantList *pVList)
 
 		if (GetApp()->IsInputDesktop())
 		{
-			//m_desktopCapture.GetSurface()->HardKill();
-			//m_desktopCapture.GetSurface()->SetDefaults();
-
+	
 			if ( (!m_desktopCapture.GetSurface()->IsLoaded()) && m_desktopCapture.GetSoftSurface()->IsActive())
 			{
 				m_desktopCapture.GetSurface()->InitFromSoftSurface(m_desktopCapture.GetSoftSurface());
@@ -1260,10 +1271,13 @@ void GameLogicComponent::OnRender(VariantList *pVList)
 		}
 		else
 		{
-			if (m_escapiManager.GetSurface()->IsLoaded())
-			{
-				m_escapiManager.GetSurface()->Blit(0, 0);
-			}
+
+			
+				if (m_escapiManager.GetSurface()->IsLoaded())
+				{
+					m_escapiManager.GetSurface()->Blit(0, 0);
+				}
+			
 		}
 		
 	}
@@ -1371,6 +1385,7 @@ void GameLogicComponent::OnFinishedTranslations()
 		utf8::utf8to16(text.begin(), text.end(), back_inserter(utf16line));
 		SetClipboardTextW(&utf16line[0], (int)utf16line.size());
 	}
+
 }
 
 void GameLogicComponent::OnTargetLanguageChanged()

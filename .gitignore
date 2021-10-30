@@ -22,3 +22,5 @@ NotShared/
 /windows_vs/bin
 /windows_vs/build
 /windows_vs/x64
+**/bin/*.exp
+**/bin/*.lib
