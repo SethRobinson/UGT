@@ -123,8 +123,8 @@ App::App()
 		m_pExportToHTML = NULL;
 		m_pAutoPlayManager = NULL;
 		m_usedSubAreaScan = false;
-		m_version = "0.71 Beta";
-		m_versionNum = 71;
+		m_version = "0.72 Beta";
+		m_versionNum = 72;
 		m_bDidPostInit = false;
 		m_gamepad_button_to_scan_active_window = VIRTUAL_KEY_NONE;
 		m_cursorShouldBeRestoredToStartPos = false;
@@ -1557,6 +1557,11 @@ bool App::LoadConfigFile()
 		m_show_live_video = StringToInt(ts.GetParmString("show_live_video", 1));
 		m_google_api_key = ts.GetParmString("google_api_key", 1);
 		m_deepl_api_key = ts.GetParmString("deepl_api_key", 1);
+		if (ts.GetParmString("deepl_api_url", 1) != "")
+		{
+			m_deepl_api_url = ts.GetParmString("deepl_api_url", 1);
+		}
+
 		m_jpg_quality_for_scan = StringToInt(ts.GetParmString("jpg_quality_for_scan", 1));
 		m_inputMode = ts.GetParmString("input", 1);
 		 

@@ -164,6 +164,7 @@ public:
 	int m_show_live_video = 0;
 	string m_google_api_key;
 	string m_deepl_api_key;
+	string m_deepl_api_url = "https://api-free.deepl.com"; //default
 	int m_jpg_quality_for_scan = 95;
 	string m_kanji_lookup_website = "https://jisho.org/search/";
 	string m_log_capture_text_to_file = "disabled";
@@ -179,6 +180,7 @@ public:
 	string m_audio_default_language = "ja";
 	string m_source_language_hint = "auto";
 	string m_google_text_detection_command = "TEXT_DETECTION";  //"DOCUMENT_TEXT_DETECTION";
+	
 	vector<LanguageSetting> m_languages;
 	int m_versionNum;
 	string m_check_for_update_on_startup = "enabled";

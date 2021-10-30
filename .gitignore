@@ -9,4 +9,10 @@ NotShared/
 *.obj
 *.DS_Store
 *.pdb
-windows_vs/.vs
+.vs
+*.tlog
+*.log
+*.recipe
+*.vcxproj.user
+**/bin/log.txt
+**/bin/*.exe

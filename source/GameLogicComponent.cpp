@@ -28,7 +28,7 @@
 //string g_fileName = "bug_english.png";
 //string g_fileName = "bug.jpg";
 //string g_fileName = "temp_connect1.jpg";
-//string g_fileName = "dink.png";
+//string g_fileName = "UGTfreeze.png";
 string g_fileName;
 #else
 string g_fileName;
@@ -404,6 +404,34 @@ bool ProcessParagraphManually(const cJSON* paragraph, TextArea& textArea)
 	return true;
 }
 
+CL_Rectf GetAARectFromPoly(const CL_Vec2f *pVerts, int vertCount)
+{
+	assert(vertCount > 0);
+
+	float left = pVerts[0].x;
+	float right = pVerts[0].x;
+	float top = pVerts[0].y;
+	float bottom = pVerts[0].y;
+
+	for (int i=0; i < vertCount; i++)
+	{
+		left = rt_min(left, pVerts[i].x);
+		right = rt_max(right, pVerts[i].x);
+		top = rt_min(top, pVerts[i].y);
+		bottom = rt_max(bottom, pVerts[i].y);
+	}
+
+	return CL_Rectf(left, top, right, bottom);
+}
+
+void SetFourVertsFromAARect(CL_Rectf r, CL_Vec2f* verts)
+{
+	verts[0] = r.get_top_left();
+	verts[1] = r.get_top_right();
+	verts[2] = r.get_bottom_right();
+	verts[3] = r.get_bottom_left();
+}
+
 bool GameLogicComponent::ProcessParagraphGoogleWay(const cJSON* paragraph, TextArea& textArea)
 {
 
@@ -442,6 +470,8 @@ bool GameLogicComponent::ProcessParagraphGoogleWay(const cJSON* paragraph, TextA
 		CL_Vec2f verts[4];
 		int vertCount = 0;
 
+		//grab the verts from Google.  They are really a polygon of four verts, wound clockwise.  NOT guaranteed to start on the top left, depends on the orientation of the text.
+
 		cJSON_ArrayForEach(vert, vertices)
 		{
 			float x, y;
@@ -471,6 +501,10 @@ bool GameLogicComponent::ProcessParagraphGoogleWay(const cJSON* paragraph, TextA
 
 			vertCount++;
 		}
+
+		//remove any rotations to enforce axis-aligned rects
+		CL_Rectf r = GetAARectFromPoly(verts, 4);
+		SetFourVertsFromAARect(r, verts);
 
 		if (!bRectSet)
 		{
@@ -551,10 +585,10 @@ bool GameLogicComponent::ProcessParagraphGoogleWay(const cJSON* paragraph, TextA
 			if (vertCount == 4)
 			{
 				WordInfo w;
-				w.m_rect = CL_Rectf(verts[0].x, verts[0].y, verts[2].x, verts[2].y);
+
+				w.m_rect = GetAARectFromPoly(verts, 4);
 				w.m_word = text->valuestring;
 				wordInfo.push_back(w);
-
 			}
 
 			const cJSON* symbolProperty = cJSON_GetObjectItemCaseSensitive(symbol, "property");
@@ -662,14 +696,25 @@ bool GameLogicComponent::ProcessParagraphGoogleWay(const cJSON* paragraph, TextA
 
 bool GameLogicComponent::ReadFromParagraph(const cJSON* paragraph, TextArea& textArea)
 {
-
+	
 	//We only need one of these... Google way trusts when google marks things as a wrap around with space or a new line.
 	ProcessParagraphGoogleWay(paragraph, textArea);
 
+	
 	//Manual way we figure it out ourselves
 	//ProcessParagraphManually(paragraph, textArea);
 
+
+
 	MergeWithPreviousTextIfNeeded(textArea);
+
+#ifdef _DEBUG
+	//check for malformed boxes
+	for (int i = 0; i < textArea.m_lines.size(); i++)
+	{
+		assert(textArea.m_lines[i].m_lineRect.get_height() >= 0);
+	}
+#endif
 
 	float isDialogFuzzyLogic = 0;
 
@@ -746,12 +791,15 @@ bool GameLogicComponent::ReadFromParagraph(const cJSON* paragraph, TextArea& tex
 			//	newFinal += "";
 			//}
 
+			assert(textArea.m_lines[i].m_lineRect.get_height() > 0);
 			textArea.m_averageTextHeight += textArea.m_lines[i].m_lineRect.get_height();
 			textArea.m_ySpacingToNextLineAverage += ySpacingToNextLinePercent;
 		}
 
 		textArea.m_ySpacingToNextLineAverage /= (textArea.m_lines.size() - 1);
 		textArea.m_averageTextHeight /= textArea.m_lines.size();
+		assert(textArea.m_averageTextHeight > 0);
+
 
 		//newFinal += textArea.m_lines[textArea.m_lines.size() - 1].m_text; //the last line
 		//textArea.rawText = newFinal;

@@ -1,8 +1,5 @@
 The Proton SDK License (based on the XFree86 1.1 license, you can do whatever but requires attribution)
 
-Copyright (C)  2019 Seth A. Robinson
-All rights reserved.
-
  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicence, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
        1. Redistributions of source code must retain the above copyright notice, this list of conditions, and the following disclaimer.
@@ -24,6 +21,4 @@ twitter: @rtsoft
 www.rtsoft.com
 www.codedojo.com
 
-Please note support libraries that Proton SDK use may use different licenses, look for them in their respective directories.
-
-
+Please note that this only applies to the code/media created for this project - supporting libraries/media may have different licenses.

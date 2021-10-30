@@ -292,7 +292,8 @@ void TextAreaComponent::RequestTranslationDeepL()
 
 		return;
 	}
-	string url = "https://api-free.deepl.com";
+
+	
 	
 	unsigned int originalFileSize = 0;
 
@@ -329,7 +330,7 @@ void TextAreaComponent::RequestTranslationDeepL()
 
 #endif
 		
-	m_netHTTP.Setup(url, 80, urlappend, NetHTTP::END_OF_DATA_SIGNAL_HTTP);
+	m_netHTTP.Setup(GetApp()->m_deepl_api_url, 80, urlappend, NetHTTP::END_OF_DATA_SIGNAL_HTTP);
 	m_netHTTP.AddPostData("auth_key", (const byte*)GetApp()->GetDeepLKey().c_str(), (int)GetApp()->GetDeepLKey().length());
 	m_netHTTP.AddPostData("text", (const byte*)textToTranslate.c_str(), (int)textToTranslate.length());
 	m_netHTTP.AddPostData("target_lang", (const byte*)ToUpperCaseString(destLanguage).c_str(), (int)destLanguage.length());
@@ -811,6 +812,11 @@ void TextAreaComponent::FitAndWordWrapToRect(const CL_Rectf &tempRect,  wstring 
 
 	while (wrappedSizeOut.y > (tempRect.get_height()*1.0f))
 	{
+
+		if (pixelHeightOut < 0)
+		{
+			assert(!"The heck");
+		}
 		if (!bFirstTime)
 		{
 			//make it smaller, it still doesn't fit
@@ -838,13 +844,7 @@ void TextAreaComponent::RenderAsDialog(float defaultFontHeightOrZeroForAuto)
 	CL_Vec2f wrappedSize;
 	float pixelHeight = defaultFontHeightOrZeroForAuto;
 
-
-	//LogMsg("Hey");
-
 	FitAndWordWrapToRect(tempRect, wtext, wlines, wrappedSize, GetApp()->m_target_language == "ja", pixelHeight);
-
-	//LogMsg("Ho");
-
 
 	//LogMsg("Final output size: %s", PrintVector2(wrappedSize));
 
