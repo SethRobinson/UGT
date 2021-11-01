@@ -532,101 +532,123 @@ bool GameLogicComponent::ProcessParagraphGoogleWay(const cJSON* paragraph, TextA
 			totalRect.bounding_rect(newWord);
 		}
 
-		for (int i = 0; i < 4; i++)
+for (int i = 0; i < 4; i++)
+{
+	lastVerts[i] = verts[i];
+}
+
+if (!lineText.empty())
+{
+	//lineText += " ";
+}
+
+cJSON_ArrayForEach(symbol, symbols)
+{
+	const cJSON* text = cJSON_GetObjectItemCaseSensitive(symbol, "text");
+	lineText += text->valuestring;
+
+
+	//what about the exact rect of this text?
+
+	const cJSON* boundingBox2 = cJSON_GetObjectItemCaseSensitive(symbol, "boundingBox");
+
+	vertices = cJSON_GetObjectItemCaseSensitive(boundingBox2, "vertices");
+	vertCount = 0;
+
+	cJSON_ArrayForEach(vert, vertices)
+	{
+		float x, y;
+
+		cJSON* tempObj = cJSON_GetObjectItem(vert, "x");
+
+		if (tempObj)
 		{
-			lastVerts[i] = verts[i];
+			x = (float)tempObj->valuedouble;
+		}
+		else
+		{
+			x = 0;
 		}
 
-		if (!lineText.empty())
+		tempObj = cJSON_GetObjectItem(vert, "y");
+		if (tempObj)
 		{
-			//lineText += " ";
+			y = (float)tempObj->valuedouble;
+		}
+		else
+		{
+			y = 0;
 		}
 
-		cJSON_ArrayForEach(symbol, symbols)
+		//assert(x >= 0 && y >= 0);
+		verts[vertCount] = CL_Vec2f(x, y);
+		vertCount++;
+	}
+	if (vertCount == 4)
+	{
+		WordInfo w;
+
+		w.m_rect = GetAARectFromPoly(verts, 4);
+		w.m_word = text->valuestring;
+		wordInfo.push_back(w);
+	}
+
+	const cJSON* symbolProperty = cJSON_GetObjectItemCaseSensitive(symbol, "property");
+	const cJSON* linebreak = cJSON_GetObjectItemCaseSensitive(symbolProperty, "detectedBreak");
+	if (linebreak != NULL)
+	{
+		const cJSON* detectedBreak = cJSON_GetObjectItemCaseSensitive(linebreak, "type");
+		const string space("SPACE");
+		const string eolspace("EOL_SURE_SPACE");
+		bool bAddCR = false;
+
+		if (space.compare(detectedBreak->valuestring) == 0)
 		{
-			const cJSON* text = cJSON_GetObjectItemCaseSensitive(symbol, "text");
-			lineText += text->valuestring;
+			lineText += " ";
+		}
+		else
+		{
+			//LogMsg("Break type: %s", detectedBreak->valuestring);
 
-
-			//what about the exact rect of this text?
-
-			const cJSON* boundingBox2 = cJSON_GetObjectItemCaseSensitive(symbol, "boundingBox");
-
-			vertices = cJSON_GetObjectItemCaseSensitive(boundingBox2, "vertices");
-			vertCount = 0;
-
-			cJSON_ArrayForEach(vert, vertices)
+			if (eolspace.compare(detectedBreak->valuestring) == 0)
 			{
-				float x, y;
 
-				cJSON* tempObj = cJSON_GetObjectItem(vert, "x");
-
-				if (tempObj)
-				{
-					x = (float)tempObj->valuedouble;
-				}
-				else
-				{
-					x = 0;
-				}
-
-				tempObj = cJSON_GetObjectItem(vert, "y");
-				if (tempObj)
-				{
-					y = (float)tempObj->valuedouble;
-				}
-				else
-				{
-					y = 0;
-				}
-
-				//assert(x >= 0 && y >= 0);
-				verts[vertCount] = CL_Vec2f(x, y);
-				vertCount++;
-			}
-			if (vertCount == 4)
-			{
-				WordInfo w;
-
-				w.m_rect = GetAARectFromPoly(verts, 4);
-				w.m_word = text->valuestring;
-				wordInfo.push_back(w);
-			}
-
-			const cJSON* symbolProperty = cJSON_GetObjectItemCaseSensitive(symbol, "property");
-			const cJSON* linebreak = cJSON_GetObjectItemCaseSensitive(symbolProperty, "detectedBreak");
-			if (linebreak != NULL)
-			{
-				const cJSON* detectedBreak = cJSON_GetObjectItemCaseSensitive(linebreak, "type");
-				const string space("SPACE");
-				const string eolspace("EOL_SURE_SPACE");
-				bool bAddCR = false;
-
-				if (space.compare(detectedBreak->valuestring) == 0)
+				//lineText += "\n"; // Seems better if EOL space is treated as a newline? (old behavior)
+				if (!IsAsianLanguage(textArea.language))
 				{
 					lineText += " ";
 				}
-				else
+
+			}
+			else
+			{
+				//well, Google is saying just do a new line, likely the next word isn't connected, but Google makes mistakes
+				//so we'll add a space anyway at the end for non-asian languages.  What harm can it do?
+				//If google does a better job in the future, we shouldn't need this
+
+				if (!IsAsianLanguage(textArea.language))
 				{
-					LogMsg("Break type: %s", detectedBreak->valuestring);
-			
-					if (eolspace.compare(detectedBreak->valuestring) == 0)
-					{
-						
-						//lineText += "\n"; // Seems better if EOL space is treated as a newline? (old behavior)
-						if (IsAsianLanguage(textArea.language))
+					bool bNeedSpace = true;
+
+					//I sort of threw this in untested, if we're going to second-guess google on where a space is needed, let's at least not insert it when there
+					//already was one or a dash was used.   So la-rge instead of la rge.  Although I guess we could just remove the dash and... well, let's not get crazy here.
+					
+					if (lineText.length() > 1 && 
+							(
+								lineText[lineText.length() - 1] == ' ' ||
+								lineText[lineText.length() - 1] == '-'
+							)
+						)
 						{
-							//kanji doesn't need spaces just because we hit a CR
-							lineText += "";
-						}
-						else
-						{
-							lineText += " ";
+							bNeedSpace = false;
 						}
 
-					}
-					else 
+					if (bNeedSpace)
 					{
+						lineText += " ";
+					}
+				}
+
 						//actually, ignore this?  We assume everything is pure dialog for this part, later we'll add CRs per line if line by line mode is used for translation
 						//bAddCR = true; //we'll add, but only for the solid string version, not where we already broke it up into lines
 					}

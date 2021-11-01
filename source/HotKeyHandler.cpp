@@ -86,10 +86,16 @@ void HotKeyHandler::OnHideWindow()
 	WINDOWPLACEMENT win;
 	memset(&win, 0, sizeof(WINDOWPLACEMENT));
 	win.length = sizeof(WINDOWPLACEMENT);
+	GetWindowPlacement(g_hWnd, &win);
+	
+	//I don't think we need to screw with window position like below was doing
+	/*
 	win.rcNormalPosition.left = GetApp()->m_window_pos_x;
 	win.rcNormalPosition.top = GetApp()->m_window_pos_y;
 	win.rcNormalPosition.right = GetApp()->m_capture_width + GetApp()->m_window_pos_x;
 	win.rcNormalPosition.bottom = GetApp()->m_capture_height + GetApp()->m_window_pos_y;
+	*/
+
 
 	win.showCmd = SW_MINIMIZE;
 

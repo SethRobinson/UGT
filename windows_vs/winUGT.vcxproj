@@ -1096,6 +1096,7 @@
     <None Include="..\bbx\RequestDebugToken.bat" />
     <None Include="..\bbx\SignFinal.bat" />
     <None Include="..\bbx\UploadRelease.bat" />
+    <None Include="..\checking_for_new_version.php" />
     <None Include="..\flash\app_info_setup.bat" />
     <None Include="..\flash\build.sh" />
     <None Include="..\flash\BuildDebug.bat" />

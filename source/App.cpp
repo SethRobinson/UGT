@@ -123,8 +123,8 @@ App::App()
 		m_pExportToHTML = NULL;
 		m_pAutoPlayManager = NULL;
 		m_usedSubAreaScan = false;
-		m_version = "0.72 Beta";
-		m_versionNum = 72;
+		m_version = "0.73 Beta";
+		m_versionNum = 73;
 		m_bDidPostInit = false;
 		m_gamepad_button_to_scan_active_window = VIRTUAL_KEY_NONE;
 		m_cursorShouldBeRestoredToStartPos = false;
@@ -1282,6 +1282,10 @@ void App::ScanSubArea()
 {
 	//first, change video mode
 
+	//I don't think we need to screw with window position like below was doing
+	
+
+
 	GetBaseApp()->SetVideoMode(m_capture_width, m_capture_height, false, 0);
 	SetPrimaryScreenSize(m_capture_width, m_capture_height);
 	SetupScreenInfo(m_capture_width, m_capture_height, ORIENTATION_DONT_CARE);
@@ -1743,6 +1747,7 @@ void OnAppLostFocus()
 		//GetApp()->m_hotKeyHandler.OnHideWindow();
 	}
 }
+void CenterWindow(HWND hWnd);
 
 void OnAppGotFocus()
 {
@@ -1754,11 +1759,11 @@ void OnAppGotFocus()
 	{
 		LogMsg("Setting size for GUI");
 		GetApp()->SetSizeForGUIIfNeeded();
-		
 		if (GetApp()->m_pGameLogicComp && GetHelpMenu() == NULL)
 		{
 				CreateHelpMenu(GetApp()->m_pGameLogicComp->GetParent());
 		}
+		//CenterWindow(g_hWnd);
 
 	}
 }
@@ -1768,7 +1773,7 @@ void OnSettingForGuiIfNeeded()
 	GetApp()->SetSizeForGUIIfNeeded();
 }
 
-void CenterWindow(HWND hWnd);
+
 
 void App::SetSizeForGUIIfNeeded()
 {
@@ -1784,13 +1789,14 @@ void App::SetSizeForGUIIfNeeded()
 
 	LogMsg("Changing screensize for GUI");
 
-	m_capture_height = guiHeight;
-	m_capture_width = guiWidth;
+	//m_capture_height = guiHeight;
+	//m_capture_width = guiWidth;
 
 	SetPrimaryScreenSize(guiWidth, guiHeight);
 	SetupScreenInfo(guiWidth, guiHeight, ORIENTATION_DONT_CARE);
 	GetBaseApp()->SetVideoMode(guiWidth, guiHeight, false, 0);
 }
+
 
 bool App::OnPreInitVideo()
 {

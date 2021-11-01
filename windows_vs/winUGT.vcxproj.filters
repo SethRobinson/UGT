@@ -1256,6 +1256,9 @@
       <Filter>shared\linux</Filter>
     </None>
     <None Include="..\README.md" />
+    <None Include="..\checking_for_new_version.php">
+      <Filter>source</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Xml Include="..\android\AndroidManifest.xml">

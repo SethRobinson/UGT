@@ -24,11 +24,9 @@ xcopy bin\htmlexport\*.txt tempbuild\htmlexport
 xcopy bin\htmlexport\*.css tempbuild\htmlexport
 
 :Do the signing, not required, uses RTsoft's signing key with obviously isn't included on the GIT
-copy tempbuild\ugt.exe ..\Signing
-cd ..\Signing
-call sign.bat ugt.exe "Universal Game Translator" "www.rtsoft.com"
-cd ..\UGT
-copy ..\Signing\ugt.exe tempbuild\ugt.exe
+
+call %RT_PROJECTS%\Signing\sign.bat tempbuild\ugt.exe "Universal Game Translator"
+call %RT_PROJECTS%\Signing\sign.bat tempbuild\escapi.dll "Universal Game Translator"
 
 :create the archive
 set FNAME=UniversalGameTranslator_Windows.zip
