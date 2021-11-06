@@ -1894,23 +1894,17 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, TCHAR *lpCmdLin
 			if (GetApp()->GetCaptureMode() == CAPTURE_MODE_DRAGRECT)
 			{
 				GetApp()->m_pWinDragRect->Update();
-				Sleep(0);
-			}
-			else
-			{
-				Sleep(1);
 			}
 		}
 
+
 		if (g_fpsLimit != 0)
 		{
-			double currSystemTime = GetSystemTimeAccurate();
-			while (fpsTimer > currSystemTime)
+			while (fpsTimer > GetSystemTimeAccurate())
 			{
-				Sleep(1);
-				currSystemTime = GetSystemTimeAccurate();
+				Sleep(0);
 			}
-			fpsTimer = (float)(currSystemTime + (1000.0 / (double(g_fpsLimit))));
+			fpsTimer = float(GetSystemTimeAccurate()) + (1000.0f / (float(g_fpsLimit)));
 		}
 
 		while (!GetBaseApp()->GetOSMessages()->empty())
