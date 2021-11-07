@@ -58,7 +58,14 @@ void HotKeyHandler::UnregisterAllHotkeys()
 {
 	for (int i = 0; i < m_keysActive.size(); i++)
 	{
-		UnregisterHotKey(g_hWnd, m_keysActive[i].m_registrationID);
+		if (!UnregisterHotKey(g_hWnd, m_keysActive[i].m_registrationID))
+		{
+			LogMsg("Error unregistering hotkey %s", m_keysActive[i].originalString.c_str());
+		}
+		else
+		{
+			m_keysActive[i].m_registrationID = 0; //invalid now
+		}
 	}
 
 }
@@ -149,7 +156,7 @@ void HotKeyHandler::OnShowWindow()
 	SetForegroundWindow(g_hWnd);
 }
 
-void HotKeyHandler::RegisterHotkey(HotKeySetting setting)
+void HotKeyHandler::RegisterHotkey(HotKeySetting &setting)
 {
 
 	if (setting.virtualKey == 0)
@@ -161,12 +168,24 @@ void HotKeyHandler::RegisterHotkey(HotKeySetting setting)
 
 	if (!RegisterHotKey(g_hWnd, m_registrationCounter, setting.modifierBits, setting.virtualKey))
 	{
-		//LogMsg("Error registering hotkey"); 
+		if (setting.m_bFirstTime)
+		{
+			string msg = string("Error registering hotkey ") + setting.originalString + " for "+setting.hotKeyAction+", it's already being used by something else!\n\nYou'll need to change the keys to use in our config.txt, or change it in the program already using it. (Check NVidia/UPlay/Origin/Steam/etc overlay hotkeys for example)";
+			LogMsg(msg.c_str());
+			
+			MessageBox(0, _T(msg.c_str()), _T("Error registering hotkey"), MB_OK | MB_ICONEXCLAMATION);
+
+		}
 	} 
 	else
 	{
 		setting.m_registrationID = m_registrationCounter;
-		m_keysActive.push_back(setting);
+		
+		if (setting.m_bFirstTime)
+		{
+			setting.m_bFirstTime = false;
+			m_keysActive.push_back(setting);
+		}
 	}
 
 }

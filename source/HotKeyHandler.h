@@ -25,6 +25,7 @@ public:
 	unsigned int modifierBits = 0;
 	unsigned int m_registrationID = 0;
 	string originalString;
+	bool m_bFirstTime = true;
 };
 
 
@@ -45,7 +46,7 @@ public:
 	void OnHideWindow();
 	void OnShowWindow();
 	//See https://docs.microsoft.com/en-us/windows/desktop/inputdev/virtual-key-codes
-	void RegisterHotkey(HotKeySetting setting);
+	void RegisterHotkey(HotKeySetting &setting);
 protected:
 	
 

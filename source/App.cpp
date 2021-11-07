@@ -123,8 +123,8 @@ App::App()
 		m_pExportToHTML = NULL;
 		m_pAutoPlayManager = NULL;
 		m_usedSubAreaScan = false;
-		m_version = "0.73 Beta";
-		m_versionNum = 73;
+		m_version = "0.74 Beta";
+		m_versionNum = 74;
 		m_bDidPostInit = false;
 		m_gamepad_button_to_scan_active_window = VIRTUAL_KEY_NONE;
 		m_cursorShouldBeRestoredToStartPos = false;

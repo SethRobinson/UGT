@@ -158,7 +158,7 @@ public:
 	//parms from config.txt, I'm lazy so making it all global
 	bool m_usedSubAreaScan;
 	int m_capture_width = 1920;
-	int m_capture_height = 1080;
+	int m_capture_height = 1080; 
 	int m_window_pos_x = 0;
 	int m_window_pos_y = 0;
 	int m_show_live_video = 0;
