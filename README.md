@@ -28,3 +28,4 @@ Credits and links
 - Written by Seth A. Robinson (seth@rtsoft.com) twitter: @rtsoft - [Codedojo](https://www.codedojo.com), Seth's blog
 - [Proton SDK wiki/tutorial site](https://www.protonsdk.com)
 - Code/bugfix contributions by Meerkov
+- [PyUGT](https://github.com/lrq3000/pyugt) by lrq3000 (similar to UGT but works with Linux/OSX also, uses Tesseract locally for the OCR pass)
