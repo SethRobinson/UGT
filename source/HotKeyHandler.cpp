@@ -122,7 +122,7 @@ void HotKeyHandler::OnHideWindow()
 		//LogMsg("It's zero");
 	}
 
-	//LogMsg("Hiding window...%d, %d", GetApp()->m_capture_width, GetApp()->m_capture_height);
+	LogMsg("Hiding window...%d, %d", GetApp()->m_capture_width, GetApp()->m_capture_height);
 	//ShowWindow(g_hWnd, SW_MINIMIZE); 
 	
 	if (GetApp()->m_audio_stop_when_window_is_closed)
@@ -137,7 +137,9 @@ void HotKeyHandler::OnShowWindow()
 {
 	if (!g_fileName.empty()) return;
 
-	//LogMsg("Showing window...%d, %d.  Focus is %d", GetApp()->m_capture_width, GetApp()->m_capture_height, (int)g_bHasFocus);
+#ifdef _DEBUG
+	LogMsg("Showing window...%d, %d.  Focus is %d", GetApp()->m_capture_width, GetApp()->m_capture_height, (int)g_bHasFocus);
+#endif
 	//ShowWindow(g_hWnd, SW_SHOW);
 	
 	WINDOWPLACEMENT win;

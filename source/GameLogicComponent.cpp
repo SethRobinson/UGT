@@ -1014,6 +1014,10 @@ void GameLogicComponent::StartProcessingFrameForText()
 		if (GetApp()->IsInputDesktop())
 		{
 			m_desktopCapture.Capture(GetApp()->m_window_pos_x, GetApp()->m_window_pos_y, GetApp()->m_capture_width, GetApp()->m_capture_height);
+			if (m_desktopCapture.GetSoftSurface()->GetSurfaceType() == SoftSurface::SURFACE_NONE)
+			{
+				assert(!"Huh?");
+			}
 			m_desktopCapture.GetSoftSurface()->FlipY();
 			JPGSurfaceLoader jpg;
 			jpg.SaveToFile(m_desktopCapture.GetSoftSurface(), "temp.jpg", GetApp()->m_jpg_quality_for_scan);

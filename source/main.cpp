@@ -1886,7 +1886,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, TCHAR *lpCmdLin
 				GetBaseApp()->Draw();
 		} else
 		{
-
+			//LogMsg("out of focus");
 			//need to keep processing even though we're out of focus to catch gamepad buttons
 			GetBaseApp()->Update();
 
@@ -1896,13 +1896,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, TCHAR *lpCmdLin
 				GetApp()->m_pWinDragRect->Update();
 			}
 		}
-
+		Sleep(1);
 
 		if (g_fpsLimit != 0)
 		{
 			while (fpsTimer > GetSystemTimeAccurate())
 			{
-				Sleep(0);
+				Sleep(1);
 			}
 			fpsTimer = float(GetSystemTimeAccurate()) + (1000.0f / (float(g_fpsLimit)));
 		}
@@ -2027,7 +2027,6 @@ cleanup:
 	WSACleanup(); 
 	return 0;
 }
-
 
 void AddText(const char *tex ,const char *filename)
 {

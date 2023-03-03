@@ -40,6 +40,7 @@ translation_engine|google
 ;used on top of an elgato capture window or something too. 
 ;My retro setup uses a Hydra SCART switcher with two outputs, one for the CRT and one for the OSSC to get HDMI so I can
 ;play on CRT but see translations on a second monitor.
+; Update:  These days I just use desktop mode usually, with an elgato capture card for HDMI input for PS3/etc.
 
 ;input|camera
 input|desktop
