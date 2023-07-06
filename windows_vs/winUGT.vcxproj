@@ -119,7 +119,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\source;..\..\shared;..\..\shared\util\boost;..\..\shared\ClanLib-2.0\Sources;..\..\shared\win\include;..\..\shared\win\;..\..\shared\win\freetype\include;..\..\shared\win\escapi-master\common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_CRT_SECURE_NO_WARNINGS;BOOST_ALL_NO_LIB;C_GL_MODE;_HAS_ITERATOR_DEBUGGING=0;_SECURE_SCL=0;_NO_DEBUG_HEAP=1;RT_PNG_SUPPORT;RT_USE_LIBCURL;RT_JPG_SUPPORT;C_BORDERLESS_WINDOW_MODE_FOR_SCREENSHOT_EASE;RT_RUNS_IN_BACKGROUND;RT_HANDLE_WM_HOTKEY;RT_ENABLE_FMOD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_CRT_SECURE_NO_WARNINGS;BOOST_ALL_NO_LIB;C_GL_MODE;_HAS_ITERATOR_DEBUGGING=0;_SECURE_SCL=0;_NO_DEBUG_HEAP=1;RT_PNG_SUPPORT;RT_USE_LIBCURL;RT_JPG_SUPPORT;C_BORDERLESS_WINDOW_MODE_FOR_SCREENSHOT_EASE;RT_RUNS_IN_BACKGROUND;RT_HANDLE_WM_HOTKEY;RT_ENABLE_FMOD;_WINSOCK_DEPRECATED_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <BufferSecurityCheck>true</BufferSecurityCheck>

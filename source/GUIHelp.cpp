@@ -82,6 +82,7 @@ Entity * CreateHelpMenu(Entity *pRoot)
 	string msg;
 
 	HotKeySetting h;
+	HotKeySetting h2;
 
 	if (GetApp()->IsInputDesktop())
 	{
@@ -91,7 +92,8 @@ Entity * CreateHelpMenu(Entity *pRoot)
 		msg += "Translate entire desktop - `$" + h.originalString + "``\n";
 	
 		h = GetApp()->m_hotKeyHandler.GetHotKeyByAction("hotkey_to_scan_draggable_area");
-		msg += "Translate draggable rectangle - `$" + h.originalString + "``\n";
+		h2 = GetApp()->m_hotKeyHandler.GetHotKeyByAction("hotkey_to_scan_last_draggable_area_again");
+		msg += "Set rectangle area - `$" + h.originalString + "`` Trans last rect set: `$"+h2.originalString+"`` or `$"+ ProtonVirtualKeyToString(GetApp()->m_gamepad_button_to_scan_active_rect_window) + "`` on Gamepad""``\n";
 
 		
 		msg += "Continue after a translation - `$<space>``\n";
@@ -108,7 +110,7 @@ Entity * CreateHelpMenu(Entity *pRoot)
 	}
 	msg += "Source language hint: `$" + GetApp()->m_source_language_hint+"``\n";
 
-	msg += "\nVersion "+GetApp()->GetAppVersion()+" by Seth A. Robinson (c) 2019-2021\n";
+	msg += "\nVersion "+GetApp()->GetAppVersion()+" by Seth A. Robinson (c) 2019-2023\n";
 
 	Entity *pText = CreateTextBoxEntity(pBG, "Text", CL_Vec2f(100, 180), CL_Vec2f(800, 800), msg);
 

@@ -123,8 +123,8 @@ App::App()
 		m_pExportToHTML = NULL;
 		m_pAutoPlayManager = NULL;
 		m_usedSubAreaScan = false;
-		m_version = "0.75 Beta";
-		m_versionNum = 75;
+		m_version = "0.76 Beta";
+		m_versionNum = 76;
 		m_bDidPostInit = false;
 		m_gamepad_button_to_scan_active_window = VIRTUAL_KEY_NONE;
 		m_cursorShouldBeRestoredToStartPos = false;
@@ -359,12 +359,14 @@ bool App::Init()
 	pTempDirectX->SetIgnoreXInputCapableDevices(true);
 	GetGamepadManager()->AddProvider(pTempDirectX); //use directx joysticks
 	
+	LogMsg("There are %d total registered gamepads", GetGamepadManager()->GetGamepadCount());
 	SetFPSLimit(100);
 #endif
 
 	//arcade input component is a way to tie keys/etc to send signals through GetBaseApp()->m_sig_arcade_input
 
 	ArcadeInputComponent *pComp = (ArcadeInputComponent*)GetBaseApp()->GetEntityRoot()->AddComponent(new ArcadeInputComponent);
+	LogMsg("There are %d total registered gamepads", GetGamepadManager()->GetGamepadCount());
 
 	for (int i=0; i < GetGamepadManager()->GetGamepadCount(); i++)
 	{
@@ -515,7 +517,8 @@ void OnGamepadButton(VariantList *m_pVList)
 		if (!g_bHasFocus && GetApp()->m_captureMode == CAPTURE_MODE_WAITING)
 		{
 			//give us focus?
-			if (vKey == GetApp()->m_gamepad_button_to_scan_active_window)
+			if (vKey == GetApp()->m_gamepad_button_to_scan_active_window
+				|| vKey == GetApp()->m_gamepad_button_to_scan_active_rect_window)
 			{
 				LogMsg("SCANNING FROM gamepad button");
 				SaveCursorPos();
@@ -525,26 +528,37 @@ void OnGamepadButton(VariantList *m_pVList)
 				SetCursorPos(GetApp()->m_window_pos_x + GetApp()->m_capture_width/2,
 					GetApp()->m_window_pos_y + GetApp()->m_capture_height/2);
 			
-
-				if (GetApp()->m_usedSubAreaScan)
-				{
-					//they've previously scanned a sub area by hand, so let's use that
-					GetApp()->ScanSubArea();
-				}
-				else
+				if (vKey == GetApp()->m_gamepad_button_to_scan_active_window)
 				{
 					GetApp()->ScanActiveWindow();
-
 				}
+
+				if (vKey == GetApp()->m_gamepad_button_to_scan_active_rect_window)
+				{
+					if (GetApp()->m_usedSubAreaScan)
+					{
+						//they've previously scanned a sub area by hand, so let's use that
+						GetApp()->SetupLastRectAreaUsed();
+						GetApp()->ScanSubArea();
+					}
+					else
+					{
+						GetApp()->ScanActiveWindow();
+						ShowQuickMessage("No rect area set yet, just using the window window instead");
+
+					}
+				}
+
+				
 
 			}
 			return;
 		}
-		else
+		else 
 		{
 			if ( /*g_bHasFocus &&*/ GetApp()->m_captureMode == CAPTURE_MODE_SHOWING)
 			{
-				if (vKey == GetApp()->m_gamepad_button_to_scan_active_window)
+				if (vKey == GetApp()->m_gamepad_button_to_scan_active_window) // || vKey == GetApp()->m_gamepad_button_to_scan_active_rect_window)
 				{
 					LogMsg("Closing capture window");
 					GetMessageManager()->CallStaticFunction(TurnOffRenderDisplay, 200, NULL);
@@ -1158,6 +1172,7 @@ void App::Update()
 			m_hotKeyHandler.RegisterHotkey(m_hotkey_for_whole_desktop);
 			m_hotKeyHandler.RegisterHotkey(m_hotkey_for_active_window);
 			m_hotKeyHandler.RegisterHotkey(m_hotkey_for_draggable_area);
+			m_hotKeyHandler.RegisterHotkey(m_hotkey_for_draggable_area_again);
 			//GetApp()->m_hotKeyHandler.OnHideWindow();
 		}
 
@@ -1192,7 +1207,6 @@ void App::Update()
 		{
 			UpdateCursor();
 		}
-
 
 		if (IsShowingHelp())
 		{
@@ -1248,7 +1262,6 @@ void App::OnLoadSurfaces()
 	m_hotKeyHandler.UnregisterAllHotkeys();
 	m_hotKeyHandler.ReregisterAllHotkeys();
 	
-
 	if (GetApp()->GetShared()->GetVar("check_invisible_mode")->GetUINT32() != 0)
 	{
 		LogMsg("Auto closing window because 'invisible mode' is checked");
@@ -1284,8 +1297,6 @@ void App::ScanSubArea()
 
 	//I don't think we need to screw with window position like below was doing
 	
-
-
 	GetBaseApp()->SetVideoMode(m_capture_width, m_capture_height, false, 0);
 	SetPrimaryScreenSize(m_capture_width, m_capture_height);
 	SetupScreenInfo(m_capture_width, m_capture_height, ORIENTATION_DONT_CARE);
@@ -1319,6 +1330,14 @@ void App::ScanActiveWindow()
 	ScanSubArea();
 }
 
+void App::SetupLastRectAreaUsed()
+{
+	m_window_pos_x = m_pWinDragRect->m_last_window_pos_x;
+	m_window_pos_y = m_pWinDragRect->m_last_window_pos_y;
+	m_capture_width = m_pWinDragRect->m_last_capture_width;
+	m_capture_height = m_pWinDragRect->m_last_capture_height;
+
+}
 void App::HandleHotKeyPushed(HotKeySetting setting)
 {
 
@@ -1350,6 +1369,26 @@ void App::HandleHotKeyPushed(HotKeySetting setting)
 		LogMsg("Scanning full desktop");
 
 		ScanSubArea();
+	}
+
+	if (setting.hotKeyAction == "hotkey_to_scan_last_draggable_area_again")
+	{
+		if (GetApp()->m_usedSubAreaScan)
+		{
+
+			//Set last scan coords
+
+			GetApp()->SetupLastRectAreaUsed();
+			GetApp()->ScanSubArea();
+		}
+		else
+		{
+			//ShowWindow(g_hWnd, SW_SHOW);
+
+			//MessageBox(NULL, "Can't render as a rect area hasn't been set yet.  Try Control-10 to set it first", "UGT", MB_OK);
+		}
+		return;
+		
 	}
 
 	if (setting.hotKeyAction == "hotkey_to_scan_active_window")
@@ -1527,14 +1566,19 @@ HotKeySetting App::GetHotKeyDataFromConfig(string data, string action)
 	}
 
 	key.hotKeyAction = action;
-	key.modifierBits = GetModifiersForHotKey(key);
 	key.originalString = data;
+	if (ToUpperCaseString(data) == "NONE")
+	{
+		LogMsg((string("Ignoring ") + action + " as it's set to "+data).c_str());
+		return key;
+	}
+	key.modifierBits = GetModifiersForHotKey(key);
 
 	if (key.hotKeyName.empty())
 	{ 
-		ShowQuickMessage("Error with hotkey " + action + ", unknown key");
+			ShowQuickMessage("Error with hotkey " + action + ", unknown key");
 	}
-
+	
 	LogMsg(string ("Registered hotkey " + action + " to " + data).c_str());
 	return key;
 }
@@ -1656,10 +1700,12 @@ bool App::LoadConfigFile()
 		}
 
 		m_gamepad_button_to_scan_active_window = StringToProtonVirtualKey(ToLowerCaseString(ts.GetParmString("gamepad_button_to_scan_active_window", 1)));
+		m_gamepad_button_to_scan_active_rect_window = StringToProtonVirtualKey(ToLowerCaseString(ts.GetParmString("gamepad_button_to_scan_active_rect_window", 1)));
 
 		m_hotkey_for_whole_desktop = GetHotKeyDataFromConfig(ts.GetParmString("hotkey_to_scan_whole_desktop", 1), "hotkey_to_scan_whole_desktop");
 		m_hotkey_for_active_window = GetHotKeyDataFromConfig(ts.GetParmString("hotkey_to_scan_active_window", 1), "hotkey_to_scan_active_window");
 		m_hotkey_for_draggable_area = GetHotKeyDataFromConfig(ts.GetParmString("hotkey_to_scan_draggable_area", 1),"hotkey_to_scan_draggable_area");
+		m_hotkey_for_draggable_area_again = GetHotKeyDataFromConfig(ts.GetParmString("hotkey_to_scan_last_draggable_area_again", 1), "hotkey_to_scan_last_draggable_area_again");
 		if (ts.GetParmString("kanji_lookup_website", 1) != "")
 			m_kanji_lookup_website = ts.GetParmString("kanji_lookup_website", 1);
 	}
@@ -1668,6 +1714,17 @@ bool App::LoadConfigFile()
 		LogMsg("Couldn't find config.txt");
 		return false;
 	}
+
+	//for people who don't update their config.txt with the new settings, let's just set the defaults for them if needed
+	if (m_hotkey_for_draggable_area_again.originalString.empty())
+	{
+		m_hotkey_for_draggable_area_again = GetHotKeyDataFromConfig("Control,F9", "hotkey_to_scan_last_draggable_area_again");
+	}
+	if (m_gamepad_button_to_scan_active_rect_window == 0)
+	{
+		m_gamepad_button_to_scan_active_rect_window = StringToProtonVirtualKey("left joystick button");
+	}
+
 
 	//another scan
 	for (int i = 0; i < ts.GetLineCount(); i++)

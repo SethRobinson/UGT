@@ -116,6 +116,7 @@ public:
 	bool IsShowingHelp();
 	void ScanSubArea();
 	void ScanActiveWindow();
+	void SetupLastRectAreaUsed();
 	void HandleHotKeyPushed(HotKeySetting setting);
 	void OnExitApp(VariantList *pVarList);
 	string GetGoogleKey() { return m_google_api_key; }
@@ -134,6 +135,7 @@ public:
 	ExportToHTML* GetExportToHTML() { return m_pExportToHTML; }
 
 	eVirtualKeys m_gamepad_button_to_scan_active_window;
+	eVirtualKeys m_gamepad_button_to_scan_active_rect_window = VIRTUAL_KEY_NONE;;
 	//we'll wire these to connect to some signals we care about
 	void OnAccel(VariantList *pVList);
 	void OnArcadeInput(VariantList *pVList);
@@ -150,6 +152,7 @@ public:
 	eTextHinting GetGlobalTextHinting() { return m_globalHinting; }
 	HotKeyHandler m_hotKeyHandler;
 	HotKeySetting m_hotkey_for_whole_desktop, m_hotkey_for_active_window, m_hotkey_for_draggable_area;
+	HotKeySetting m_hotkey_for_draggable_area_again;
 	vector< KeyData> m_keyData;
 	eTextHinting m_globalHinting = HINTING_AUTO;
 	POINT m_cursorPosAtStart;

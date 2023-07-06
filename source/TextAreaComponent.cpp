@@ -419,7 +419,7 @@ void TextAreaComponent::OnSelected(VariantList* pVList) //0=vec2 point of click,
 void TextAreaComponent::Init(TextArea textArea)
 {
 	m_textArea = textArea;
-	assert(m_textArea.m_rect.left >= 0);
+	//assert(m_textArea.m_rect.left >= 0);
 
 	SetSize2DEntity(GetParent(), textArea.m_rect.get_size_vec2());
 	SetPos2DEntity(GetParent(), m_textArea.m_rect.get_top_left());

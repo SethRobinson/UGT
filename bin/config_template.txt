@@ -113,6 +113,9 @@ audio|fmod
 ;F8, F9, F10, Pause, Scroll Lock, Num 7, Num 8, Num 9, Num -, Num 4, Num 5, Num 6, 
 ;Num +, Num 1, Num 2, Num 3, Num 0, Num Del, Sys Req, , \, F11, F12, 
 
+
+;NOTE: Set to NONE to none use that key at all
+
 ;Hotkeys can be set to require other keys down too.  Not case sensitive, order doesn't matter. Example to require pressing 
 ;Control-Alt-Shift-F12 to do something:
 ;hotkey_to_scan_active_window|Control,Alt,Shift,F12|
@@ -120,6 +123,7 @@ audio|fmod
 hotkey_to_scan_active_window|Control,F12|
 hotkey_to_scan_whole_desktop|Control,F11|
 hotkey_to_scan_draggable_area|Control,F10|
+hotkey_to_scan_last_draggable_area_again|Control,F9|
 
 ;you can also set a global gamepad button to trigger scanning the active window.  This way you can scan while playing an emulator without touching the keyboard,
 ;or while watching video via an app showing HDMI capture or whatever.  Set to "none" or blank to turn this off.
@@ -133,6 +137,7 @@ hotkey_to_scan_draggable_area|Control,F10|
 ;Note, right joystick button means pushing down (er, in? so it clicks) on the right stick itself, not an actual button
 
 gamepad_button_to_scan_active_window|right joystick button
+gamepad_button_to_scan_active_rect_window|left joystick button
 
 ;Website for kanji lookups when you left click one (the actual kanji is appended to the end of the URL)
 ;Leaving commented out for the default

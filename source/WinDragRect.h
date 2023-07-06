@@ -37,6 +37,11 @@ public:
 	CL_Rect m_selRect;
 	eDragMode m_dragMode;
 
+	int m_last_capture_width = 1920;
+	int m_last_capture_height = 1080;
+	int m_last_window_pos_x = 0;
+	int m_last_window_pos_y = 0;
+
 protected:
 	HWND m_hWnd;
 	WNDCLASS wc;

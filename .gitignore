@@ -24,3 +24,4 @@ NotShared/
 /windows_vs/x64
 **/bin/*.exp
 **/bin/*.lib
+bin/config.txt
