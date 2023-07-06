@@ -1,8 +1,8 @@
 # UGT - Universal Game Translator - Uses Google's Cloud Vision to read and speak dialog from any image/game in any language
 
-<a href="https://www.youtube.com/watch?v=2YcS75EOu7Y"><img align="top" src="webmedia/gamepad_test.png" width=300></a>
-<a href="https://www.youtube.com/watch?v=9BH8AEABr_w"><img align="top" src="webmedia/ff_export_test.png" width=300></a>
-<a href="https://www.youtube.com/watch?v=cJeYnmxh2Pg"><img align="top" src="webmedia/drag_test.png" width=300></a>
+<a href="https://www.youtube.com/watch?v=2YcS75EOu7Y"><img align="top" src="webmedia/gamepad_test.png" width=280></a>
+<a href="https://www.youtube.com/watch?v=9BH8AEABr_w"><img align="top" src="webmedia/ff_export_test.png" width=280></a>
+<a href="https://www.youtube.com/watch?v=cJeYnmxh2Pg"><img align="top" src="webmedia/drag_test.png" width=280></a>
 
 # For the user
 
