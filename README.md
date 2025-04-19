@@ -1,3 +1,5 @@
+## HEY:  This project is no longer being updated.  Check out the complete rewrite: [UGTLive](https://github.com/SethRobinson/UGTLive)!
+
 # UGT - Universal Game Translator - Uses Google's Cloud Vision to read and speak dialog from any image/game in any language
 
 <a href="https://www.youtube.com/watch?v=2YcS75EOu7Y"><img align="top" src="webmedia/gamepad_test.png" width=270></a>
