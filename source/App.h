@@ -129,8 +129,8 @@ public:
 	Variant* GetVarWithDefault(const string& varName, const Variant& var) { return m_varDB.GetVarWithDefault(varName, var); }
 
 	string m_target_language = "en";
-	boost::signal<void(void)> m_sig_target_language_changed;
-	boost::signal<void(void)> m_sig_kill_all_text;
+	boost::signals2::signal<void(void)> m_sig_target_language_changed;
+	boost::signals2::signal<void(void)> m_sig_kill_all_text;
 	AutoPlayManager* GetAutoPlayManager() { return m_pAutoPlayManager; }
 	ExportToHTML* GetExportToHTML() { return m_pExportToHTML; }
 

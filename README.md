@@ -1,4 +1,6 @@
-## HEY:  This project is no longer being updated.  Check out the complete rewrite: [UGTLive](https://github.com/SethRobinson/UGTLive)!
+## HEY:  A rewrite of this app that uses AI and more "live" type stuff is here: [UGTLive](https://github.com/SethRobinson/UGTLive)!  However, this older version does certain things better with still image translation, so maybe worth checking out as well.
+
+**Also check out:** [UGTBrowser](https://chromewebstore.google.com/detail/ugtbrowser/ccpaaggcacbmdbjhclgggndopoekjfkc) - A Chrome extension for inline translation of highlighted text using state-of-the-art AI models.
 
 # UGT - Universal Game Translator - Uses Google's Cloud Vision to read and speak dialog from any image/game in any language
 
