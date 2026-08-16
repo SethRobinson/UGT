@@ -25,3 +25,31 @@ NotShared/
 **/bin/*.exp
 **/bin/*.lib
 bin/config.txt
+
+# VS build output (project-name intermediate dir)
+/windows_vs/UGT/
+
+# Runtime output UGT writes into bin/ while running
+/bin/config.dat
+/bin/error.txt
+/bin/translation_log.txt
+/bin/translation_request.txt
+/bin/*.json
+/bin/*.html
+/bin/htmlexport/index.html
+/bin/htmlexport/background.jpg
+
+# Local test images / screenshots dropped into bin/ (no images are tracked at bin's root)
+/bin/*.jpg
+/bin/*.png
+
+# FMOD runtime DLLs (not redistributed in the repo)
+/bin/fmod*.dll
+
+# Local font experiments, not referenced by fonts.txt
+/bin/Akaash*
+/bin/saab*
+
+# Photoshop source files (the exported .png versions are what's tracked)
+/bin/*.psd
+/webmedia/*.psd
