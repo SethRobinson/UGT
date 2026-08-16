@@ -7,7 +7,7 @@
 
 #pragma once
 #include "BaseApp.h"
-#include "FreeTypeManager.h"
+#include "GUI/FreeTypeManager.h"
 #include "HotKeyHandler.h"
 #include "UpdateChecker.h"
 

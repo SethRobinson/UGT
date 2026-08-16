@@ -397,9 +397,6 @@
     <ClCompile Include="..\..\shared\Irrlicht\source\Irrlicht\libpng\pngerror.c">
       <Filter>shared\Renderer\PNG</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\shared\Irrlicht\source\Irrlicht\libpng\pnggccrd.c">
-      <Filter>shared\Renderer\PNG</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\shared\Irrlicht\source\Irrlicht\libpng\pngget.c">
       <Filter>shared\Renderer\PNG</Filter>
     </ClCompile>
@@ -427,13 +424,16 @@
     <ClCompile Include="..\..\shared\Irrlicht\source\Irrlicht\libpng\pngtrans.c">
       <Filter>shared\Renderer\PNG</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\shared\Irrlicht\source\Irrlicht\libpng\pngvcrd.c">
-      <Filter>shared\Renderer\PNG</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\shared\Irrlicht\source\Irrlicht\libpng\pngwio.c">
       <Filter>shared\Renderer\PNG</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\shared\Irrlicht\source\Irrlicht\libpng\pngwrite.c">
+      <Filter>shared\Renderer\PNG</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\shared\Irrlicht\source\Irrlicht\libpng\pngwtran.c">
+      <Filter>shared\Renderer\PNG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\shared\Irrlicht\source\Irrlicht\libpng\pngwutil.c">
       <Filter>shared\Renderer\PNG</Filter>
     </ClCompile>
     <ClCompile Include="..\..\shared\Network\NetHTTP.cpp">
@@ -457,8 +457,8 @@
     <ClCompile Include="..\Source\TextAreaComponent.cpp">
       <Filter>source</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\FreeTypeManager.cpp">
-      <Filter>source</Filter>
+    <ClCompile Include="..\..\shared\GUI\FreeTypeManager.cpp">
+      <Filter>shared\GUI</Filter>
     </ClCompile>
     <ClCompile Include="..\..\shared\Renderer\JPGSurfaceLoader.cpp">
       <Filter>shared\Renderer</Filter>
@@ -978,8 +978,8 @@
     <ClInclude Include="..\Source\TextAreaComponent.h">
       <Filter>source</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\FreeTypeManager.h">
-      <Filter>source</Filter>
+    <ClInclude Include="..\..\shared\GUI\FreeTypeManager.h">
+      <Filter>shared\GUI</Filter>
     </ClInclude>
     <ClInclude Include="..\..\shared\Renderer\JPGSurfaceLoader.h">
       <Filter>shared\Renderer</Filter>

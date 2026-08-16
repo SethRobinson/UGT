@@ -667,12 +667,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release GL|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='FMOD_Release_GL|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\..\shared\Irrlicht\source\Irrlicht\libpng\pnggccrd.c">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug GL|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='FMOD_Debug_GL|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release GL|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='FMOD_Release_GL|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
     <ClCompile Include="..\..\shared\Irrlicht\source\Irrlicht\libpng\pngget.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug GL|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='FMOD_Debug_GL|x64'">NotUsing</PrecompiledHeader>
@@ -727,19 +721,25 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release GL|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='FMOD_Release_GL|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\..\shared\Irrlicht\source\Irrlicht\libpng\pngvcrd.c">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug GL|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='FMOD_Debug_GL|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release GL|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='FMOD_Release_GL|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
     <ClCompile Include="..\..\shared\Irrlicht\source\Irrlicht\libpng\pngwio.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug GL|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='FMOD_Debug_GL|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release GL|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='FMOD_Release_GL|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\..\shared\Irrlicht\source\Irrlicht\libpng\pngwrite.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug GL|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='FMOD_Debug_GL|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release GL|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='FMOD_Release_GL|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="..\..\shared\Irrlicht\source\Irrlicht\libpng\pngwtran.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug GL|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='FMOD_Debug_GL|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release GL|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='FMOD_Release_GL|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\shared\Irrlicht\source\Irrlicht\libpng\pngwutil.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug GL|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='FMOD_Debug_GL|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release GL|x64'">NotUsing</PrecompiledHeader>
@@ -858,7 +858,7 @@
     <ClCompile Include="..\source\AutoPlayManager.cpp" />
     <ClCompile Include="..\source\CursorComponent.cpp" />
     <ClCompile Include="..\source\ExportToHTML.cpp" />
-    <ClCompile Include="..\Source\FreeTypeManager.cpp" />
+    <ClCompile Include="..\..\shared\GUI\FreeTypeManager.cpp" />
     <ClCompile Include="..\source\GameLogicComponent.cpp" />
     <ClCompile Include="..\source\GUIHelp.cpp" />
     <ClCompile Include="..\source\HotKeyHandler.cpp" />
@@ -991,7 +991,7 @@
     <ClInclude Include="..\source\AutoPlayManager.h" />
     <ClInclude Include="..\source\CursorComponent.h" />
     <ClInclude Include="..\source\ExportToHTML.h" />
-    <ClInclude Include="..\Source\FreeTypeManager.h" />
+    <ClInclude Include="..\..\shared\GUI\FreeTypeManager.h" />
     <ClInclude Include="..\source\GameLogicComponent.h" />
     <ClInclude Include="..\source\GUIHelp.h" />
     <ClInclude Include="..\source\HotKeyHandler.h" />
